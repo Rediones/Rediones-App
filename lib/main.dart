@@ -46,6 +46,8 @@ import 'package:timeago/timeago.dart' as time;
 import 'components/community_data.dart';
 import 'components/user_data.dart';
 
+import 'repositories/database_manager.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,6 +58,8 @@ void main() async {
   c.currentCamera = 0;
 
   await ScreenUtil.ensureScreenSize();
+
+  await DatabaseManager.initialize();
 
   runApp(const ProviderScope(child: Rediones()));
 

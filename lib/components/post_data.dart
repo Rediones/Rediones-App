@@ -36,13 +36,15 @@ class Post extends Equatable {
   );
 
 
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'text': text,
-    'postCategory': postCategory,
-    'posterId': poster.id,
+  Map<String, dynamic> toJson() => {
+    'content': text,
+    '_id': id,
+    'category': postCategory,
     'shares': shares,
-    'timestamp': timestamp,
+    'createdAt': timestamp.toIso8601String(),
+    'likes': likes,
+    'postedBy': poster.toJson(),
+    'media': media
   };
 
 
