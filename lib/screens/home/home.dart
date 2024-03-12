@@ -8,11 +8,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get_it/get_it.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/comment_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/providers.dart';
 import 'package:rediones/components/user_data.dart';
+import 'package:rediones/repositories/post_repository.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' show showToast, unFocus;
 import 'package:rediones/tools/widgets.dart';
@@ -37,21 +39,21 @@ class _HomeState extends ConsumerState<Home> {
 
   void refreshPosts() {}
 
-  void fetchPosts() =>
-      getPosts().then((response) {
-        List<Post> p = response.payload;
+  void fetchPosts() => getPosts().then((response) {
         if (!mounted) return;
+        
+        List<Post> p = response.payload;
         if (response.status == Status.failed) {
           showToast(response.message);
         }
 
-        setState(() {
-          if (!fetched) fetched = true;
-          ref
-              .watch(postsProvider.notifier)
-              .state
-              .addAll(p);
-        });
+        ref.watch(postsProvider.notifier).state.addAll(p);
+
+        final PostRepository repository = GetIt.I.get();
+        repository.clearAll();
+        repository.addPosts(p);
+
+        setState(() => fetched = true);
       });
 
   @override
@@ -78,12 +80,11 @@ class _HomeState extends ConsumerState<Home> {
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      builder: (context) =>
-          PostComments(
-            future: future,
-            postID: postID,
-            parentContext: context,
-          ),
+      builder: (context) => PostComments(
+        future: future,
+        postID: postID,
+        parentContext: context,
+      ),
     );
   }
 
@@ -97,7 +98,7 @@ class _HomeState extends ConsumerState<Home> {
   Widget build(BuildContext context) {
     List<Post> posts = ref.watch(postsProvider);
     String profilePicture =
-    ref.watch(userProvider.select((value) => value.profilePicture));
+        ref.watch(userProvider.select((value) => value.profilePicture));
     String username = ref.watch(userProvider.select((value) => value.username));
     String nickname = ref.watch(userProvider.select((value) => value.nickname));
 
@@ -123,27 +124,25 @@ class _HomeState extends ConsumerState<Home> {
                       children: [
                         CachedNetworkImage(
                           imageUrl: profilePicture,
-                          errorWidget: (context, url, error) =>
-                              CircleAvatar(
-                                backgroundColor: neutral2,
-                                radius: 32.r,
-                                child:
+                          errorWidget: (context, url, error) => CircleAvatar(
+                            backgroundColor: neutral2,
+                            radius: 32.r,
+                            child:
                                 Icon(Icons.person_outline_rounded, size: 24.r),
-                              ),
+                          ),
                           progressIndicatorBuilder: (context, url, download) =>
                               Container(
-                                width: 40.r,
-                                height: 40.r,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: neutral2,
-                                ),
-                              ),
-                          imageBuilder: (context, provider) =>
-                              CircleAvatar(
-                                backgroundImage: provider,
-                                radius: 32.r,
-                              ),
+                            width: 40.r,
+                            height: 40.r,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: neutral2,
+                            ),
+                          ),
+                          imageBuilder: (context, provider) => CircleAvatar(
+                            backgroundImage: provider,
+                            radius: 32.r,
+                          ),
                         ),
                         SizedBox(width: 10.w),
                         Column(
@@ -152,10 +151,11 @@ class _HomeState extends ConsumerState<Home> {
                           children: [
                             SizedBox(
                               width: 140.w,
-                              child: Text(username,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: context.textTheme.titleLarge!.copyWith(
-                                      fontWeight: FontWeight.w600),
+                              child: Text(
+                                username,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.textTheme.titleLarge!
+                                    .copyWith(fontWeight: FontWeight.w600),
                               ),
                             ),
                             Text("@$nickname",
@@ -216,9 +216,7 @@ class _HomeState extends ConsumerState<Home> {
         ),
       ),
       onDrawerChanged: (change) =>
-      ref
-          .watch(hideBottomProvider.notifier)
-          .state = change,
+          ref.watch(hideBottomProvider.notifier).state = change,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -230,26 +228,24 @@ class _HomeState extends ConsumerState<Home> {
                   onTap: () => _scaffoldKey.currentState!.openDrawer(),
                   child: CachedNetworkImage(
                     imageUrl: profilePicture,
-                    errorWidget: (context, url, error) =>
-                        CircleAvatar(
-                          backgroundColor: neutral2,
-                          radius: 20.r,
-                          child: Icon(Icons.person_outline_rounded, size: 16.r),
-                        ),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      backgroundColor: neutral2,
+                      radius: 20.r,
+                      child: Icon(Icons.person_outline_rounded, size: 16.r),
+                    ),
                     progressIndicatorBuilder: (context, url, download) =>
                         Container(
-                          width: 40.r,
-                          height: 40.r,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: neutral2,
-                          ),
-                        ),
-                    imageBuilder: (context, provider) =>
-                        CircleAvatar(
-                          backgroundImage: provider,
-                          radius: 20.r,
-                        ),
+                      width: 40.r,
+                      height: 40.r,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: neutral2,
+                      ),
+                    ),
+                    imageBuilder: (context, provider) => CircleAvatar(
+                      backgroundImage: provider,
+                      radius: 20.r,
+                    ),
                   ),
                 ),
               ),
@@ -257,16 +253,14 @@ class _HomeState extends ConsumerState<Home> {
             elevation: 0.0,
             automaticallyImplyLeading: false,
             title: GestureDetector(
-              onTap: () =>
-                  scrollController.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 1000),
-                    curve: Curves.easeIn,
-                  ),
+              onTap: () => scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 1000),
+                curve: Curves.easeIn,
+              ),
               child: Text(
                 "REDIONES",
-                style: context.textTheme.titleMedium!
-                    .copyWith(color: appRed),
+                style: context.textTheme.titleMedium!.copyWith(color: appRed),
               ),
             ),
             centerTitle: true,
@@ -309,17 +303,18 @@ class _HomeState extends ConsumerState<Home> {
                           width: 390.w,
                           height: 40.h,
                           hint: "What are you looking for?",
-                          prefix:
-                          SizedBox(height: 40.h,
-                              width: 40.h,
-                              child: SvgPicture.asset("assets/Search Icon.svg",
-                                  width: 20.h,
-                                  height: 20.h,
-                                  color: darkTheme ? Colors.white54 : Colors.black45,
-                                fit: BoxFit.scaleDown,
-                              ),
-                          )
-                      ),
+                          prefix: SizedBox(
+                            height: 40.h,
+                            width: 40.h,
+                            child: SvgPicture.asset(
+                              "assets/Search Icon.svg",
+                              width: 20.h,
+                              height: 20.h,
+                              color:
+                                  darkTheme ? Colors.white54 : Colors.black45,
+                              fit: BoxFit.scaleDown,
+                            ),
+                          )),
                       SizedBox(height: 10.h)
                     ],
                   ),
@@ -328,71 +323,69 @@ class _HomeState extends ConsumerState<Home> {
             ),
           ),
           SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-              sliver: !fetched || posts.isEmpty
-                  ? SliverFillRemaining(
-                child: !fetched
-                    ? Skeletonizer(
-                  enabled: true,
-                  child: ListView.separated(
-                    itemCount: dummyPosts.length,
-                    itemBuilder: (_, index) =>
-                        PostContainer(
-                          post: dummyPosts[index],
-                          onCommentClicked: () {},
-                        ),
-                    separatorBuilder: (_, __) =>
-                        SizedBox(height: 20.h),
-                  ),
-                )
-                    : GestureDetector(
-                  onTap: refresh,
-                  child: Center(
-                    child: Text(
-                      "No posts available. Tap to refresh",
-                      style: context.textTheme.bodyLarge,
-                    ),
-                  ),
-                ),
-              )
-                  : SliverFillRemaining(
-                child: AnimationLimiter(
-                  child: RefreshIndicator(
-                    onRefresh: refresh,
-                    child: ListView.separated(
-                      physics: const BouncingScrollPhysics(),
-                      controller: scrollController,
-                      itemCount: posts.length + 1,
-                      separatorBuilder: (_, __) => SizedBox(height: 20.h),
-                      itemBuilder: (_, index) {
-                        if (index == posts.length) {
-                          return SizedBox(height: 100.h);
-                        }
-
-                        Post post = posts[index];
-
-                        return AnimationConfiguration.staggeredList(
-                          position: index,
-                          duration: const Duration(milliseconds: 750),
-                          child: SlideAnimation(
-                            verticalOffset: 25.h,
-                            child: FadeInAnimation(
-                              child: PostContainer(
-                                post: post,
-                                onCommentClicked: () =>
-                                    onCommentClicked(
-                                      post.id,
-                                      getComments(post.id),
-                                    ),
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+            sliver: !fetched || posts.isEmpty
+                ? SliverFillRemaining(
+                    child: !fetched
+                        ? Skeletonizer(
+                            enabled: true,
+                            child: ListView.separated(
+                              itemCount: dummyPosts.length,
+                              itemBuilder: (_, index) => PostContainer(
+                                post: dummyPosts[index],
+                                onCommentClicked: () {},
+                              ),
+                              separatorBuilder: (_, __) =>
+                                  SizedBox(height: 20.h),
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: refresh,
+                            child: Center(
+                              child: Text(
+                                "No posts available. Tap to refresh",
+                                style: context.textTheme.bodyLarge,
                               ),
                             ),
                           ),
-                        );
-                      },
+                  )
+                : SliverFillRemaining(
+                    child: AnimationLimiter(
+                      child: RefreshIndicator(
+                        onRefresh: refresh,
+                        child: ListView.separated(
+                          physics: const BouncingScrollPhysics(),
+                          controller: scrollController,
+                          itemCount: posts.length + 1,
+                          separatorBuilder: (_, __) => SizedBox(height: 20.h),
+                          itemBuilder: (_, index) {
+                            if (index == posts.length) {
+                              return SizedBox(height: 100.h);
+                            }
+
+                            Post post = posts[index];
+
+                            return AnimationConfiguration.staggeredList(
+                              position: index,
+                              duration: const Duration(milliseconds: 750),
+                              child: SlideAnimation(
+                                verticalOffset: 25.h,
+                                child: FadeInAnimation(
+                                  child: PostContainer(
+                                    post: post,
+                                    onCommentClicked: () => onCommentClicked(
+                                      post.id,
+                                      getComments(post.id),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
           )
         ],
       ),
@@ -431,7 +424,7 @@ class _PostCommentsState extends State<PostComments> {
     controller.clear();
 
     RedionesResponse<CommentData?> resp =
-    await createComment(widget.postID, text);
+        await createComment(widget.postID, text);
     if (resp.status == Status.success) {
       response.payload.add(resp.payload!);
       setState(() {});
@@ -441,9 +434,7 @@ class _PostCommentsState extends State<PostComments> {
   @override
   Widget build(BuildContext context) {
     return AnimatedPadding(
-      padding: MediaQuery
-          .of(context)
-          .viewInsets,
+      padding: MediaQuery.of(context).viewInsets,
       duration: const Duration(milliseconds: 100),
       curve: Curves.decelerate,
       child: SizedBox(
@@ -451,7 +442,6 @@ class _PostCommentsState extends State<PostComments> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
             FutureBuilder(
               future: widget.future,
               builder: (context, snapshot) {
@@ -463,7 +453,7 @@ class _PostCommentsState extends State<PostComments> {
                   );
                 } else if (snapshot.connectionState == ConnectionState.done) {
                   RedionesResponse<List<CommentData>> response =
-                  snapshot.data as RedionesResponse<List<CommentData>>;
+                      snapshot.data as RedionesResponse<List<CommentData>>;
                   if (response.status == Status.failed) {
                     return Expanded(
                       child: Center(
@@ -519,7 +509,11 @@ class _PostCommentsState extends State<PostComments> {
                         alignment: Alignment.centerRight,
                         child: Padding(
                           padding: EdgeInsets.only(right: 15.w),
-                          child: Text("${response.payload.length} comment${response.payload.length == 1 ? "" : "s"}", style: context.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600),),
+                          child: Text(
+                            "${response.payload.length} comment${response.payload.length == 1 ? "" : "s"}",
+                            style: context.textTheme.bodyLarge!
+                                .copyWith(fontWeight: FontWeight.w600),
+                          ),
                         ),
                       ),
                       SizedBox(height: 15.h),
@@ -553,36 +547,35 @@ class _PostCommentsState extends State<PostComments> {
                                       imageUrl: data.postedBy.profilePicture,
                                       errorWidget: (context, url, error) =>
                                           CircleAvatar(
-                                            backgroundColor: neutral2,
-                                            radius: 16.r,
-                                            child: Icon(
-                                                Icons.person_outline_rounded,
-                                                color: Colors.black,
-                                                size: 12.r),
-                                          ),
+                                        backgroundColor: neutral2,
+                                        radius: 16.r,
+                                        child: Icon(
+                                            Icons.person_outline_rounded,
+                                            color: Colors.black,
+                                            size: 12.r),
+                                      ),
                                       progressIndicatorBuilder:
-                                          (context, url, download) =>
-                                          Center(
-                                            child: CircularProgressIndicator(
-                                                color: appRed,
-                                                value: download.progress),
-                                          ),
+                                          (context, url, download) => Center(
+                                        child: CircularProgressIndicator(
+                                            color: appRed,
+                                            value: download.progress),
+                                      ),
                                       imageBuilder: (context, provider) =>
                                           CircleAvatar(
-                                            backgroundImage: provider,
-                                            radius: 16.r,
-                                          ),
+                                        backgroundImage: provider,
+                                        radius: 16.r,
+                                      ),
                                     ),
                                     SizedBox(width: 10.w),
                                     Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(data.postedBy.username,
                                             style: context.textTheme.bodyLarge!
                                                 .copyWith(
-                                                fontWeight:
-                                                FontWeight.w600)),
+                                                    fontWeight:
+                                                        FontWeight.w600)),
                                         SizedBox(height: 10.h),
                                         SizedBox(
                                             width: 300.w,
@@ -592,7 +585,7 @@ class _PostCommentsState extends State<PostComments> {
                                         SizedBox(height: 10.h),
                                         Row(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                              MainAxisAlignment.start,
                                           children: [
                                             IconButton(
                                               icon: Icon(
