@@ -272,126 +272,126 @@ class _RedionesState extends ConsumerState<Rediones>
     );
     time.setDefaultLocale('en_short');
 
-    _lightTheme = const TextTheme(
+    _lightTheme = TextTheme(
       bodySmall: TextStyle(
-        fontSize: 12,
+        fontSize: 12.sp,
         color: primary,
         fontWeight: FontWeight.normal,
       ),
       bodyMedium: TextStyle(
-        fontSize: 14,
+        fontSize: 14.sp,
         color: primary,
         fontWeight: FontWeight.normal,
       ),
       bodyLarge: TextStyle(
-        fontSize: 16,
+        fontSize: 16.sp,
         color: primary,
         fontWeight: FontWeight.normal,
       ),
       titleSmall: TextStyle(
-        fontSize: 18,
+        fontSize: 18.sp,
         color: primary,
         fontWeight: FontWeight.w700,
       ),
       titleMedium: TextStyle(
-        fontSize: 20,
+        fontSize: 20.sp,
         color: primary,
         fontWeight: FontWeight.w700,
       ),
       titleLarge: TextStyle(
-        fontSize: 22,
+        fontSize: 22.sp,
         color: primary,
         fontWeight: FontWeight.w700,
       ),
       displaySmall: TextStyle(
-        fontSize: 22,
+        fontSize: 22.sp,
         color: primary,
         fontWeight: FontWeight.w600,
       ),
       displayMedium: TextStyle(
-        fontSize: 24,
+        fontSize: 24.sp,
         color: primary,
         fontWeight: FontWeight.w600,
       ),
       displayLarge: TextStyle(
-        fontSize: 26,
+        fontSize: 26.sp,
         color: primary,
         fontWeight: FontWeight.w600,
       ),
       headlineSmall: TextStyle(
-        fontSize: 24,
+        fontSize: 24.sp,
         color: primary,
         fontWeight: FontWeight.bold,
       ),
       headlineMedium: TextStyle(
-        fontSize: 26,
+        fontSize: 26.sp,
         color: primary,
         fontWeight: FontWeight.bold,
       ),
       headlineLarge: TextStyle(
-        fontSize: 28,
+        fontSize: 28.sp,
         color: primary,
         fontWeight: FontWeight.bold,
       ),
     );
-    _darkTheme = const TextTheme(
+    _darkTheme = TextTheme(
       bodySmall: TextStyle(
-        fontSize: 12,
+        fontSize: 12.sp,
         color: theme,
         fontWeight: FontWeight.normal,
       ),
       bodyMedium: TextStyle(
-        fontSize: 14,
+        fontSize: 14.sp,
         color: theme,
         fontWeight: FontWeight.normal,
       ),
       bodyLarge: TextStyle(
-        fontSize: 16,
+        fontSize: 16.sp,
         color: theme,
         fontWeight: FontWeight.normal,
       ),
       titleSmall: TextStyle(
-        fontSize: 18,
+        fontSize: 18.sp,
         color: theme,
         fontWeight: FontWeight.w700,
       ),
       titleMedium: TextStyle(
-        fontSize: 20,
+        fontSize: 20.sp,
         color: theme,
         fontWeight: FontWeight.w700,
       ),
       titleLarge: TextStyle(
-        fontSize: 22,
+        fontSize: 22.sp,
         color: theme,
         fontWeight: FontWeight.w700,
       ),
       displaySmall: TextStyle(
-        fontSize: 22,
+        fontSize: 22.sp,
         color: theme,
         fontWeight: FontWeight.w600,
       ),
       displayMedium: TextStyle(
-        fontSize: 24,
+        fontSize: 24.sp,
         color: theme,
         fontWeight: FontWeight.w600,
       ),
       displayLarge: TextStyle(
-        fontSize: 26,
+        fontSize: 26.sp,
         color: theme,
         fontWeight: FontWeight.w600,
       ),
       headlineSmall: TextStyle(
-        fontSize: 24,
+        fontSize: 24.sp,
         color: theme,
         fontWeight: FontWeight.bold,
       ),
       headlineMedium: TextStyle(
-        fontSize: 26,
+        fontSize: 26.sp,
         color: theme,
         fontWeight: FontWeight.bold,
       ),
       headlineLarge: TextStyle(
-        fontSize: 28,
+        fontSize: 28.sp,
         color: theme,
         fontWeight: FontWeight.bold,
       ),
