@@ -57,6 +57,7 @@ dependencies:
   path:
   sembast:
   get_it:
+  is_lock_screen:
   fluttertoast:
   flex_color_scheme:
   video_player:

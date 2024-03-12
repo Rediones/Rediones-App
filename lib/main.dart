@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:is_lock_screen/is_lock_screen.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/screens/auth/login.dart';
@@ -48,7 +49,6 @@ import 'components/user_data.dart';
 
 import 'repositories/database_manager.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -70,20 +70,22 @@ void main() async {
   };
 }
 
-class Rediones extends StatefulWidget {
+class Rediones extends ConsumerStatefulWidget {
   const Rediones({super.key});
 
   @override
-  State<Rediones> createState() => _RedionesState();
+  ConsumerState<Rediones> createState() => _RedionesState();
 }
 
-class _RedionesState extends State<Rediones> {
+class _RedionesState extends ConsumerState<Rediones>
+    with WidgetsBindingObserver {
   late GoRouter _router;
   late TextTheme _lightTheme, _darkTheme;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     _router = GoRouter(
       initialLocation: Pages.splash.path,
@@ -241,17 +243,20 @@ class _RedionesState extends State<Rediones> {
         GoRoute(
           path: Pages.communityChat.path,
           name: Pages.communityChat,
-          builder: (_, state) => CommunityChatPage(data: state.extra as CommunityData),
+          builder: (_, state) =>
+              CommunityChatPage(data: state.extra as CommunityData),
         ),
         GoRoute(
           path: Pages.communityLibrary.path,
           name: Pages.communityLibrary,
-          builder: (_, state) => CommunityLibraryPage(data: state.extra as CommunityData),
+          builder: (_, state) =>
+              CommunityLibraryPage(data: state.extra as CommunityData),
         ),
         GoRoute(
           path: Pages.communityParticipants.path,
           name: Pages.communityParticipants,
-          builder: (_, state) => CommunityParticipantsPage(data: state.extra as CommunityData),
+          builder: (_, state) =>
+              CommunityParticipantsPage(data: state.extra as CommunityData),
         ),
         GoRoute(
           path: Pages.communitySearch.path,
@@ -389,6 +394,12 @@ class _RedionesState extends State<Rediones> {
   }
 
   @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       builder: (context, widget) => MaterialApp.router(
@@ -412,5 +423,20 @@ class _RedionesState extends State<Rediones> {
       designSize: const Size(390, 844),
       minTextAdapt: true,
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      final isLock = await isLockScreen();
+      if (isLock != null && !isLock) {
+        // App is minimized, not locked
+        // Perform your logic here
+      } else {
+        // Screen is locked
+        // Perform your logic here
+      }
+    }
   }
 }

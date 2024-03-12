@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:rediones/repositories/post_repository.dart';
+import 'package:rediones/repositories/user_repository.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 
@@ -22,5 +23,6 @@ class DatabaseManager {
 
   static _registerRepositories(){
     GetIt.I.registerLazySingleton<PostRepository>(() => PostRepository());
+    GetIt.I.registerLazySingleton<UserRepository>(() => UserRepository());
   }
 }
