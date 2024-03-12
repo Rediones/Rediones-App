@@ -4,10 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:is_lock_screen/is_lock_screen.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
+import 'package:rediones/components/post_data.dart';
+import 'package:rediones/components/providers.dart';
+import 'package:rediones/repositories/post_repository.dart';
+import 'package:rediones/repositories/user_repository.dart';
 import 'package:rediones/screens/auth/login.dart';
 import 'package:rediones/screens/auth/signup.dart';
 import 'package:rediones/screens/events/create_events.dart';
@@ -429,14 +434,24 @@ class _RedionesState extends ConsumerState<Rediones>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
-      final isLock = await isLockScreen();
-      if (isLock != null && !isLock) {
-        // App is minimized, not locked
-        // Perform your logic here
-      } else {
-        // Screen is locked
-        // Perform your logic here
-      }
+      //final isLock = await isLockScreen();
+      //if (isLock != null && !isLock) {
+      final PostRepository postRepository = GetIt.I.get();
+      final List<Post> posts = ref.watch(postsProvider);
+      postRepository.clearAll();
+      postRepository.addPosts(posts);
+
+      final UserRepository userRepository = GetIt.I.get();
+      final User user = ref.watch(userProvider);
+      userRepository.updateUser(user);
+
+      //}
+
+      //else {
+      // Screen is locked
+      // Perform your logic here
+
+      //}
     }
   }
 }

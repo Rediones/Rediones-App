@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -362,20 +360,4 @@ class NetworkManager extends ChangeNotifier {
   }
 
   bool get isConnected => _connectionStatus != ConnectivityResult.none;
-}
-
-class DatabaseManager {
-  static Database? _database;
-
-  static Future<void> init() async {
-    _database = await openDatabase(
-      join(await getDatabasesPath(), 'message_database.db'),
-      onCreate: (db, version) {
-        db.execute('CREATE TABLE');
-        db.execute('CREATE TABLE messages()');
-      },
-    );
-  }
-
-  static List<LastMessageData> getLastMessages() => [];
 }
