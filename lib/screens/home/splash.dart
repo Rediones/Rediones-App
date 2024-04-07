@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:is_first_run/is_first_run.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/components/providers.dart';
@@ -9,13 +10,14 @@ import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class Splash extends ConsumerStatefulWidget {
-  const Splash({Key? key}) : super(key: key);
+  const Splash({super.key});
 
   @override
   ConsumerState<Splash> createState() => _SplashState();
 }
 
-class _SplashState extends ConsumerState<Splash> with SingleTickerProviderStateMixin {
+class _SplashState extends ConsumerState<Splash>
+    with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late Animation<double> animation;
 
@@ -38,33 +40,16 @@ class _SplashState extends ConsumerState<Splash> with SingleTickerProviderStateM
 
     Future.delayed(
       const Duration(milliseconds: 1000),
-      () async {
-        controller.forward();
+      () => controller.forward().then((_) async {
         Map<String, String>? authDetails = await FileHandler.loadAuthDetails();
-        if(authDetails == null) {
-          controller.reverse().then((_) => navigate(Pages.login));
-        } else {
-          authenticate(authDetails, Pages.login).then((resp) {
-            String destination = Pages.login;
-            if(resp.status == Status.failed) {
-              showError(resp.message, background: offWhite, text: appRed);
-            } else {
-              login(authDetails, ref);
-              ref.watch(userProvider.notifier).state = resp.payload!;
-              if (!resp.payload!.isProfileComplete) {
-                destination = Pages.editProfile;
-              } else {
-                destination = Pages.home;
-              }
-            }
-            navigate(destination);
-          });
-        }
-      },
+        controller.reverse().then(
+            (_) => navigate(authDetails == null ? Pages.login : Pages.home));
+      }),
     );
   }
 
-  void navigate(String destination) => context.router.pushReplacementNamed(destination);
+  void navigate(String destination) =>
+      context.router.pushReplacementNamed(destination);
 
   @override
   void dispose() {

@@ -327,7 +327,7 @@ Future<void> initializeApp(WidgetRef ref) async {
   ref.watch(initializedProvider.notifier).state = true;
 }
 
-void login(Map<String, String> authDetails, WidgetRef ref) {
+void saveAuthDetails(Map<String, String> authDetails, WidgetRef ref) {
   FileHandler.saveAuthDetails(authDetails);
   ref.watch(isLoggedInProvider.notifier).state = true;
 }

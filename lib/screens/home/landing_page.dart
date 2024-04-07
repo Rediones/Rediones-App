@@ -1,23 +1,16 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rediones/api/post_service.dart';
-import 'package:rediones/components/user_data.dart';
+import 'package:animated_snack_bar/animated_snack_bar.dart';
+import 'package:rediones/api/file_handler.dart';
+import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/components/providers.dart';
 import 'package:rediones/screens/home/home.dart';
 import 'package:rediones/screens/notification/notification.dart';
-import 'package:rediones/screens/project/project_page.dart';
 import 'package:rediones/screens/spotlight/spotlight.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
-
-import 'dart:developer';
 
 class LandingPage extends ConsumerStatefulWidget {
   const LandingPage({super.key});
@@ -27,7 +20,6 @@ class LandingPage extends ConsumerStatefulWidget {
 }
 
 class _LandingPageState extends ConsumerState<LandingPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   late List<Widget> navPages;
 
   @override
@@ -39,6 +31,32 @@ class _LandingPageState extends ConsumerState<LandingPage> {
       SizedBox(),
       NotificationPage(),
     ];
+
+    _authenticate();
+  }
+
+  void _showError(String text) {
+    HapticFeedback.heavyImpact();
+    AnimatedSnackBar.material(
+      text,
+      type: AnimatedSnackBarType.error,
+      mobileSnackBarPosition: MobileSnackBarPosition.top,
+      animationCurve: Curves.bounceIn,
+      snackBarStrategy: RemoveSnackBarStrategy(),
+    ).show(context);
+  }
+
+
+  void _authenticate() async {
+    Map<String, String>? authDetails = await FileHandler.loadAuthDetails();
+    authenticate(authDetails!, Pages.login).then((resp) {
+      if (resp.status == Status.failed) {
+        _showError(resp.message);
+      } else {
+        saveAuthDetails(authDetails, ref);
+        ref.watch(userProvider.notifier).state = resp.payload!;
+      }
+    });
   }
 
   @override
@@ -53,8 +71,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
               index: currentTab,
               children: navPages,
             ),
-            if (!ref.watch(hideBottomProvider))
-              bottomNavBar
+            if (!ref.watch(hideBottomProvider)) bottomNavBar
           ],
         ),
       ),

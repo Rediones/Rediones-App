@@ -63,6 +63,12 @@ dependencies:
   video_player:
   fijkplayer:
   dropdown_button2:
+  animated_snack_bar:
+  flutter_media_downloader:
+  is_first_run:
+  awesome_dialog:
+  awesome_notifications:
+
 
 dev_dependencies:
   flutter_test:
