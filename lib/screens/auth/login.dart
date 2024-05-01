@@ -10,10 +10,8 @@ import 'package:rediones/tools/functions.dart' as f;
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
-import '../../api/base.dart';
-
 class Login extends ConsumerStatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  const Login({super.key});
 
   @override
   ConsumerState<Login> createState() => _LoginState();
@@ -25,8 +23,6 @@ class _LoginState extends ConsumerState<Login> {
   final TextEditingController _emailControl = TextEditingController();
   final Map<String, String> _authDetails = {"email": "", "password": ""};
   bool _showPassword = false;
-
-  String error = "";
 
   void navigate(RedionesResponse<User?> result) {
     String location = Pages.home;
@@ -52,20 +48,24 @@ class _LoginState extends ConsumerState<Login> {
   }
 
   void _login() {
+    ref.watch(authenticatingProvider.notifier).state = AuthStatus.Authenticating;
+
     authenticate(_authDetails, Pages.login).then((result) {
       if (!mounted) return;
 
-      showToast(result.status == Status.failed
-          ? result.message
-          : "Welcome, ${result.payload!.username}");
-      setState(() => error = result.message);
-
+      f.showNewError(
+          result.status == Status.failed
+              ? result.message
+              : "Welcome, ${result.payload!.username}",
+          context);
 
       if (result.status == Status.success) {
+        ref.watch(authenticatingProvider.notifier).state = AuthStatus.Auth_Success;
         _controller.clear();
         _emailControl.clear();
         navigate(result);
       } else {
+        ref.watch(authenticatingProvider.notifier).state = AuthStatus.Auth_Failed;
         Navigator.of(context).pop();
       }
     });
@@ -80,7 +80,6 @@ class _LoginState extends ConsumerState<Login> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -93,12 +92,11 @@ class _LoginState extends ConsumerState<Login> {
               ),
               Text(
                 "Rediones",
-                style:
-                    context.textTheme.displaySmall!.copyWith(color: appRed),
+                style: context.textTheme.titleLarge!.copyWith(color: appRed),
               ),
               Text(
-                "welcome back",
-                style: context.textTheme.bodyLarge,
+                "Welcome back",
+                style: context.textTheme.bodyMedium,
               ),
               SizedBox(height: 32.h),
               Form(
@@ -113,7 +111,7 @@ class _LoginState extends ConsumerState<Login> {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Username or Email",
-                          style: context.textTheme.bodyMedium,
+                          style: context.textTheme.labelSmall,
                         ),
                       ),
                       SizedBox(height: 4.h),
@@ -124,7 +122,7 @@ class _LoginState extends ConsumerState<Login> {
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
                           if (value!.isEmpty || !value.contains("@")) {
-                            f.showError("Invalid Email Address");
+                            f.showNewError("Invalid Email Address", context);
                             return '';
                           }
                           return null;
@@ -135,8 +133,10 @@ class _LoginState extends ConsumerState<Login> {
                       SizedBox(height: 10.h),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text("Password",
-                            style: context.textTheme.bodyMedium),
+                        child: Text(
+                          "Password",
+                          style: context.textTheme.labelSmall,
+                        ),
                       ),
                       SizedBox(height: 4.h),
                       SpecialForm(
@@ -162,8 +162,8 @@ class _LoginState extends ConsumerState<Login> {
                         ),
                         onValidate: (value) {
                           if (value!.length < 6) {
-                            f.showError(
-                                "Password is too short. Use at least 6 characters");
+                            f.showNewError(
+                                "Password is too short. Use at least 6 characters", context);
                             return '';
                           }
                           return null;
@@ -177,12 +177,12 @@ class _LoginState extends ConsumerState<Login> {
                         children: [
                           Text(
                             "Forgot Password? ",
-                            style: context.textTheme.bodyMedium,
+                            style: context.textTheme.labelSmall,
                           ),
                           Text(
                             "Click Here",
-                            style: context.textTheme.bodyMedium?.copyWith(
-                                color: appRed, fontWeight: FontWeight.w600),
+                            style: context.textTheme.bodySmall?.copyWith(
+                                color: appRed, fontWeight: FontWeight.w700),
                           ),
                         ],
                       ),
@@ -193,12 +193,13 @@ class _LoginState extends ConsumerState<Login> {
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(390.w, 40.h),
                           backgroundColor: appRed,
+                          elevation: 1.0,
                         ),
                         onPressed: submit,
                         child: Text(
                           "Sign In",
                           style: context.textTheme.bodyLarge!.copyWith(
-                              color: theme, fontWeight: FontWeight.w500),
+                              color: theme, fontWeight: FontWeight.w600),
                         ),
                       ),
                       SizedBox(
@@ -209,7 +210,7 @@ class _LoginState extends ConsumerState<Login> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text("Don't have an account?",
-                              style: context.textTheme.bodyMedium),
+                              style: context.textTheme.labelSmall),
                           SizedBox(
                             width: 5.w,
                           ),
@@ -218,8 +219,8 @@ class _LoginState extends ConsumerState<Login> {
                                 .pushReplacementNamed(Pages.register),
                             child: Text(
                               "Register",
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                  color: appRed, fontWeight: FontWeight.w600),
+                              style: context.textTheme.labelSmall?.copyWith(
+                                  color: appRed, fontWeight: FontWeight.w700),
                             ),
                           ),
                         ],
@@ -235,5 +236,3 @@ class _LoginState extends ConsumerState<Login> {
     );
   }
 }
-
-

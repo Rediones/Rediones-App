@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:is_first_run/is_first_run.dart';
 import 'package:rediones/api/file_handler.dart';
-import 'package:rediones/api/profile_service.dart';
-import 'package:rediones/components/providers.dart';
 import 'package:rediones/tools/constants.dart';
-import 'package:rediones/tools/functions.dart';
-import 'package:rediones/tools/widgets.dart';
 
 class Splash extends ConsumerStatefulWidget {
   const Splash({super.key});
@@ -63,20 +57,13 @@ class _SplashState extends ConsumerState<Splash>
       backgroundColor: appRed,
       body: SafeArea(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Rediones",
-                style: context.textTheme.displayLarge!.copyWith(color: theme),
-              ),
-              SizedBox(height: 20.h),
-              FadeTransition(
-                opacity: animation,
-                child: whiteLoader,
-              ),
-            ],
+          child: FadeTransition(
+            opacity: animation,
+            child: Text(
+              "Rediones",
+              style: context.textTheme.titleLarge!
+                  .copyWith(color: theme, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
       ),

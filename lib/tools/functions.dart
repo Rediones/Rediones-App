@@ -1,3 +1,4 @@
+import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,20 +6,69 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rediones/tools/constants.dart';
 
-void showError(String message, {Color background = appRed, Color text = offWhite}) {
+void showNewError(String message, BuildContext context) {
+  HapticFeedback.vibrate();
+  AnimatedSnackBar snackBar = AnimatedSnackBar(
+      builder: (context) => ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 220.w,
+              minHeight: 40.h,
+            ),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
+              decoration: BoxDecoration(
+                color: appRed,
+                borderRadius: BorderRadius.circular(5.r),
+              ),
+              alignment: Alignment.center,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Icon(
+                    Icons.error_outline_outlined,
+                    color: theme,
+                    size: 20.r,
+                  ),
+                  SizedBox(
+                    width: 160.w,
+                    child: Text(
+                      message,
+                      style: context.textTheme.bodySmall!.copyWith(
+                        color: theme,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      mobileSnackBarPosition: MobileSnackBarPosition.bottom,
+      animationCurve: Curves.ease,
+      snackBarStrategy: RemoveSnackBarStrategy(),
+      duration: const Duration(seconds: 4),
+      animationDuration: const Duration(milliseconds: 350));
+  snackBar.show(context);
+}
+
+void showError(String message,
+    {Color background = appRed, Color text = offWhite}) {
   HapticFeedback.vibrate();
   showToast(message, background: background, text: text);
 }
 
-void showToast(String message, {Color background = appRed, Color text = offWhite}) => Fluttertoast.showToast(
-    msg: message,
-    toastLength: Toast.LENGTH_SHORT,
-    gravity: ToastGravity.SNACKBAR,
-    timeInSecForIosWeb: 2,
-    backgroundColor: background,
-    textColor: text,
-    fontSize: 14.sp,
-);
+void showToast(String message,
+        {Color background = appRed, Color text = offWhite}) =>
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.SNACKBAR,
+      timeInSecForIosWeb: 2,
+      backgroundColor: background,
+      textColor: text,
+      fontSize: 14.sp,
+    );
 
 void unFocus() => FocusManager.instance.primaryFocus?.unfocus();
 
@@ -104,11 +154,10 @@ String formatDuration(Duration duration) {
   return "$min:$secs";
 }
 
-
 int fastHash(String string) {
   var hash = 0xcbf29ce484222325;
   int i = 0;
-  while(i < string.length) {
+  while (i < string.length) {
     final codeUnit = string.codeUnitAt(i++);
     hash ^= codeUnit >> 8;
     hash *= 0x100000001b3;
@@ -129,4 +178,3 @@ bool validateForm(GlobalKey<FormState> formKey) {
   }
   return false;
 }
-

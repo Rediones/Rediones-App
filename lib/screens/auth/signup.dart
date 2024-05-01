@@ -40,9 +40,9 @@ class _SignupState extends ConsumerState<Signup> {
   void register() {
     authenticate(_authDetails, Pages.register).then(
       (result) {
-        f.showToast(result.status == Status.failed
+        f.showNewError(result.status == Status.failed
             ? result.message
-            : "Account Created Successfully");
+            : "Account Created Successfully", context);
 
         if (result.status == Status.success) {
           _controller.clear();
@@ -84,9 +84,8 @@ class _SignupState extends ConsumerState<Signup> {
               ),
               Text(
                 "Rediones",
-                style: context.textTheme.displaySmall?.copyWith(color: appRed),
+                style: context.textTheme.titleLarge!.copyWith(color: appRed),
               ),
-              Text("welcome", style: context.textTheme.bodyLarge),
               SizedBox(height: 32.h),
               Form(
                 key: _formKey,
@@ -98,8 +97,10 @@ class _SignupState extends ConsumerState<Signup> {
                     children: [
                       Align(
                         alignment: Alignment.centerLeft,
-                        child:
-                            Text("Email", style: context.textTheme.bodyMedium),
+                        child: Text(
+                          "Email",
+                          style: context.textTheme.labelSmall,
+                        ),
                       ),
                       SizedBox(height: 4.h),
                       SpecialForm(
@@ -110,7 +111,7 @@ class _SignupState extends ConsumerState<Signup> {
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
                           if (value!.isEmpty || !value.contains("@")) {
-                            f.showError("Invalid Email Address");
+                            f.showNewError("Invalid Email Address", context);
                             return '';
                           }
                           return null;
@@ -121,8 +122,10 @@ class _SignupState extends ConsumerState<Signup> {
                       SizedBox(height: 10.h),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text("Password",
-                            style: context.textTheme.bodyMedium),
+                        child: Text(
+                          "Password",
+                          style: context.textTheme.labelSmall,
+                        ),
                       ),
                       SizedBox(height: 4.h),
                       SpecialForm(
@@ -148,8 +151,8 @@ class _SignupState extends ConsumerState<Signup> {
                         ),
                         onValidate: (value) {
                           if (value!.length < 6) {
-                            f.showError(
-                                "Password is too short. Use at least 6 characters");
+                            f.showNewError(
+                                "Password is too short. Use at least 6 characters", context);
                             return '';
                           }
                           return null;
@@ -160,8 +163,10 @@ class _SignupState extends ConsumerState<Signup> {
                       SizedBox(height: 10.h),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text("Confirm Password",
-                            style: context.textTheme.bodyMedium),
+                        child: Text(
+                          "Confirm Password",
+                          style: context.textTheme.labelSmall,
+                        ),
                       ),
                       SizedBox(height: 4.h),
                       SpecialForm(
@@ -187,7 +192,7 @@ class _SignupState extends ConsumerState<Signup> {
                         ),
                         onValidate: (value) {
                           if (value != _controller.text) {
-                            f.showError("Password do not match");
+                            f.showNewError("Password do not match", context);
                             return '';
                           }
                           return null;
@@ -206,7 +211,7 @@ class _SignupState extends ConsumerState<Signup> {
                         child: Text(
                           "Sign Up",
                           style: context.textTheme.bodyLarge!.copyWith(
-                              color: theme, fontWeight: FontWeight.w500),
+                              color: theme, fontWeight: FontWeight.w600),
                         ),
                       ),
                       SizedBox(
@@ -218,7 +223,7 @@ class _SignupState extends ConsumerState<Signup> {
                         children: [
                           Text(
                             "Already have an account?",
-                            style: context.textTheme.bodyMedium,
+                            style: context.textTheme.labelSmall,
                           ),
                           SizedBox(
                             width: 5.w,
@@ -228,8 +233,8 @@ class _SignupState extends ConsumerState<Signup> {
                                 .pushReplacementNamed(Pages.login),
                             child: Text(
                               "Sign In",
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                  color: appRed, fontWeight: FontWeight.w600),
+                              style: context.textTheme.labelSmall?.copyWith(
+                                  color: appRed, fontWeight: FontWeight.w700),
                             ),
                           ),
                         ],
