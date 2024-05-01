@@ -24,7 +24,6 @@ extension StringPath on String {
 }
 
 extension RedionesContext on BuildContext {
-
   ThemeData get theme => Theme.of(this);
   TextTheme get textTheme => theme.textTheme;
   GoRouter get router => GoRouter.of(this);
