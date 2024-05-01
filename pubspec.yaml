@@ -1,0 +1,111 @@
+name: rediones
+description: A social media platform with the sole aim of connecting young people all across the world
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.1.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  dio:
+  file_picker:
+  badges:
+  intl:
+  clipboard:
+  camera:
+  path_provider:
+  equatable:
+  flutter_boxicons:
+  flutter_screenutil:
+  flutter_spinkit:
+  connectivity_plus:
+  cached_network_image:
+  flutter_launcher_icons:
+  flutter_native_splash:
+  photo_view:
+  flutter_reaction_button:
+  video_editor:
+  photofilters:
+  chatview:
+  timeago:
+  shared_preferences:
+  flutter_svg:
+  better_player:
+  photo_gallery:
+  transparent_image:
+  flutter_rating_stars:
+  helpers:
+  glassmorphism:
+  story_view:
+  socket_io_client:
+  chat_bubbles:
+  flutter_video_info:
+  permission_handler:
+  go_router:
+  flutter_riverpod:
+  animated_switcher_plus:
+  flutter_image_compress:
+  progressive_image:
+  flutter_staggered_animations:
+  crop_image:
+  skeletonizer:
+  path:
+  sembast:
+  get_it:
+  is_lock_screen:
+  fluttertoast:
+  flex_color_scheme:
+  video_player:
+  fijkplayer:
+  dropdown_button2:
+  animated_snack_bar:
+  flutter_media_downloader:
+  is_first_run:
+  awesome_dialog:
+  awesome_notifications:
+  curved_labeled_navigation_bar:
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.1
+
+flutter_icons:
+  image_path_android: "images/icon.png"
+  image_path_ios: "images/icon.png"
+  android: true
+  ios: true
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "images/icon.png"
+  min_sdk_android: 29
+  remove_alpha_ios: true
+
+flutter_native_splash:
+  color: "#D94A4A"
+  android: true
+  ios: true
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: fonts/Nunito-Black.ttf
+        - asset: fonts/Nunito-Black.ttf
+        - asset: fonts/Nunito-ExtraBold.ttf
+        - asset: fonts/Nunito-ExtraLight.ttf
+        - asset: fonts/Nunito-Italic.ttf
+        - asset: fonts/Nunito-Light.ttf
+        - asset: fonts/Nunito-Medium.ttf
+        - asset: fonts/Nunito-Regular.ttf
+        - asset: fonts/Nunito-SemiBold.ttf
