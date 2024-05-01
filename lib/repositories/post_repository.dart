@@ -1,6 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
-import 'dart:developer' show log;
+
 import 'package:rediones/components/post_data.dart';
 
 class PostRepository {
@@ -12,7 +12,7 @@ class PostRepository {
   }
 
   Future addPosts(List<Post> posts) async {
-    return await _store.add(
+    return await _store.records(posts.map((post) => post.id)).add(
         _database, posts.map((post) => post.toJson()).toList(growable: false));
   }
 
@@ -30,14 +30,9 @@ class PostRepository {
 
   Future<List<Post>> getAllPosts() async {
     final snapshots = await _store.find(_database);
-    log(snapshots.runtimeType.toString());
-
-    snapshots.map((snapshot) {
-      
-    
-      // return Post.fromJson(snapshot.value as Map<String, dynamic>);
-    }).toList(growable: false);
-
-    return [];
+    return snapshots
+        .map(
+            (snapshot) => Post.fromJson(snapshot.value as Map<String, dynamic>))
+        .toList(growable: false);
   }
 }

@@ -49,7 +49,7 @@ const SpinKitWave whiteLoader = SpinKitWave(
   size: 20,
 );
 
-// const BottomNavBar bottomNavBar = BottomNavBar();
+const BottomNavBar bottomNavBar = BottomNavBar();
 
 class TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   TabHeaderDelegate({required this.tabBar, this.color});
@@ -177,7 +177,7 @@ class SpecialForm extends StatelessWidget {
   final double height;
 
   const SpecialForm({
-    super.key,
+    Key? key,
     required this.controller,
     required this.width,
     required this.height,
@@ -201,7 +201,7 @@ class SpecialForm extends StatelessWidget {
     this.prefix,
     this.suffix,
     this.maxLines = 1,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -263,8 +263,8 @@ class SpecialForm extends StatelessWidget {
           ),
           hintText: hint,
           hintStyle: hintStyle ??
-              context.textTheme.labelSmall!
-                  .copyWith(fontWeight: FontWeight.w300, color: neutral3),
+              context.textTheme.bodyMedium!
+                  .copyWith(fontWeight: FontWeight.w200),
         ),
         onChanged: (value) {
           if (onChange == null) return;
@@ -489,244 +489,243 @@ class WaitScreen extends StatelessWidget {
   }
 }
 
-// class BottomNavBar extends ConsumerWidget {
-//   const BottomNavBar({
-//     super.key,
-//   });
+class BottomNavBar extends ConsumerWidget {
+  const BottomNavBar({
+    super.key,
+  });
 
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     bool darkTheme = context.isDark;
-//     int currentTab = ref.watch(dashboardIndexProvider);
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    bool darkTheme = context.isDark;
+    int currentTab = ref.watch(dashboardIndexProvider);
 
-//     return Align(
-//       alignment: Alignment.bottomCenter,
-//       child: Padding(
-//         padding: EdgeInsets.symmetric(horizontal: 10.w),
-//         child: SizedBox(
-//           height: 120.h,
-//           child: Stack(
-//             children: [
-//               Positioned(
-//                 top: 20.h,
-//                 left: 160.w,
-//                 right: 160.w,
-//                 child: GestureDetector(
-//                   onTap: () {
-//                     if (currentTab == 0) {
-//                       showDialog(
-//                         context: context,
-//                         barrierDismissible: true,
-//                         builder: (context) => Dialog(
-//                           backgroundColor: Colors.transparent,
-//                           elevation: 0.0,
-//                           child: ClipPath(
-//                             clipper: TriangleClipper(
-//                               borderRadius: 10.r,
-//                               triangleHeight: 15.h,
-//                               triangleWidth: 20.h,
-//                             ),
-//                             child: Container(
-//                               color: darkTheme ? primary : theme,
-//                               height: 160.h,
-//                               width: 40.w,
-//                               padding: EdgeInsets.only(left: 55.w, top: 12.5.h),
-//                               child: ListView(children: [
-//                                 ListTile(
-//                                   onTap: () {
-//                                     Navigator.pop(context);
-//                                     context.router.pushNamed(Pages.createPosts);
-//                                   },
-//                                   title: Text(
-//                                     "Create A Post",
-//                                     style: context.textTheme.bodyMedium,
-//                                   ),
-//                                 ),
-//                                 ListTile(
-//                                   onTap: () {
-//                                     Navigator.pop(context);
-//                                     context.router.pushNamed(Pages.askQuestion);
-//                                   },
-//                                   title: Text(
-//                                     "Ask Question",
-//                                     style: context.textTheme.bodyMedium,
-//                                   ),
-//                                 ),
-//                               ]),
-//                             ),
-//                           ),
-//                         ),
-//                       );
-//                     } else if (currentTab == 1) {
-//                       showDialog(
-//                         context: context,
-//                         useSafeArea: true,
-//                         barrierDismissible: true,
-//                         builder: (context) => Dialog(
-//                           backgroundColor: Colors.transparent,
-//                           elevation: 0.0,
-//                           child: ClipPath(
-//                             clipper: TriangleClipper(
-//                               borderRadius: 10.r,
-//                               triangleHeight: 15.h,
-//                               triangleWidth: 20.h,
-//                             ),
-//                             child: Container(
-//                               color: neutral2,
-//                               height: 65.h,
-//                               width: 80.w,
-//                               child: Column(
-//                                 children: [
-//                                   SizedBox(height: 20.h),
-//                                   GestureDetector(
-//                                     onTap: () async {
-//                                       Navigator.pop(context);
-//                                       Permission.storage.request().then((resp) {
-//                                         if (resp.isGranted) {
-//                                           context.router.pushNamed(
-//                                             Pages.createSpotlight,
-//                                           );
-//                                         }
-//                                       });
-//                                     },
-//                                     child: Text(
-//                                       "Create A Spotlight Video",
-//                                       style: context.textTheme.bodyMedium!
-//                                           .copyWith(color: theme),
-//                                     ),
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                           ),
-//                         ),
-//                       );
-//                     } else if (currentTab == 2) {
-//                       context.router.pushNamed(Pages.createProject);
-//                     }
-//                   },
-//                   child: Container(
-//                     height: 50.r,
-//                     width: 50.r,
-//                     alignment: Alignment.center,
-//                     decoration: BoxDecoration(
-//                       shape: BoxShape.circle,
-//                       color: currentTab == 1
-//                           ? goodYellow
-//                           : (darkTheme ? midPrimary : primary),
-//                     ),
-//                     child: Icon(
-//                       Icons.add_rounded,
-//                       size: 32.r,
-//                       color: currentTab == 1 ? primary : offWhite,
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//               Align(
-//                 alignment: Alignment.bottomCenter,
-//                 child: ClipPath(
-//                   clipper: BottomNavBarClipper(
-//                     borderRadius: 15.r,
-//                     cutoutRadius: 35.r,
-//                   ),
-//                   child: Container(
-//                     color: currentTab == 1
-//                         ? neutral2
-//                         : (darkTheme ? midPrimary : primary),
-//                     height: 70.h,
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         SizedBox(
-//                           width: 160.w,
-//                           child: Row(
-//                             mainAxisAlignment: MainAxisAlignment.spaceAround,
-//                             children: [
-//                               BottomNavItem(
-//                                 color: currentTab == 1 ? offWhite : null,
-//                                 selected: currentTab == 0,
-//                                 height: 70.h,
-//                                 text: "Home",
-//                                 activeSVG: "assets/Home Active.svg",
-//                                 inactiveSVG: "assets/Home Inactive.svg",
-//                                 onSelect: () {
-//                                   unFocus();
-//                                   if (currentTab != 0) {
-//                                     ref
-//                                         .watch(dashboardIndexProvider.notifier)
-//                                         .state = 0;
-//                                   }
-//                                 },
-//                               ),
-//                               BottomNavItem(
-//                                 selected: currentTab == 1,
-//                                 color: currentTab == 1 ? appRed : null,
-//                                 height: 70.h,
-//                                 activeSVG: "assets/Spotlight Active.svg",
-//                                 inactiveSVG: "assets/Spotlight Inactive.svg",
-//                                 text: "Spotlight",
-//                                 onSelect: () {
-//                                   unFocus();
-//                                   if (currentTab != 1) {
-//                                     ref
-//                                         .watch(dashboardIndexProvider.notifier)
-//                                         .state = 1;
-//                                   }
-//                                 },
-//                               ),
-//                             ],
-//                           ),
-//                         ),
-//                         SizedBox(
-//                           width: 160.w,
-//                           child: Row(
-//                             mainAxisAlignment: MainAxisAlignment.spaceAround,
-//                             children: [
-//                               BottomNavItem(
-//                                 selected: currentTab == 2,
-//                                 color: currentTab == 1 ? offWhite : null,
-//                                 height: 70.h,
-//                                 text: "Communities",
-//                                 activeSVG: "assets/Community.svg",
-//                                 inactiveSVG: "assets/Community.svg",
-//                                 onSelect: () {
-//                                   unFocus();
-//                                   context.router
-//                                       .pushNamed(Pages.communityPractice);
-//                                 },
-//                               ),
-//                               BottomNavItem(
-//                                 selected: currentTab == 3,
-//                                 color: currentTab == 1 ? offWhite : null,
-//                                 height: 70.h,
-//                                 text: "Notification",
-//                                 activeSVG: "assets/Notification Active.svg",
-//                                 inactiveSVG: "assets/Notification Inactive.svg",
-//                                 onSelect: () {
-//                                   unFocus();
-//                                   if (currentTab != 3) {
-//                                     ref
-//                                         .watch(dashboardIndexProvider.notifier)
-//                                         .state = 3;
-//                                   }
-//                                 },
-//                               ),
-//                             ],
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        child: SizedBox(
+          height: 120.h,
+          child: Stack(
+            children: [
+              Positioned(
+                top: 20.h,
+                left: 160.w,
+                right: 160.w,
+                child: GestureDetector(
+                  onTap: () {
+                    if (currentTab == 0) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (context) => Dialog(
+                          backgroundColor: Colors.transparent,
+                          elevation: 0.0,
+                          child: ClipPath(
+                            clipper: TriangleClipper(
+                              borderRadius: 10.r,
+                              triangleHeight: 15.h,
+                              triangleWidth: 20.h,
+                            ),
+                            child: Container(
+                              color: darkTheme ? primary : theme,
+                              height: 160.h,
+                              width: 40.w,
+                              padding: EdgeInsets.only(left: 55.w, top: 12.5.h),
+                              child: ListView(children: [
+                                ListTile(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    context.router.pushNamed(Pages.createPosts);
+                                  },
+                                  title: Text(
+                                    "Create A Post",
+                                    style: context.textTheme.bodyMedium,
+                                  ),
+                                ),
+                                ListTile(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    context.router.pushNamed(Pages.askQuestion);
+                                  },
+                                  title: Text(
+                                    "Ask Question",
+                                    style: context.textTheme.bodyMedium,
+                                  ),
+                                ),
+                              ]),
+                            ),
+                          ),
+                        ),
+                      );
+                    } else if (currentTab == 1) {
+                      showDialog(
+                        context: context,
+                        useSafeArea: true,
+                        barrierDismissible: true,
+                        builder: (context) => Dialog(
+                          backgroundColor: Colors.transparent,
+                          elevation: 0.0,
+                          child: ClipPath(
+                            clipper: TriangleClipper(
+                              borderRadius: 10.r,
+                              triangleHeight: 15.h,
+                              triangleWidth: 20.h,
+                            ),
+                            child: Container(
+                              color: neutral2,
+                              height: 65.h,
+                              width: 80.w,
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 20.h),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      Navigator.pop(context);
+                                      Permission.storage.request().then((resp) {
+                                        if (resp.isGranted) {
+                                          context.router.pushNamed(
+                                            Pages.createSpotlight,
+                                          );
+                                        }
+                                      });
+                                    },
+                                    child: Text(
+                                      "Create A Spotlight Video",
+                                      style: context.textTheme.bodyMedium!
+                                          .copyWith(color: theme),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    } else if (currentTab == 2) {
+                      context.router.pushNamed(Pages.createProject);
+                    }
+                  },
+                  child: Container(
+                    height: 50.r,
+                    width: 50.r,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: currentTab == 1
+                          ? goodYellow
+                          : (darkTheme ? midPrimary : primary),
+                    ),
+                    child: Icon(
+                      Icons.add_rounded,
+                      size: 32.r,
+                      color: currentTab == 1 ? primary : offWhite,
+                    ),
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: ClipPath(
+                  clipper: BottomNavBarClipper(
+                    borderRadius: 15.r,
+                    cutoutRadius: 35.r,
+                  ),
+                  child: Container(
+                    color: currentTab == 1
+                        ? neutral2
+                        : (darkTheme ? midPrimary : primary),
+                    height: 70.h,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: 160.w,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              BottomNavItem(
+                                color: currentTab == 1 ? offWhite : null,
+                                selected: currentTab == 0,
+                                height: 70.h,
+                                text: "Home",
+                                activeSVG: "assets/Home Active.svg",
+                                inactiveSVG: "assets/Home Inactive.svg",
+                                onSelect: () {
+                                  unFocus();
+                                  if (currentTab != 0) {
+                                    ref
+                                        .watch(dashboardIndexProvider.notifier)
+                                        .state = 0;
+                                  }
+                                },
+                              ),
+                              BottomNavItem(
+                                selected: currentTab == 1,
+                                color: currentTab == 1 ? appRed : null,
+                                height: 70.h,
+                                activeSVG: "assets/Spotlight Active.svg",
+                                inactiveSVG: "assets/Spotlight Inactive.svg",
+                                text: "Spotlight",
+                                onSelect: () {
+                                  unFocus();
+                                  if (currentTab != 1) {
+                                    ref
+                                        .watch(dashboardIndexProvider.notifier)
+                                        .state = 1;
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 160.w,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              BottomNavItem(
+                                selected: currentTab == 2,
+                                color: currentTab == 1 ? offWhite : null,
+                                height: 70.h,
+                                text: "Communities",
+                                activeSVG: "assets/Community.svg",
+                                inactiveSVG: "assets/Community.svg",
+                                onSelect: () {
+                                  unFocus();
+                                  context.router.pushNamed(Pages.communityPractice);
+                                },
+                              ),
+                              BottomNavItem(
+                                selected: currentTab == 3,
+                                color: currentTab == 1 ? offWhite : null,
+                                height: 70.h,
+                                text: "Notification",
+                                activeSVG: "assets/Notification Active.svg",
+                                inactiveSVG: "assets/Notification Inactive.svg",
+                                onSelect: () {
+                                  unFocus();
+                                  if (currentTab != 3) {
+                                    ref
+                                        .watch(dashboardIndexProvider.notifier)
+                                        .state = 3;
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class ImageSlide extends StatelessWidget {
   final List<Uint8List> mediaBytes;
@@ -970,7 +969,7 @@ class _PostContainerState extends ConsumerState<PostContainer> {
       width: 390.w,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15.r),
-        border: Border.all(color: darkTheme ? neutral2 : fadedPrimary),
+        border: Border.all(color: darkTheme ? neutral : fadedPrimary),
         color: Colors.transparent,
       ),
       padding: EdgeInsets.symmetric(horizontal: 15.w),
@@ -1021,7 +1020,7 @@ class _PostContainerState extends ConsumerState<PostContainer> {
                         imageBuilder: (context, provider) {
                           return CircleAvatar(
                             backgroundImage: provider,
-                            radius: 20.r,
+                            radius: 26.r,
                           );
                         },
                       ),
@@ -1038,19 +1037,19 @@ class _PostContainerState extends ConsumerState<PostContainer> {
                                 child: Text(
                                   widget.post.poster.username,
                                   overflow: TextOverflow.ellipsis,
-                                  style: context.textTheme.bodySmall!
+                                  style: context.textTheme.bodyMedium!
                                       .copyWith(fontWeight: FontWeight.w700),
                                 ),
                               ),
                               Text("@${widget.post.poster.nickname}",
-                                  style: context.textTheme.labelSmall!.copyWith(fontSize: 10)),
+                                  style: context.textTheme.bodyMedium),
                               Wrap(
                                 spacing: 3.w,
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
                                   Icon(icon[0], size: 12.r, color: icon[1]),
                                   Text(title,
-                                      style: context.textTheme.labelSmall!.copyWith(fontSize: 10))
+                                      style: context.textTheme.bodySmall)
                                 ],
                               ),
                             ],
@@ -1104,7 +1103,7 @@ class _PostContainerState extends ConsumerState<PostContainer> {
                   child: Row(
                     children: [
                       Text(time.format(widget.post.timestamp),
-                          style: context.textTheme.labelSmall),
+                          style: context.textTheme.bodySmall),
                       SizedBox(width: 10.w),
                       IconButton(
                         iconSize: 26.r,
@@ -1124,19 +1123,21 @@ class _PostContainerState extends ConsumerState<PostContainer> {
           GestureDetector(
             onTap: () => setState(() => expandText = !expandText),
             child: RichText(
-                text: TextSpan(children: [
-              TextSpan(
-                text:
-                    "${widget.post.text.substring(0, expandText ? null : (widget.post.text.length >= 150 ? 150 : widget.post.text.length))}"
-                    "${widget.post.text.length >= 150 && !expandText ? "..." : ""}",
-                style: context.textTheme.bodyMedium,
-              ),
-              if (widget.post.text.length > 150)
-                TextSpan(
-                  text: expandText ? " Read Less" : " Read More",
-                  style: context.textTheme.bodySmall!.copyWith(color: appRed),
-                ),
-            ])),
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "${widget.post.text.substring(0, expandText ? null : (widget.post.text.length >= 150 ? 150 : widget.post.text.length))}"
+                        "${widget.post.text.length >= 150 && !expandText ? "..." : ""}",
+                    style: context.textTheme.bodyLarge,
+                  ),
+                  if(widget.post.text.length > 150)
+                    TextSpan(
+                      text: expandText ? " Read Less" : " Read More",
+                      style: context.textTheme.bodyMedium!.copyWith(color: appRed),
+                    ),
+                ]
+              )
+            ),
           ),
           SizedBox(height: 10.h),
           if (widget.post.type == MediaType.imageAndText)
@@ -1218,14 +1219,15 @@ class _PostContainerState extends ConsumerState<PostContainer> {
                       key: ValueKey<bool>(liked),
                       splashRadius: 0.01,
                       onPressed: onLike,
-                      iconSize: 18.r,
+                      iconSize: 20.r,
                       icon: Icon(liked ? Boxicons.bxs_like : Boxicons.bx_like,
                           color: liked ? appRed : null),
                     ),
                   ),
+                  SizedBox(width: 5.w),
                   Text(
                     "${widget.post.likes.length}",
-                    style: context.textTheme.bodySmall,
+                    style: context.textTheme.bodyMedium,
                   )
                 ],
               ),
@@ -1236,12 +1238,12 @@ class _PostContainerState extends ConsumerState<PostContainer> {
                     ignore: true,
                     child: IconButton(
                       icon: SvgPicture.asset("assets/Comment Post.svg",
-                      width: 18.r, height: 18.r,
                           color: darkTheme ? Colors.white : null),
                       onPressed: widget.onCommentClicked,
                       splashRadius: 0.01,
                     ),
                   ),
+                  SizedBox(width: 5.w),
                   FutureBuilder(
                     future: commentsFuture,
                     builder: (context, snapshot) {
@@ -1254,7 +1256,7 @@ class _PostContainerState extends ConsumerState<PostContainer> {
                       }
                       return Text(
                         text,
-                        style: context.textTheme.bodySmall,
+                        style: context.textTheme.bodyMedium,
                       );
                     },
                   ),
@@ -1266,15 +1268,16 @@ class _PostContainerState extends ConsumerState<PostContainer> {
                   Skeleton.ignore(
                     ignore: true,
                     child: IconButton(
-                      icon: SvgPicture.asset("assets/Reply.svg", width: 18.r, height: 18.r,
+                      icon: SvgPicture.asset("assets/Reply.svg",
                           color: darkTheme ? Colors.white : null),
                       onPressed: () {},
                       splashRadius: 0.01,
                     ),
                   ),
+                  SizedBox(width: 5.w),
                   Text(
                     "${widget.post.shares}",
-                    style: context.textTheme.bodySmall,
+                    style: context.textTheme.bodyMedium,
                   )
                 ],
               ),
@@ -1312,15 +1315,17 @@ class MultiMemberImage extends StatelessWidget {
     required this.total,
   });
 
+
   double leftPadding(int count) {
     return 225;
   }
+
 
   @override
   Widget build(BuildContext context) {
     int count = images.length > 3 ? 4 : (images.length + 1);
 
-    if (images.isEmpty) return const SizedBox();
+    if(images.isEmpty) return const SizedBox();
 
     return SizedBox(
       width: 170.w,
@@ -1334,37 +1339,34 @@ class MultiMemberImage extends StatelessWidget {
                 count,
                 (index) => Positioned(
                   left: 22.5.w * (index + 1),
-                  child: (index == count - 1)
-                      ? CircleAvatar(
-                          backgroundColor: border,
-                          radius: size,
-                          child: CircleAvatar(
-                            foregroundColor: Colors.transparent,
-                            backgroundColor: Colors.transparent,
-                            radius: size * 0.9,
-                            child: Text(
-                              "+${total - images.length}",
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                  fontWeight: FontWeight.w600, color: primary),
-                            ),
-                          ),
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: images[0],
-                          errorWidget: (_, url, error) => CircleAvatar(
-                            radius: size,
-                            backgroundColor: neutral2,
-                          ),
-                          progressIndicatorBuilder: (_, url, error) =>
-                              CircleAvatar(
-                            radius: size,
-                            backgroundColor: neutral2,
-                          ),
-                          imageBuilder: (_, provider) => CircleAvatar(
-                            backgroundColor: border,
-                            radius: size,
-                          ),
-                        ),
+                  child: (index == count - 1) ? CircleAvatar(
+                    backgroundColor: border,
+                    radius: size,
+                    child: CircleAvatar(
+                      foregroundColor: Colors.transparent,
+                      backgroundColor: Colors.transparent,
+                      radius: size * 0.9,
+                      child: Text(
+                        "+${total - images.length}",
+                        style: context.textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.w600, color: primary),
+                      ),
+                    ),
+                  ) :  CachedNetworkImage(
+                    imageUrl: images[0],
+                    errorWidget: (_, url, error) => CircleAvatar(
+                      radius: size,
+                      backgroundColor: neutral2,
+                    ),
+                    progressIndicatorBuilder: (_, url, error) => CircleAvatar(
+                      radius: size,
+                      backgroundColor: neutral2,
+                    ),
+                    imageBuilder: (_, provider) => CircleAvatar(
+                      backgroundColor: border,
+                      radius: size,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1652,18 +1654,24 @@ class ProjectContainer extends StatelessWidget {
 class BottomNavItem extends StatelessWidget {
   final String activeSVG;
   final String inactiveSVG;
+  final String text;
   final Color? color;
   final bool invertColor;
   final bool selected;
+  final double height;
+  final VoidCallback onSelect;
 
   const BottomNavItem({
-    super.key,
+    Key? key,
     this.color,
     this.invertColor = false,
     this.activeSVG = "",
     this.inactiveSVG = "",
+    required this.text,
+    required this.height,
     required this.selected,
-  });
+    required this.onSelect,
+  }) : super(key: key);
 
   Color getColor(bool darkTheme) {
     if (color != null) {
@@ -1683,13 +1691,32 @@ class BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcherZoom.zoomIn(
-      duration: const Duration(milliseconds: 200),
-      child: SvgPicture.asset(
-        selected ? activeSVG : inactiveSVG,
-        key: ValueKey<bool>(selected),
-        width: 20.r,
-        height: 20.r,
+    return GestureDetector(
+      onTap: onSelect,
+      child: SizedBox(
+        height: height,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedSwitcherZoom.zoomIn(
+              duration: const Duration(milliseconds: 200),
+              child: SvgPicture.asset(
+                selected ? activeSVG : inactiveSVG,
+                key: ValueKey<bool>(selected),
+                width: 20.r,
+                height: 20.r,
+              ),
+            ),
+            SizedBox(height: 5.h),
+            Text(
+              text,
+              style: context.textTheme.bodyMedium!.copyWith(
+                color: selected ? appRed : theme.withOpacity(0.5),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -290,13 +290,9 @@ final StateProvider<bool> isLoggedInProvider = StateProvider((ref) => false);
 final StateProvider<bool> initializedProvider = StateProvider((ref) => false);
 final StateProvider<bool> hideBottomProvider = StateProvider((ref) => false);
 final StateProvider<int> dashboardIndexProvider = StateProvider((ref) => 0);
-final StateProvider<AuthStatus> authenticatingProvider = StateProvider((ref) => AuthStatus.None);
-final StateProvider<bool> shrinkFABProvider = StateProvider((ref) => false);
 
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);
-  ref.invalidate(shrinkFABProvider);
-  ref.invalidate(authenticatingProvider);
   ref.invalidate(recentSearchesProvider);
   ref.invalidate(communitiesProvider);
   ref.invalidate(hideBottomProvider);
@@ -314,13 +310,6 @@ void logout(WidgetRef ref) {
   ref.invalidate(postsProvider);
   ref.invalidate(conversationsProvider);
   ref.invalidate(userProvider);
-}
-
-enum AuthStatus {
-  None, 
-  Authenticating,
-  Auth_Success,
-  Auth_Failed,
 }
 
 Future<void> initializeApp(WidgetRef ref) async {
