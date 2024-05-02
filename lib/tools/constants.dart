@@ -16,6 +16,12 @@ const Color neutral3 = Color.fromARGB(255, 165, 165, 165);
 const Color statusColor = Color.fromARGB(255, 229, 229, 229);
 const Color offWhite = Color.fromRGBO(224, 224, 224, 1.0);
 
+const Color primary1 = Color(0xFF1F1F1F);
+const Color primaryPoint6 = Color.fromRGBO(0, 0, 0, 0.6);
+const Color gray = Color(0xFF808080);
+const Color gray2 = Color.fromRGBO(65, 65, 65, 0.5);
+const Color border = Color.fromRGBO(31, 31, 31, 0.15);
+
 List<CameraDescription> allCameras = [];
 int currentCamera = 0;
 

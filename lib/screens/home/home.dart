@@ -255,13 +255,13 @@ class _HomeState extends ConsumerState<Home> {
                     ),
                     imageBuilder: (context, provider) => CircleAvatar(
                       backgroundImage: provider,
-                      radius: 20.r,
+                      radius: 16.r,
                     ),
                   ),
                 ),
               ),
             ),
-            elevation: 0.0,
+            elevation: 1.0,
             automaticallyImplyLeading: false,
             title: GestureDetector(
               onTap: () => scrollController.animateTo(
@@ -271,11 +271,11 @@ class _HomeState extends ConsumerState<Home> {
               ),
               child: Text(
                 "REDIONES",
-                style: context.textTheme.titleMedium!.copyWith(color: appRed),
+                style: context.textTheme.titleSmall,
               ),
             ),
             centerTitle: true,
-            expandedHeight: 100.h,
+            // expandedHeight: 100.h,
             pinned: true,
             floating: true,
             collapsedHeight: kToolbarHeight,
@@ -298,40 +298,40 @@ class _HomeState extends ConsumerState<Home> {
                 ),
               )
             ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: SizedBox(
-                height: 120.h,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SpecialForm(
-                          controller: searchController,
-                          focus: searchFocus,
-                          borderColor: Colors.transparent,
-                          fillColor: neutral2,
-                          width: 390.w,
-                          height: 40.h,
-                          hint: "What are you looking for?",
-                          prefix: SizedBox(
-                            height: 40.h,
-                            width: 40.h,
-                            child: SvgPicture.asset(
-                              "assets/Search Icon.svg",
-                              width: 20.h,
-                              height: 20.h,
-                              color:
-                                  darkTheme ? Colors.white54 : Colors.black45,
-                              fit: BoxFit.scaleDown,
-                            ),
-                          )),
-                      SizedBox(height: 10.h)
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            // flexibleSpace: FlexibleSpaceBar(
+            //   background: SizedBox(
+            //     height: 120.h,
+            //     child: Padding(
+            //       padding: EdgeInsets.symmetric(horizontal: 10.w),
+            //       child: Column(
+            //         mainAxisAlignment: MainAxisAlignment.end,
+            //         children: [
+            //           SpecialForm(
+            //               controller: searchController,
+            //               focus: searchFocus,
+            //               borderColor: Colors.transparent,
+            //               fillColor: neutral2,
+            //               width: 390.w,
+            //               height: 40.h,
+            //               hint: "What are you looking for?",
+            //               prefix: SizedBox(
+            //                 height: 40.h,
+            //                 width: 40.h,
+            //                 child: SvgPicture.asset(
+            //                   "assets/Search Icon.svg",
+            //                   width: 20.h,
+            //                   height: 20.h,
+            //                   color:
+            //                       darkTheme ? Colors.white54 : Colors.black45,
+            //                   fit: BoxFit.scaleDown,
+            //                 ),
+            //               )),
+            //           SizedBox(height: 10.h)
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ),
           SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),

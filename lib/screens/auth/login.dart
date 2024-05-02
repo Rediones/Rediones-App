@@ -88,7 +88,7 @@ class _LoginState extends ConsumerState<Login> {
               ),
               Text(
                 "Rediones",
-                style: context.textTheme.titleLarge!.copyWith(color: appRed),
+                style: context.textTheme.titleSmall!.copyWith(color: appRed),
               ),
               Text(
                 "Welcome back",
