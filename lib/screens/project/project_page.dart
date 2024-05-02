@@ -126,8 +126,8 @@ class _OngoingProjectContainer extends StatelessWidget {
     bool isOver = false;
 
     return GestureDetector(
-      onTap: () =>
-          Navigator.push(context, FadeRoute(ViewProjectPage(data: data))),
+      // onTap: () =>
+      //     Navigator.push(context, FadeRoute(ViewProjectPage(data: data))),
       child: Container(
         width: 390.w,
         height: 100.h,

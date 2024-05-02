@@ -40,7 +40,7 @@ class _HomeState extends ConsumerState<Home> {
 
   void fetchPosts() => getPosts().then((response) {
         if (!mounted) return;
-        
+
         List<Post> p = response.payload;
         if (response.status == Status.failed) {
           showToast(response.message);
@@ -48,11 +48,13 @@ class _HomeState extends ConsumerState<Home> {
 
         log("Assigning new posts");
 
-        ref.watch(postsProvider.notifier).state.addAll(p);
+        List<Post> posts = ref.watch(postsProvider.notifier).state;
+        posts.clear();
+        posts.addAll(p);
 
-        final PostRepository repository = GetIt.I.get();
-        repository.clearAll();
-        repository.addPosts(p);
+        // final PostRepository repository = GetIt.I.get();
+        // repository.clearAll();
+        // repository.addPosts(p);
 
         setState(() => fetched = true);
       });
@@ -67,9 +69,6 @@ class _HomeState extends ConsumerState<Home> {
       }
     });
 
-
-
-
     fetchPosts();
   }
 
@@ -78,7 +77,6 @@ class _HomeState extends ConsumerState<Home> {
     List<Post> posts = await repository.getAllPosts();
     ref.watch(postsProvider.notifier).state.addAll(posts);
   }
-
 
   @override
   void dispose() {
@@ -228,179 +226,240 @@ class _HomeState extends ConsumerState<Home> {
       ),
       onDrawerChanged: (change) =>
           ref.watch(hideBottomProvider.notifier).state = change,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            leading: Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(left: 10.w),
-                child: GestureDetector(
-                  onTap: () => _scaffoldKey.currentState!.openDrawer(),
-                  child: CachedNetworkImage(
-                    imageUrl: profilePicture,
-                    errorWidget: (context, url, error) => CircleAvatar(
-                      backgroundColor: neutral2,
-                      radius: 20.r,
-                      child: Icon(Icons.person_outline_rounded, size: 16.r),
-                    ),
-                    progressIndicatorBuilder: (context, url, download) =>
-                        Container(
-                      width: 40.r,
-                      height: 40.r,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: neutral2,
-                      ),
-                    ),
-                    imageBuilder: (context, provider) => CircleAvatar(
-                      backgroundImage: provider,
-                      radius: 16.r,
-                    ),
+      appBar: AppBar(
+        leading: Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: EdgeInsets.only(left: 10.w),
+            child: GestureDetector(
+              onTap: () => _scaffoldKey.currentState!.openDrawer(),
+              child: CachedNetworkImage(
+                imageUrl: profilePicture,
+                errorWidget: (context, url, error) => CircleAvatar(
+                  backgroundColor: neutral2,
+                  radius: 20.r,
+                  child: Icon(Icons.person_outline_rounded, size: 16.r),
+                ),
+                progressIndicatorBuilder: (context, url, download) => Container(
+                  width: 40.r,
+                  height: 40.r,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: neutral2,
                   ),
+                ),
+                imageBuilder: (context, provider) => CircleAvatar(
+                  backgroundImage: provider,
+                  radius: 16.r,
                 ),
               ),
             ),
-            elevation: 1.0,
-            automaticallyImplyLeading: false,
-            title: GestureDetector(
-              onTap: () => scrollController.animateTo(
-                0,
-                duration: const Duration(milliseconds: 1000),
-                curve: Curves.easeIn,
-              ),
-              child: Text(
-                "REDIONES",
-                style: context.textTheme.titleSmall,
-              ),
-            ),
-            centerTitle: true,
-            // expandedHeight: 100.h,
-            pinned: true,
-            floating: true,
-            collapsedHeight: kToolbarHeight,
-            actions: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: EdgeInsets.only(right: 10.w),
-                  child: IconButton(
-                    icon: SvgPicture.asset(
-                      darkTheme
-                          ? "assets/Message Dark.svg"
-                          : "assets/Message.svg",
-                      width: 22.r,
-                      height: 22.r,
-                    ),
-                    onPressed: () => context.router.pushNamed(Pages.message),
-                    splashRadius: 0.01,
-                  ),
-                ),
-              )
-            ],
-            // flexibleSpace: FlexibleSpaceBar(
-            //   background: SizedBox(
-            //     height: 120.h,
-            //     child: Padding(
-            //       padding: EdgeInsets.symmetric(horizontal: 10.w),
-            //       child: Column(
-            //         mainAxisAlignment: MainAxisAlignment.end,
-            //         children: [
-            //           SpecialForm(
-            //               controller: searchController,
-            //               focus: searchFocus,
-            //               borderColor: Colors.transparent,
-            //               fillColor: neutral2,
-            //               width: 390.w,
-            //               height: 40.h,
-            //               hint: "What are you looking for?",
-            //               prefix: SizedBox(
-            //                 height: 40.h,
-            //                 width: 40.h,
-            //                 child: SvgPicture.asset(
-            //                   "assets/Search Icon.svg",
-            //                   width: 20.h,
-            //                   height: 20.h,
-            //                   color:
-            //                       darkTheme ? Colors.white54 : Colors.black45,
-            //                   fit: BoxFit.scaleDown,
-            //                 ),
-            //               )),
-            //           SizedBox(height: 10.h)
-            //         ],
-            //       ),
-            //     ),
-            //   ),
-            // ),
           ),
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-            sliver: (!fetched || posts.isEmpty)
-                ? SliverFillRemaining(
-                    child: !fetched
-                        ? Skeletonizer(
-                            enabled: true,
-                            child: ListView.separated(
-                              itemCount: dummyPosts.length,
-                              itemBuilder: (_, index) => PostContainer(
-                                post: dummyPosts[index],
-                                onCommentClicked: () {},
-                              ),
-                              separatorBuilder: (_, __) =>
-                                  SizedBox(height: 20.h),
-                            ),
-                          )
-                        : GestureDetector(
-                            onTap: refresh,
-                            child: Center(
-                              child: Text(
-                                "No posts available. Tap to refresh",
-                                style: context.textTheme.bodyLarge,
+        ),
+        automaticallyImplyLeading: false,
+        title: GestureDetector(
+          onTap: () => scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 1000),
+            curve: Curves.easeIn,
+          ),
+          child: Text(
+            "REDIONES",
+            style: context.textTheme.titleMedium,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: EdgeInsets.only(right: 10.w),
+              child: IconButton(
+                icon: SvgPicture.asset(
+                  darkTheme ? "assets/Message Dark.svg" : "assets/Message.svg",
+                  width: 22.r,
+                  height: 22.r,
+                ),
+                onPressed: () => context.router.pushNamed(Pages.message),
+                splashRadius: 0.01,
+              ),
+            ),
+          )
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+          child: (!fetched || posts.isEmpty)
+              ? !fetched
+                  ? Skeletonizer(
+                      enabled: true,
+                      child: ListView.separated(
+                        itemCount: dummyPosts.length,
+                        itemBuilder: (_, index) => PostContainer(
+                          post: dummyPosts[index],
+                          onCommentClicked: () {},
+                        ),
+                        separatorBuilder: (_, __) => SizedBox(height: 20.h),
+                      ),
+                    )
+                  : Center(
+                      child: GestureDetector(
+                        onTap: refresh,
+                        child: Center(
+                          child: Text(
+                            "No posts available. Tap to refresh",
+                            style: context.textTheme.bodyLarge,
+                          ),
+                        ),
+                      ),
+                    )
+              : AnimationLimiter(
+                  child: RefreshIndicator(
+                    onRefresh: refresh,
+                    child: ListView.separated(
+                      physics: const BouncingScrollPhysics(),
+                      controller: scrollController,
+                      itemCount: posts.length + 1,
+                      separatorBuilder: (_, __) => SizedBox(height: 20.h),
+                      itemBuilder: (_, index) {
+                        if (index == posts.length) {
+                          return SizedBox(height: 100.h);
+                        }
+
+                        Post post = posts[index];
+
+                        return AnimationConfiguration.staggeredList(
+                          position: index,
+                          duration: const Duration(milliseconds: 750),
+                          child: SlideAnimation(
+                            verticalOffset: 25.h,
+                            child: FadeInAnimation(
+                              child: PostContainer(
+                                post: post,
+                                onCommentClicked: () => onCommentClicked(
+                                  post.id,
+                                  getComments(post.id),
+                                ),
                               ),
                             ),
                           ),
-                  )
-                : SliverFillRemaining(
-                    child: AnimationLimiter(
-                      child: RefreshIndicator(
-                        onRefresh: refresh,
-                        child: ListView.separated(
-                          physics: const BouncingScrollPhysics(),
-                          controller: scrollController,
-                          itemCount: posts.length + 1,
-                          separatorBuilder: (_, __) => SizedBox(height: 20.h),
-                          itemBuilder: (_, index) {
-                            if (index == posts.length) {
-                              return SizedBox(height: 100.h);
-                            }
-
-                            Post post = posts[index];
-
-                            return AnimationConfiguration.staggeredList(
-                              position: index,
-                              duration: const Duration(milliseconds: 750),
-                              child: SlideAnimation(
-                                verticalOffset: 25.h,
-                                child: FadeInAnimation(
-                                  child: PostContainer(
-                                    post: post,
-                                    onCommentClicked: () => onCommentClicked(
-                                      post.id,
-                                      getComments(post.id),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
-          )
-        ],
+                ),
+        ),
       ),
     );
   }
 }
 
+//CustomScrollView(
+//slivers: [
+// SliverAppBar(
+//   leading: Align(
+//     alignment: Alignment.centerLeft,
+//     child: Padding(
+//       padding: EdgeInsets.only(left: 10.w),
+//       child: GestureDetector(
+//         onTap: () => _scaffoldKey.currentState!.openDrawer(),
+//         child: CachedNetworkImage(
+//           imageUrl: profilePicture,
+//           errorWidget: (context, url, error) => CircleAvatar(
+//             backgroundColor: neutral2,
+//             radius: 20.r,
+//             child: Icon(Icons.person_outline_rounded, size: 16.r),
+//           ),
+//           progressIndicatorBuilder: (context, url, download) =>
+//               Container(
+//             width: 40.r,
+//             height: 40.r,
+//             decoration: const BoxDecoration(
+//               shape: BoxShape.circle,
+//               color: neutral2,
+//             ),
+//           ),
+//           imageBuilder: (context, provider) => CircleAvatar(
+//             backgroundImage: provider,
+//             radius: 16.r,
+//           ),
+//         ),
+//       ),
+//     ),
+//   ),
+//   elevation: 1.0,
+//   automaticallyImplyLeading: false,
+//   title: GestureDetector(
+//     onTap: () => scrollController.animateTo(
+//       0,
+//       duration: const Duration(milliseconds: 1000),
+//       curve: Curves.easeIn,
+//     ),
+//     child: Text(
+//       "REDIONES",
+//       style: context.textTheme.titleSmall,
+//     ),
+//   ),
+//   centerTitle: true,
+//   // expandedHeight: 100.h,
+//   pinned: true,
+//   floating: true,
+//   collapsedHeight: kToolbarHeight,
+//   actions: [
+//     Align(
+//       alignment: Alignment.centerRight,
+//       child: Padding(
+//         padding: EdgeInsets.only(right: 10.w),
+//         child: IconButton(
+//           icon: SvgPicture.asset(
+//             darkTheme
+//                 ? "assets/Message Dark.svg"
+//                 : "assets/Message.svg",
+//             width: 22.r,
+//             height: 22.r,
+//           ),
+//           onPressed: () => context.router.pushNamed(Pages.message),
+//           splashRadius: 0.01,
+//         ),
+//       ),
+//     )
+//   ],
+//   // flexibleSpace: FlexibleSpaceBar(
+//   //   background: SizedBox(
+//   //     height: 120.h,
+//   //     child: Padding(
+//   //       padding: EdgeInsets.symmetric(horizontal: 10.w),
+//   //       child: Column(
+//   //         mainAxisAlignment: MainAxisAlignment.end,
+//   //         children: [
+//   //           SpecialForm(
+//   //               controller: searchController,
+//   //               focus: searchFocus,
+//   //               borderColor: Colors.transparent,
+//   //               fillColor: neutral2,
+//   //               width: 390.w,
+//   //               height: 40.h,
+//   //               hint: "What are you looking for?",
+//   //               prefix: SizedBox(
+//   //                 height: 40.h,
+//   //                 width: 40.h,
+//   //                 child: SvgPicture.asset(
+//   //                   "assets/Search Icon.svg",
+//   //                   width: 20.h,
+//   //                   height: 20.h,
+//   //                   color:
+//   //                       darkTheme ? Colors.white54 : Colors.black45,
+//   //                   fit: BoxFit.scaleDown,
+//   //                 ),
+//   //               )),
+//   //           SizedBox(height: 10.h)
+//   //         ],
+//   //       ),
+//   //     ),
+//   //   ),
+//   // ),
+// ),
+
+// ],
+// ),

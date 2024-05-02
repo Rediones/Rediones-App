@@ -80,12 +80,18 @@ class _RedionesState extends ConsumerState<Rediones>
           useMaterial3: true,
           scheme: FlexScheme.mandyRed,
           textTheme: lightTheme,
+            appBarStyle: FlexAppBarStyle.scaffoldBackground,
+            surfaceTint: Colors.transparent,
+            appBarElevation: 1.0
         ),
         darkTheme: FlexThemeData.dark(
           fontFamily: "Nunito",
           useMaterial3: true,
           scheme: FlexScheme.mandyRed,
           textTheme: darkTheme,
+          appBarStyle: FlexAppBarStyle.scaffoldBackground,
+          surfaceTint: Colors.transparent,
+          appBarElevation: 1.0,
         ),
         routerConfig: _router,
       ),

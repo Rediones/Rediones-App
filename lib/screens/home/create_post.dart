@@ -149,20 +149,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                             style: context.textTheme.bodyMedium),
                         onTap: () {
                           unFocus();
-                          Navigator.push(
-                            context,
-                            FadeRoute(
-                              const _ChooseCategoryPage(),
-                            ),
-                          ).then(
-                                (resp) =>
-                                setState(() {
-                                  postCategory = resp;
-                                  title =
-                                      postCategories[postCategory]?.keys.first;
-                                  icon = postCategories[postCategory]?[title]!;
-                                }),
-                          );
+
                         },
                       ),
                       SizedBox(height: 10.h),

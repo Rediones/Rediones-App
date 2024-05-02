@@ -431,65 +431,6 @@ class ComboBox extends StatelessWidget {
   }
 }
 
-class FadeRoute<T> extends PageRoute<T> {
-  final Widget child;
-
-  FadeRoute(this.child);
-
-  @override
-  Color get barrierColor => Colors.black;
-
-  @override
-  String get barrierLabel => "";
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation) =>
-      FadeTransition(opacity: animation, child: child);
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 500);
-}
-
-class WaitScreen extends StatelessWidget {
-  final Future<bool> future;
-  final Widget onFalse;
-  final Widget onTrue;
-
-  const WaitScreen(
-      {Key? key,
-      required this.future,
-      required this.onFalse,
-      required this.onTrue})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-          child: FutureBuilder(
-        future: future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CenteredPopup();
-          } else if (snapshot.connectionState == ConnectionState.done) {
-            bool result = snapshot.data as bool;
-            Navigator.pushReplacement(
-                context, FadeRoute(result ? onTrue : onFalse));
-            return const SizedBox();
-          } else {
-            Navigator.pushReplacement(context, FadeRoute(onFalse));
-            return const SizedBox();
-          }
-        },
-      )),
-    );
-  }
-}
-
 class BottomNavBar extends ConsumerWidget {
   const BottomNavBar({
     super.key,
@@ -588,6 +529,11 @@ class BottomNavBar extends ConsumerWidget {
                         barrierDismissible: true,
                         builder: (context) => Dialog(
                           backgroundColor: Colors.transparent,
+                          insetPadding: EdgeInsets.only(
+                            left: 130.w,
+                            right: 130.w,
+                            top: 500.h,
+                          ),
                           elevation: 0.0,
                           child: ClipPath(
                             clipper: TriangleClipper(
@@ -630,8 +576,8 @@ class BottomNavBar extends ConsumerWidget {
                     }
                   },
                   child: Container(
-                    height: 50.r,
-                    width: 50.r,
+                    height: 65.r,
+                    width: 65.r,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -1754,33 +1700,25 @@ class BottomNavBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     Path path = Path();
-    path.addRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTRB(0, 0, size.width, size.height),
-        Radius.circular(borderRadius),
-      ),
-    );
 
-    return Path.combine(
-        PathOperation.reverseDifference,
-        Path()
-          ..addOval(Rect.fromCircle(
-              center: Offset(size.width * 0.5, 0), radius: cutoutRadius)),
-        path);
-
-    // double r = 20.0, sm = 30.0;
-    // path.moveTo(0, 0);
-    // path.cubicTo(r, 0, size.width * 0.5, sm, size.width * 0.5, 0);
-    // path.arcToPoint(Offset(size.width * 0.5, sm), radius: Radius.circular(sm));
-    // path.lineTo(size.width, 0.0);
-    // path.lineTo(size.width, size.height);
-    // path.cubicTo(size.width - r, size.height, size.width * 0.5, size.height - sm, size.width * 0.5, size.height);
-    // path.close();
-    // return path;
+    path.moveTo(0, borderRadius);
+    path.arcToPoint(Offset(borderRadius, 0.0), radius: Radius.circular(borderRadius));
+    path.lineTo((size.width * 0.5) - cutoutRadius - borderRadius, 0.0);
+    path.arcToPoint(Offset((size.width * 0.5) - cutoutRadius, borderRadius), radius: Radius.circular(borderRadius));
+    path.arcToPoint(Offset((size.width * 0.5) + cutoutRadius, borderRadius), clockwise: false, radius: Radius.elliptical(cutoutRadius * 1.02, 28.r));
+    path.arcToPoint(Offset((size.width * 0.5) + cutoutRadius + borderRadius, 0.0), radius: Radius.circular(borderRadius));
+    path.lineTo(size.width - borderRadius, 0.0);
+    path.arcToPoint(Offset(size.width, borderRadius), radius: Radius.circular(borderRadius));
+    path.lineTo(size.width, size.height - borderRadius);
+    path.arcToPoint(Offset(size.width - borderRadius, size.height), radius: Radius.circular(borderRadius));
+    path.lineTo(borderRadius, size.height);
+    path.arcToPoint(Offset(0, size.height - borderRadius), radius: Radius.circular(borderRadius));
+    path.close();
+    return path;
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<Path> oldClipper) => true;
 }
 
 class TriangleClipper extends CustomClipper<Path> {

@@ -223,8 +223,8 @@ class _GroupDataContainerState extends State<_GroupDataContainer> {
     bool darkTheme = context.isDark;
 
     return GestureDetector(
-      onTap: () =>
-          Navigator.push(context, FadeRoute(GroupHome(data: widget.data))),
+      // onTap: () =>
+      //     Navigator.push(context, FadeRoute(GroupHome(data: widget.data))),
       child: Container(
         width: 170.w,
         height: 250.h,
