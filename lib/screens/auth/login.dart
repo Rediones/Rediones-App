@@ -48,9 +48,7 @@ class _LoginState extends ConsumerState<Login> {
   }
 
   void _login() {
-    ref.watch(authenticatingProvider.notifier).state = AuthStatus.Authenticating;
-
-    authenticate(_authDetails, Pages.login).then((result) {
+   authenticate(_authDetails, Pages.login).then((result) {
       if (!mounted) return;
 
       f.showNewError(
@@ -60,12 +58,10 @@ class _LoginState extends ConsumerState<Login> {
           context);
 
       if (result.status == Status.success) {
-        ref.watch(authenticatingProvider.notifier).state = AuthStatus.Auth_Success;
         _controller.clear();
         _emailControl.clear();
         navigate(result);
       } else {
-        ref.watch(authenticatingProvider.notifier).state = AuthStatus.Auth_Failed;
         Navigator.of(context).pop();
       }
     });
