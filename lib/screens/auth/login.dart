@@ -48,7 +48,7 @@ class _LoginState extends ConsumerState<Login> {
   }
 
   void _login() {
-   authenticate(_authDetails, Pages.login).then((result) {
+    authenticate(_authDetails, Pages.login).then((result) {
       if (!mounted) return;
 
       f.showNewError(
@@ -86,13 +86,10 @@ class _LoginState extends ConsumerState<Login> {
               SizedBox(
                 height: 63.h,
               ),
+              Text("Log In", style: context.textTheme.titleMedium),
               Text(
-                "Rediones",
-                style: context.textTheme.titleSmall!.copyWith(color: appRed),
-              ),
-              Text(
-                "Welcome back",
-                style: context.textTheme.bodyMedium,
+                "Hi, Welcome back.",
+                style: context.textTheme.bodyLarge,
               ),
               SizedBox(height: 32.h),
               Form(
@@ -103,19 +100,17 @@ class _LoginState extends ConsumerState<Login> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Username or Email",
-                          style: context.textTheme.labelSmall,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
                       SpecialForm(
                         width: 390.w,
                         height: 40.h,
                         controller: _emailControl,
+                        fillColor: authFieldBackground,
                         type: TextInputType.emailAddress,
+                        prefix: Icon(
+                          Icons.mail_outline_rounded,
+                          size: 18.r,
+                          color: primaryPoint2,
+                        ),
                         onValidate: (value) {
                           if (value!.isEmpty || !value.contains("@")) {
                             f.showNewError("Invalid Email Address", context);
@@ -124,23 +119,21 @@ class _LoginState extends ConsumerState<Login> {
                           return null;
                         },
                         onSave: (value) => _authDetails["email"] = value!,
-                        hint: "Enter your email here",
+                        hint: "Email",
                       ),
                       SizedBox(height: 10.h),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Password",
-                          style: context.textTheme.labelSmall,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
                       SpecialForm(
                         width: 390.w,
                         height: 40.h,
                         obscure: !_showPassword,
                         controller: _controller,
+                        fillColor: authFieldBackground,
                         type: TextInputType.text,
+                        prefix: Icon(
+                          Icons.lock_outline_rounded,
+                          size: 18.r,
+                          color: primaryPoint2,
+                        ),
                         suffix: GestureDetector(
                           child: AnimatedSwitcherTranslation.right(
                             duration: const Duration(milliseconds: 500),
@@ -150,7 +143,7 @@ class _LoginState extends ConsumerState<Login> {
                                   : Icons.visibility_off,
                               size: 18.r,
                               key: ValueKey<bool>(_showPassword),
-                              color: Colors.grey,
+                              color: primaryPoint2,
                             ),
                           ),
                           onTap: () =>
@@ -159,7 +152,8 @@ class _LoginState extends ConsumerState<Login> {
                         onValidate: (value) {
                           if (value!.length < 6) {
                             f.showNewError(
-                                "Password is too short. Use at least 6 characters", context);
+                                "Password is too short. Use at least 6 characters",
+                                context);
                             return '';
                           }
                           return null;
@@ -167,23 +161,8 @@ class _LoginState extends ConsumerState<Login> {
                         onSave: (value) => _authDetails["password"] = value!,
                         hint: "********",
                       ),
-                      SizedBox(height: 10.h),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Forgot Password? ",
-                            style: context.textTheme.labelSmall,
-                          ),
-                          Text(
-                            "Click Here",
-                            style: context.textTheme.bodySmall?.copyWith(
-                                color: appRed, fontWeight: FontWeight.w700),
-                          ),
-                        ],
-                      ),
                       SizedBox(
-                        height: 50.h,
+                        height: 40.h,
                       ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -193,34 +172,64 @@ class _LoginState extends ConsumerState<Login> {
                         ),
                         onPressed: submit,
                         child: Text(
-                          "Sign In",
+                          "Login",
                           style: context.textTheme.bodyLarge!.copyWith(
                               color: theme, fontWeight: FontWeight.w600),
                         ),
                       ),
-                      SizedBox(
-                        height: 25.h,
-                      ),
+                      SizedBox(height: 10.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text("Don't have an account?",
-                              style: context.textTheme.labelSmall),
+                          Text(
+                            "Forgot Password? ",
+                            style: context.textTheme.labelSmall,
+                          ),
                           SizedBox(
                             width: 5.w,
                           ),
-                          GestureDetector(
-                            onTap: () => context.router
-                                .pushReplacementNamed(Pages.register),
-                            child: Text(
-                              "Register",
-                              style: context.textTheme.labelSmall?.copyWith(
-                                  color: appRed, fontWeight: FontWeight.w700),
-                            ),
+                          Text(
+                            "Click Here",
+                            style: context.textTheme.bodySmall!
+                                .copyWith(color: appRed),
                           ),
                         ],
                       ),
+                      SizedBox(
+                        height: 40.h,
+                      ),
+                      Center(
+                        child: Text(
+                          "-OR-",
+                          style: context.textTheme.titleLarge,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 40.h,
+                      ),
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          fixedSize: Size(390.w, 40.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.h),
+                            side: const BorderSide(color: neutral),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset("assets/google.png"),
+                            SizedBox(width: 10.w),
+                            Text(
+                              "log in with Google",
+                              style: context.textTheme.bodyMedium,
+                            )
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 ),

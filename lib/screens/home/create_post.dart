@@ -125,20 +125,6 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                             style: context.textTheme.bodyMedium),
                         onTap: () {},
                       ),
-                      ListTile(
-                        leading: Icon(
-                            postCategory == null
-                                ? Boxicons.bx_category
-                                : icon![0],
-                            size: 18.r,
-                            color: postCategory == null ? appRed : icon![1]),
-                        title: Text(postCategory == null ? "Category" : title!,
-                            style: context.textTheme.bodyMedium),
-                        onTap: () {
-                          unFocus();
-
-                        },
-                      ),
                       SizedBox(height: 10.h),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(

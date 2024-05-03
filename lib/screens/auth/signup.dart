@@ -1,4 +1,5 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,9 +41,11 @@ class _SignupState extends ConsumerState<Signup> {
   void register() {
     authenticate(_authDetails, Pages.register).then(
       (result) {
-        f.showNewError(result.status == Status.failed
-            ? result.message
-            : "Account Created Successfully", context);
+        f.showNewError(
+            result.status == Status.failed
+                ? result.message
+                : "Account Created Successfully",
+            context);
 
         if (result.status == Status.success) {
           _controller.clear();
@@ -82,9 +85,10 @@ class _SignupState extends ConsumerState<Signup> {
               SizedBox(
                 height: 63.h,
               ),
+              Text("Sign Up", style: context.textTheme.titleMedium),
               Text(
-                "Rediones",
-                style: context.textTheme.titleLarge!.copyWith(color: appRed),
+                "Welcome to Rediones",
+                style: context.textTheme.bodyLarge,
               ),
               SizedBox(height: 32.h),
               Form(
@@ -95,18 +99,10 @@ class _SignupState extends ConsumerState<Signup> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Email",
-                          style: context.textTheme.labelSmall,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
                       SpecialForm(
                         width: 390.w,
                         height: 40.h,
-                        fillColor: Colors.transparent,
+                        fillColor: authFieldBackground,
                         controller: _emailControl,
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
@@ -117,23 +113,21 @@ class _SignupState extends ConsumerState<Signup> {
                           return null;
                         },
                         onSave: (value) => _authDetails["email"] = value!,
-                        hint: "Enter your email here",
+                        hint: "Email",
                       ),
                       SizedBox(height: 10.h),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Password",
-                          style: context.textTheme.labelSmall,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
                       SpecialForm(
                         obscure: !_showPassword,
                         width: 390.w,
                         height: 40.h,
+                        fillColor: authFieldBackground,
                         controller: _controller,
                         type: TextInputType.text,
+                        prefix: Icon(
+                          Icons.lock_outline_rounded,
+                          size: 18.r,
+                          color: primaryPoint2,
+                        ),
                         suffix: GestureDetector(
                           onTap: () =>
                               setState(() => _showPassword = !_showPassword),
@@ -145,36 +139,43 @@ class _SignupState extends ConsumerState<Signup> {
                                   : Icons.visibility_off,
                               size: 18.r,
                               key: ValueKey<bool>(_showPassword),
-                              color: Colors.grey,
+                              color: primaryPoint2,
                             ),
                           ),
                         ),
                         onValidate: (value) {
                           if (value!.length < 6) {
                             f.showNewError(
-                                "Password is too short. Use at least 6 characters", context);
+                                "Password is too short. Use at least 6 characters",
+                                context);
                             return '';
                           }
                           return null;
                         },
                         onSave: (value) => _authDetails["password"] = value!,
-                        hint: "********",
+                        hint: "Password",
                       ),
-                      SizedBox(height: 10.h),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Confirm Password",
-                          style: context.textTheme.labelSmall,
+                      Text(
+                        "Password must be at least 6 characters",
+                        style: context.textTheme.bodySmall!.copyWith(
+                          color: _controller.text.length < 6
+                              ? appRed
+                              : possibleGreen,
                         ),
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 10.h),
                       SpecialForm(
                         obscure: !_showConfirmPassword,
                         height: 40.h,
                         width: 390.w,
                         controller: _confirmControl,
+                        fillColor: authFieldBackground,
                         type: TextInputType.text,
+                        prefix: Icon(
+                          Icons.lock_outline_rounded,
+                          size: 18.r,
+                          color: primaryPoint2,
+                        ),
                         suffix: GestureDetector(
                           child: AnimatedSwitcherTranslation.right(
                             duration: const Duration(milliseconds: 500),
@@ -184,7 +185,7 @@ class _SignupState extends ConsumerState<Signup> {
                                   : Icons.visibility_off,
                               key: ValueKey<bool>(_showConfirmPassword),
                               size: 18.r,
-                              color: Colors.grey,
+                              color: primaryPoint2,
                             ),
                           ),
                           onTap: () => setState(() =>
@@ -197,32 +198,30 @@ class _SignupState extends ConsumerState<Signup> {
                           }
                           return null;
                         },
-                        hint: "********",
+                        hint: "Confirm Password",
                       ),
                       SizedBox(
-                        height: 46.h,
+                        height: 40.h,
                       ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(390.w, 40.h),
                           backgroundColor: appRed,
+                          elevation: 1.0,
                         ),
                         onPressed: submit,
                         child: Text(
-                          "Sign Up",
+                          "Sign up",
                           style: context.textTheme.bodyLarge!.copyWith(
                               color: theme, fontWeight: FontWeight.w600),
                         ),
                       ),
-                      SizedBox(
-                        height: 25.h,
-                      ),
+                      SizedBox(height: 10.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            "Already have an account?",
+                            "Already have an account? ",
                             style: context.textTheme.labelSmall,
                           ),
                           SizedBox(
@@ -232,13 +231,48 @@ class _SignupState extends ConsumerState<Signup> {
                             onTap: () => context.router
                                 .pushReplacementNamed(Pages.login),
                             child: Text(
-                              "Sign In",
-                              style: context.textTheme.labelSmall?.copyWith(
-                                  color: appRed, fontWeight: FontWeight.w700),
+                              "Log In",
+                              style: context.textTheme.bodySmall!
+                                  .copyWith(color: appRed),
                             ),
                           ),
                         ],
                       ),
+                      SizedBox(
+                        height: 40.h,
+                      ),
+                      Center(
+                        child: Text(
+                          "-OR-",
+                          style: context.textTheme.titleLarge,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 40.h,
+                      ),
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          fixedSize: Size(390.w, 40.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.h),
+                            side: const BorderSide(color: neutral),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset("assets/google.png"),
+                            SizedBox(width: 10.w),
+                            Text(
+                              "sign up with Google",
+                              style: context.textTheme.bodyMedium,
+                            )
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 ),

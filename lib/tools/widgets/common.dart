@@ -112,7 +112,7 @@ class SpecialForm extends StatelessWidget {
   final double height;
 
   const SpecialForm({
-    Key? key,
+    super.key,
     required this.controller,
     required this.width,
     required this.height,
@@ -136,12 +136,10 @@ class SpecialForm extends StatelessWidget {
     this.prefix,
     this.suffix,
     this.maxLines = 1,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    bool darkTheme =
-        MediaQuery.of(context).platformBrightness == Brightness.dark;
     return SizedBox(
       width: width,
       height: height,
@@ -211,7 +209,7 @@ class SpecialForm extends StatelessWidget {
           hintText: hint,
           hintStyle: hintStyle ??
               context.textTheme.bodyLarge!
-                  .copyWith(fontWeight: FontWeight.w400),
+                  .copyWith(fontWeight: FontWeight.w500, color: primaryPoint6),
         ),
         onChanged: (value) {
           if (onChange == null) return;
