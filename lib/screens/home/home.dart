@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -32,7 +33,7 @@ class _HomeState extends ConsumerState<Home> {
   final ScrollController scrollController = ScrollController();
 
   final FocusNode searchFocus = FocusNode();
-  bool fetched = false;
+  bool loading = true;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
@@ -44,6 +45,8 @@ class _HomeState extends ConsumerState<Home> {
         List<Post> p = response.payload;
         if (response.status == Status.failed) {
           showToast(response.message);
+          setState(() => loading = false);
+          return;
         }
 
         log("Assigning new posts");
@@ -56,7 +59,7 @@ class _HomeState extends ConsumerState<Home> {
         // repository.clearAll();
         // repository.addPosts(p);
 
-        setState(() => fetched = true);
+        setState(() => loading = false);
       });
 
   @override
@@ -98,7 +101,7 @@ class _HomeState extends ConsumerState<Home> {
   }
 
   Future<void> refresh() async {
-    setState(() => fetched = false);
+    setState(() => loading = true);
     ref.watch(postsProvider).clear();
     fetchPosts();
   }
@@ -290,141 +293,79 @@ class _HomeState extends ConsumerState<Home> {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-          child: (!fetched || posts.isEmpty)
-              ? !fetched
-                  ? Skeletonizer(
-                      enabled: true,
-                      child: ListView.separated(
-                        itemCount: dummyPosts.length,
-                        itemBuilder: (_, index) => PostContainer(
-                          post: dummyPosts[index],
-                          onCommentClicked: () {},
+          child: loading
+              ? Skeletonizer(
+                  enabled: true,
+                  child: ListView.separated(
+                    itemCount: dummyPosts.length,
+                    itemBuilder: (_, index) => PostContainer(
+                      post: dummyPosts[index],
+                      onCommentClicked: () {},
+                    ),
+                    separatorBuilder: (_, __) => SizedBox(height: 20.h),
+                  ),
+                )
+              : (!loading && posts.isEmpty)
+                  ? Center(
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "No posts available.",
+                              style: context.textTheme.bodyLarge,
+                            ),
+                            TextSpan(
+                                text: " Tap to refresh",
+                                style: context.textTheme.bodyLarge!
+                                    .copyWith(color: appRed),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = refresh),
+                          ],
                         ),
-                        separatorBuilder: (_, __) => SizedBox(height: 20.h),
                       ),
                     )
-                  : Center(
-                      child: GestureDetector(
-                        onTap: refresh,
-                        child: Center(
-                          child: Text(
-                            "No posts available. Tap to refresh",
-                            style: context.textTheme.bodyLarge,
-                          ),
-                        ),
-                      ),
-                    )
-              : AnimationLimiter(
-                  child: RefreshIndicator(
-                    onRefresh: refresh,
-                    child: ListView.separated(
-                      physics: const BouncingScrollPhysics(),
-                      controller: scrollController,
-                      itemCount: posts.length + 1,
-                      separatorBuilder: (_, __) => SizedBox(height: 20.h),
-                      itemBuilder: (_, index) {
-                        if (index == posts.length) {
-                          return SizedBox(height: 100.h);
-                        }
+                  : AnimationLimiter(
+                      child: RefreshIndicator(
+                        color: appRed,
+                        onRefresh: refresh,
+                        child: ListView.separated(
+                          physics: const BouncingScrollPhysics(),
+                          controller: scrollController,
+                          itemCount: posts.length + 1,
+                          separatorBuilder: (_, __) => SizedBox(height: 20.h),
+                          itemBuilder: (_, index) {
+                            if (index == posts.length) {
+                              return SizedBox(height: 100.h);
+                            }
 
-                        Post post = posts[index];
+                            Post post = posts[index];
 
-                        return AnimationConfiguration.staggeredList(
-                          position: index,
-                          duration: const Duration(milliseconds: 750),
-                          child: SlideAnimation(
-                            verticalOffset: 25.h,
-                            child: FadeInAnimation(
-                              child: PostContainer(
-                                post: post,
-                                onCommentClicked: () => onCommentClicked(
-                                  post.id,
-                                  getComments(post.id),
+                            return AnimationConfiguration.staggeredList(
+                              position: index,
+                              duration: const Duration(milliseconds: 750),
+                              child: SlideAnimation(
+                                verticalOffset: 25.h,
+                                child: FadeInAnimation(
+                                  child: PostContainer(
+                                    post: post,
+                                    onCommentClicked: () => onCommentClicked(
+                                      post.id,
+                                      getComments(post.id),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                ),
         ),
       ),
     );
   }
 }
 
-//CustomScrollView(
-//slivers: [
-// SliverAppBar(
-//   leading: Align(
-//     alignment: Alignment.centerLeft,
-//     child: Padding(
-//       padding: EdgeInsets.only(left: 10.w),
-//       child: GestureDetector(
-//         onTap: () => _scaffoldKey.currentState!.openDrawer(),
-//         child: CachedNetworkImage(
-//           imageUrl: profilePicture,
-//           errorWidget: (context, url, error) => CircleAvatar(
-//             backgroundColor: neutral2,
-//             radius: 20.r,
-//             child: Icon(Icons.person_outline_rounded, size: 16.r),
-//           ),
-//           progressIndicatorBuilder: (context, url, download) =>
-//               Container(
-//             width: 40.r,
-//             height: 40.r,
-//             decoration: const BoxDecoration(
-//               shape: BoxShape.circle,
-//               color: neutral2,
-//             ),
-//           ),
-//           imageBuilder: (context, provider) => CircleAvatar(
-//             backgroundImage: provider,
-//             radius: 16.r,
-//           ),
-//         ),
-//       ),
-//     ),
-//   ),
-//   elevation: 1.0,
-//   automaticallyImplyLeading: false,
-//   title: GestureDetector(
-//     onTap: () => scrollController.animateTo(
-//       0,
-//       duration: const Duration(milliseconds: 1000),
-//       curve: Curves.easeIn,
-//     ),
-//     child: Text(
-//       "REDIONES",
-//       style: context.textTheme.titleSmall,
-//     ),
-//   ),
-//   centerTitle: true,
-//   // expandedHeight: 100.h,
-//   pinned: true,
-//   floating: true,
-//   collapsedHeight: kToolbarHeight,
-//   actions: [
-//     Align(
-//       alignment: Alignment.centerRight,
-//       child: Padding(
-//         padding: EdgeInsets.only(right: 10.w),
-//         child: IconButton(
-//           icon: SvgPicture.asset(
-//             darkTheme
-//                 ? "assets/Message Dark.svg"
-//                 : "assets/Message.svg",
-//             width: 22.r,
-//             height: 22.r,
-//           ),
-//           onPressed: () => context.router.pushNamed(Pages.message),
-//           splashRadius: 0.01,
-//         ),
-//       ),
-//     )
-//   ],
 //   // flexibleSpace: FlexibleSpaceBar(
 //   //   background: SizedBox(
 //   //     height: 120.h,

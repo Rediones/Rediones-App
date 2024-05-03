@@ -61,6 +61,13 @@ TextTheme get lightTheme => TextTheme(
     color: primary1,
     fontWeight: FontWeight.w700,
   ),
+  titleLarge: TextStyle(
+    fontSize: 20.sp,
+    height: (30 / 20),
+    leadingDistribution: TextLeadingDistribution.proportional,
+    color: primary1,
+    fontWeight: FontWeight.w700,
+  ),
 );
 
 TextTheme get darkTheme => TextTheme(
@@ -116,6 +123,13 @@ TextTheme get darkTheme => TextTheme(
   titleMedium: TextStyle(
     fontSize: 18.sp,
     height: (24.42 / 18),
+    leadingDistribution: TextLeadingDistribution.proportional,
+    color: primary1,
+    fontWeight: FontWeight.w700,
+  ),
+  titleLarge: TextStyle(
+    fontSize: 20.sp,
+    height: (30 / 20),
     leadingDistribution: TextLeadingDistribution.proportional,
     color: primary1,
     fontWeight: FontWeight.w700,

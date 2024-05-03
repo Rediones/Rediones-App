@@ -62,7 +62,6 @@ class _ViewProjectPageState extends State<ViewProjectPage> {
                   SizedBox(
                     height: 25.h,
                   ),
-                  const BreakLine(),
                   SizedBox(
                     height: 25.h,
                   ),
@@ -78,7 +77,6 @@ class _ViewProjectPageState extends State<ViewProjectPage> {
                   SizedBox(
                     height: 15.h,
                   ),
-                  const BreakLine(),
                   SizedBox(
                     height: 25.h,
                   ),
@@ -91,7 +89,6 @@ class _ViewProjectPageState extends State<ViewProjectPage> {
                   SizedBox(
                     height: 15.h,
                   ),
-                  const BreakLine(),
                   SizedBox(
                     height: 25.h,
                   ),
@@ -104,7 +101,6 @@ class _ViewProjectPageState extends State<ViewProjectPage> {
                   SizedBox(
                     height: 15.h,
                   ),
-                  const BreakLine(),
                   SizedBox(
                     height: 15.h,
                   ),

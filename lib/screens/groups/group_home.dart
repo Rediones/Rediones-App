@@ -259,7 +259,6 @@ class _GroupHomeState extends State<GroupHome> {
                                       style: context.textTheme.bodyMedium),
                                 ),
                                 SizedBox(height: 30.h),
-                                const BreakLine(),
                               ],
                             ),
                           ),

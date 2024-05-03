@@ -26,6 +26,8 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
   final TextEditingController controller = TextEditingController();
   final List<Uint8List> mediaBytes = [];
 
+  String? visibility;
+
   PostCategory? postCategory;
   String? title;
   List<dynamic>? icon;
@@ -58,7 +60,6 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
 
   @override
   Widget build(BuildContext context) {
-    Map<PostCategory, Map<String, List<dynamic>>> postCategories = ref.watch(postCategoryProvider);
 
 
     return Scaffold(
@@ -71,7 +72,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
         ),
         elevation: 0.0,
         centerTitle: true,
-        title: Text("Create Post", style: context.textTheme.titleMedium),
+        title: Text("Create Post", style: context.textTheme.titleLarge),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -83,27 +84,13 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                 SizedBox(
                   height: 20.h,
                 ),
-                Wrap(
-                  spacing: 5.w,
-                  children: [
-                    Text(
-                      "Description",
-                      style: context.textTheme.bodyLarge!
-                          .copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      "*",
-                      style:
-                      context.textTheme.bodyLarge!.copyWith(color: appRed),
-                    ),
-                  ],
-                ),
+                ComboBox(hint: "", value: visibility, dropdownItems: const ["Public"], onChanged: (val) => setState(() => visibility = val)),
                 SizedBox(height: 4.h),
                 SpecialForm(
                   controller: controller,
-                  hint: "e.g This is a sample description",
-                  maxLines: 10,
-                  height: 168.h,
+                  hint: "What would you like to share?",
+                  maxLines: 6,
+                  height: 120.h,
                   width: 390.w,
                 ),
                 SizedBox(
