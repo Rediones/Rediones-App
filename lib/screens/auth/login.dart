@@ -22,7 +22,19 @@ class _LoginState extends ConsumerState<Login> {
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _emailControl = TextEditingController();
   final Map<String, String> _authDetails = {"email": "", "password": ""};
-  bool _showPassword = false;
+  bool _showPassword = false, validPassword = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      if(!validPassword && _controller.text.length >= 6) {
+        setState(() => validPassword = true);
+      } else if(validPassword && _controller.text.length < 6) {
+        setState(() => validPassword = false);
+      }
+    });
+  }
 
   void navigate(RedionesResponse<User?> result) {
     String location = Pages.home;
@@ -105,6 +117,7 @@ class _LoginState extends ConsumerState<Login> {
                         height: 40.h,
                         controller: _emailControl,
                         fillColor: authFieldBackground,
+                        borderColor: Colors.transparent,
                         type: TextInputType.emailAddress,
                         prefix: Icon(
                           Icons.mail_outline_rounded,
@@ -128,6 +141,7 @@ class _LoginState extends ConsumerState<Login> {
                         obscure: !_showPassword,
                         controller: _controller,
                         fillColor: authFieldBackground,
+                        borderColor: Colors.transparent,
                         type: TextInputType.text,
                         prefix: Icon(
                           Icons.lock_outline_rounded,
@@ -159,7 +173,18 @@ class _LoginState extends ConsumerState<Login> {
                           return null;
                         },
                         onSave: (value) => _authDetails["password"] = value!,
-                        hint: "********",
+                        hint: "Password",
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Password must be at least 6 characters",
+                          style: context.textTheme.bodySmall!.copyWith(
+                            color: !validPassword
+                                ? appRed
+                                : possibleGreen,
+                          ),
+                        ),
                       ),
                       SizedBox(
                         height: 40.h,
@@ -183,14 +208,14 @@ class _LoginState extends ConsumerState<Login> {
                         children: [
                           Text(
                             "Forgot Password? ",
-                            style: context.textTheme.labelSmall,
+                            style: context.textTheme.bodyMedium,
                           ),
                           SizedBox(
                             width: 5.w,
                           ),
                           Text(
                             "Click Here",
-                            style: context.textTheme.bodySmall!
+                            style: context.textTheme.bodyMedium!
                                 .copyWith(color: appRed),
                           ),
                         ],
@@ -200,7 +225,7 @@ class _LoginState extends ConsumerState<Login> {
                       ),
                       Center(
                         child: Text(
-                          "-OR-",
+                          "- OR -",
                           style: context.textTheme.titleLarge,
                         ),
                       ),
@@ -210,7 +235,8 @@ class _LoginState extends ConsumerState<Login> {
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
+                          backgroundColor: theme,
+                          elevation: 0.0,
                           fixedSize: Size(390.w, 40.h),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.h),
@@ -229,7 +255,31 @@ class _LoginState extends ConsumerState<Login> {
                             )
                           ],
                         ),
-                      )
+                      ),
+                      SizedBox(
+                        height: 40.h,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Don't have an account? ",
+                            style: context.textTheme.bodyMedium,
+                          ),
+                          SizedBox(
+                            width: 5.w,
+                          ),
+                          GestureDetector(
+                            onTap: () => context.router
+                                .pushReplacementNamed(Pages.register),
+                            child: Text(
+                              "Sign Up",
+                              style: context.textTheme.bodyMedium!
+                                  .copyWith(color: appRed),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

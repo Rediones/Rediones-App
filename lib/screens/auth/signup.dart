@@ -25,6 +25,22 @@ class _SignupState extends ConsumerState<Signup> {
   final Map<String, String> _authDetails = {"email": "", "password": ""};
   bool _showPassword = false;
   bool _showConfirmPassword = false;
+  bool validPassword = false, passwordMatch = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      setState(() => passwordMatch = _controller.text == _confirmControl.text);
+
+      if(!validPassword && _controller.text.length >= 6) {
+        setState(() => validPassword = true);
+      } else if(validPassword && _controller.text.length < 6) {
+        setState(() => validPassword = false);
+      }
+    });
+    _confirmControl.addListener(() => setState(() => passwordMatch = _controller.text == _confirmControl.text));
+  }
 
   void submit() {
     f.unFocus();
@@ -103,7 +119,13 @@ class _SignupState extends ConsumerState<Signup> {
                         width: 390.w,
                         height: 40.h,
                         fillColor: authFieldBackground,
+                        borderColor: Colors.transparent,
                         controller: _emailControl,
+                        prefix: Icon(
+                          Icons.mail_outline_rounded,
+                          size: 18.r,
+                          color: primaryPoint2,
+                        ),
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
                           if (value!.isEmpty || !value.contains("@")) {
@@ -121,6 +143,7 @@ class _SignupState extends ConsumerState<Signup> {
                         width: 390.w,
                         height: 40.h,
                         fillColor: authFieldBackground,
+                        borderColor: Colors.transparent,
                         controller: _controller,
                         type: TextInputType.text,
                         prefix: Icon(
@@ -155,12 +178,15 @@ class _SignupState extends ConsumerState<Signup> {
                         onSave: (value) => _authDetails["password"] = value!,
                         hint: "Password",
                       ),
-                      Text(
-                        "Password must be at least 6 characters",
-                        style: context.textTheme.bodySmall!.copyWith(
-                          color: _controller.text.length < 6
-                              ? appRed
-                              : possibleGreen,
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Password must be at least 6 characters",
+                          style: context.textTheme.bodySmall!.copyWith(
+                            color: !validPassword
+                                ? appRed
+                                : possibleGreen,
+                          ),
                         ),
                       ),
                       SizedBox(height: 10.h),
@@ -170,6 +196,7 @@ class _SignupState extends ConsumerState<Signup> {
                         width: 390.w,
                         controller: _confirmControl,
                         fillColor: authFieldBackground,
+                        borderColor: Colors.transparent,
                         type: TextInputType.text,
                         prefix: Icon(
                           Icons.lock_outline_rounded,
@@ -200,6 +227,16 @@ class _SignupState extends ConsumerState<Signup> {
                         },
                         hint: "Confirm Password",
                       ),
+                      if(!passwordMatch)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Passwords do not match",
+                          style: context.textTheme.bodySmall!.copyWith(
+                            color: appRed,
+                          ),
+                        ),
+                      ),
                       SizedBox(
                         height: 40.h,
                       ),
@@ -222,7 +259,7 @@ class _SignupState extends ConsumerState<Signup> {
                         children: [
                           Text(
                             "Already have an account? ",
-                            style: context.textTheme.labelSmall,
+                            style: context.textTheme.bodyMedium,
                           ),
                           SizedBox(
                             width: 5.w,
@@ -232,7 +269,7 @@ class _SignupState extends ConsumerState<Signup> {
                                 .pushReplacementNamed(Pages.login),
                             child: Text(
                               "Log In",
-                              style: context.textTheme.bodySmall!
+                              style: context.textTheme.bodyMedium!
                                   .copyWith(color: appRed),
                             ),
                           ),
@@ -243,7 +280,7 @@ class _SignupState extends ConsumerState<Signup> {
                       ),
                       Center(
                         child: Text(
-                          "-OR-",
+                          "- OR -",
                           style: context.textTheme.titleLarge,
                         ),
                       ),
@@ -253,7 +290,8 @@ class _SignupState extends ConsumerState<Signup> {
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
+                          backgroundColor: theme,
+                          elevation: 0.0,
                           fixedSize: Size(390.w, 40.h),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.h),

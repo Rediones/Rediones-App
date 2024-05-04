@@ -188,22 +188,22 @@ class SpecialForm extends StatelessWidget {
           focusedBorder: OutlineInputBorder(
             borderRadius:
             BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
-            borderSide: const BorderSide(
-              color: border
+            borderSide: BorderSide(
+              color: borderColor ?? border
             ),
           ),
           border: OutlineInputBorder(
             borderRadius:
             BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
-            borderSide: const BorderSide(
-                color: border
+            borderSide: BorderSide(
+                color: borderColor ?? border
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius:
             BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
-            borderSide: const BorderSide(
-                color: border
+            borderSide: BorderSide(
+                color: borderColor ?? border
             ),
           ),
           hintText: hint,
