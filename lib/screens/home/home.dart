@@ -166,13 +166,16 @@ class _HomeState extends ConsumerState<Home> {
                               child: Text(
                                 username,
                                 overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.titleLarge!
-                                    .copyWith(fontWeight: FontWeight.w600),
+                                style: context.textTheme.titleLarge!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 32.sp),
                               ),
                             ),
-                            Text("@$nickname",
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.bodyMedium)
+                            Text(
+                              "@$nickname",
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.bodyLarge,
+                            )
                           ],
                         )
                       ],
@@ -185,7 +188,7 @@ class _HomeState extends ConsumerState<Home> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
                 leading: SvgPicture.asset("assets/Groups.svg",
                     color: !darkTheme ? Colors.black : null),
-                title: Text("Groups", style: context.textTheme.bodyMedium),
+                title: Text("Groups", style: context.textTheme.bodyLarge),
                 onTap: () {
                   Navigator.pop(context);
                   context.router.pushNamed(Pages.groups);
@@ -196,7 +199,7 @@ class _HomeState extends ConsumerState<Home> {
                 leading: SvgPicture.asset("assets/Community.svg",
                     color: !darkTheme ? Colors.black : null),
                 title: Text("Community Practice",
-                    style: context.textTheme.bodyMedium),
+                    style: context.textTheme.bodyLarge),
                 onTap: () {
                   Navigator.pop(context);
                   context.router.pushNamed(Pages.communityPractice);
@@ -206,7 +209,7 @@ class _HomeState extends ConsumerState<Home> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
                 leading: SvgPicture.asset("assets/Events.svg",
                     color: !darkTheme ? Colors.black : null),
-                title: Text("Events", style: context.textTheme.bodyMedium),
+                title: Text("Events", style: context.textTheme.bodyLarge),
                 onTap: () {
                   Navigator.pop(context);
                   context.router.pushNamed(Pages.events);
@@ -221,7 +224,7 @@ class _HomeState extends ConsumerState<Home> {
                 },
                 leading: SvgPicture.asset("assets/Logout.svg",
                     color: !darkTheme ? Colors.black : null),
-                title: Text("Log Out", style: context.textTheme.bodyMedium),
+                title: Text("Log Out", style: context.textTheme.bodyLarge),
               ),
             ],
           ),
@@ -331,14 +334,44 @@ class _HomeState extends ConsumerState<Home> {
                         child: ListView.separated(
                           physics: const BouncingScrollPhysics(),
                           controller: scrollController,
-                          itemCount: posts.length + 1,
+                          itemCount: posts.length + 2,
                           separatorBuilder: (_, __) => SizedBox(height: 20.h),
                           itemBuilder: (_, index) {
-                            if (index == posts.length) {
+                            if (index == 0) {
+                              return SizedBox(
+                                height: 50.h,
+                                child: Center(
+                                  child: SpecialForm(
+                                    controller: searchController,
+                                    focus: searchFocus,
+                                    borderColor: Colors.transparent,
+                                    fillColor: neutral2,
+                                    width: 390.w,
+                                    height: 40.h,
+                                    hint: "What are you looking for?",
+                                    prefix: SizedBox(
+                                      height: 40.h,
+                                      width: 40.h,
+                                      child: SvgPicture.asset(
+                                        "assets/Search Icon.svg",
+                                        width: 20.h,
+                                        height: 20.h,
+                                        color: darkTheme
+                                            ? Colors.white54
+                                            : Colors.black45,
+                                        fit: BoxFit.scaleDown,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            if (index == posts.length + 1) {
                               return SizedBox(height: 100.h);
                             }
 
-                            Post post = posts[index];
+                            Post post = posts[index - 1];
 
                             return AnimationConfiguration.staggeredList(
                               position: index,
@@ -374,26 +407,6 @@ class _HomeState extends ConsumerState<Home> {
 //   //       child: Column(
 //   //         mainAxisAlignment: MainAxisAlignment.end,
 //   //         children: [
-//   //           SpecialForm(
-//   //               controller: searchController,
-//   //               focus: searchFocus,
-//   //               borderColor: Colors.transparent,
-//   //               fillColor: neutral2,
-//   //               width: 390.w,
-//   //               height: 40.h,
-//   //               hint: "What are you looking for?",
-//   //               prefix: SizedBox(
-//   //                 height: 40.h,
-//   //                 width: 40.h,
-//   //                 child: SvgPicture.asset(
-//   //                   "assets/Search Icon.svg",
-//   //                   width: 20.h,
-//   //                   height: 20.h,
-//   //                   color:
-//   //                       darkTheme ? Colors.white54 : Colors.black45,
-//   //                   fit: BoxFit.scaleDown,
-//   //                 ),
-//   //               )),
 //   //           SizedBox(height: 10.h)
 //   //         ],
 //   //       ),

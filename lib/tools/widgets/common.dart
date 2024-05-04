@@ -16,10 +16,9 @@ const SpinKitWave whiteLoader = SpinKitWave(
 );
 
 class TabHeaderDelegate extends SliverPersistentHeaderDelegate {
-  TabHeaderDelegate({required this.tabBar, this.color});
+  TabHeaderDelegate({required this.tabBar});
 
   final TabBar tabBar;
-  final Color? color;
 
   @override
   double get minExtent => tabBar.preferredSize.height;
@@ -31,7 +30,7 @@ class TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) =>
       Container(
-        color: color,
+        color: context.isDark ? primary1 : Colors.white,
         child: tabBar,
       );
 

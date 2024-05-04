@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,7 +12,7 @@ import 'package:rediones/tools/widgets.dart';
 import 'package:timeago/timeago.dart' as time;
 
 class NotificationPage extends ConsumerStatefulWidget {
-  const NotificationPage({Key? key}) : super(key: key);
+  const NotificationPage({super.key});
 
   @override
   ConsumerState<NotificationPage> createState() => _NotificationPageState();
@@ -59,29 +60,29 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
     return NestedScrollView(
       headerSliverBuilder: (context, isScrolled) => [
         SliverPadding(
-          padding: EdgeInsets.only(left: 15.w, top: 10.h),
-          sliver: SliverToBoxAdapter(
-            child: Text("Notifications", style: context.textTheme.titleMedium,),
-          )
-        ),
+            padding: EdgeInsets.only(left: 15.w, top: 10.h),
+            sliver: SliverToBoxAdapter(
+              child: Text(
+                "Notifications",
+                style: context.textTheme.titleLarge,
+              ),
+            )),
         SliverPersistentHeader(
           delegate: TabHeaderDelegate(
-              color: context.isDark ? Colors.black12 : Colors.white12,
               tabBar: TabBar(
-                controller: controller,
-                indicatorColor: appRed,
-                labelColor: appRed,
-                labelStyle: context.textTheme.bodyMedium!
-                    .copyWith(fontWeight: FontWeight.w500),
-                unselectedLabelStyle: context.textTheme.bodyMedium!
-                    .copyWith(fontWeight: FontWeight.w500),
-                tabs: const [
-                  Tab(text: "All"),
-                  Tab(text: "Verified"),
-                  Tab(text: "Tags & Mention")
-                ],
-              )
-          ),
+            controller: controller,
+            indicatorColor: appRed,
+            labelColor: appRed,
+            labelStyle: context.textTheme.bodyLarge!
+                .copyWith(fontWeight: FontWeight.w600),
+            unselectedLabelStyle: context.textTheme.bodyLarge!
+                .copyWith(fontWeight: FontWeight.w500),
+            tabs: const [
+              Tab(text: "All"),
+              Tab(text: "Verified"),
+              Tab(text: "Tags & Mention")
+            ],
+          )),
           pinned: true,
         ),
       ],
@@ -126,12 +127,21 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
               child: !loaded
                   ? const CenteredPopup()
                   : (notifications.isEmpty)
-                      ? GestureDetector(
-                          onTap: refresh,
-                          child: Center(
-                            child: Text(
-                              "No notifications available. Tap to refresh",
-                              style: context.textTheme.bodyLarge,
+                      ? Center(
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "No posts available.",
+                                  style: context.textTheme.bodyLarge,
+                                ),
+                                TextSpan(
+                                    text: " Tap to refresh",
+                                    style: context.textTheme.bodyLarge!
+                                        .copyWith(color: appRed),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = refresh),
+                              ],
                             ),
                           ),
                         )
@@ -197,8 +207,7 @@ class NotificationHeader extends StatefulWidget {
   final NotificationData notification;
   final String username;
 
-  const NotificationHeader(this.notification, {Key? key, this.username = ""})
-      : super(key: key);
+  const NotificationHeader(this.notification, {super.key, this.username = ""});
 
   @override
   State<NotificationHeader> createState() => _NotificationHeaderState();
@@ -219,26 +228,62 @@ class _NotificationHeaderState extends State<NotificationHeader> {
                 leading: SvgPicture.asset("assets/Less Often.svg"),
                 title: Text(
                   "See this notification less often",
-                  style: context.textTheme.bodyMedium,
+                  style: context.textTheme.bodyLarge,
                 ),
                 onTap: () {},
               ),
               ListTile(
                 leading: SvgPicture.asset("assets/Unfollow User.svg"),
-                title: Text("Unfollow @${widget.username}",
-                    style: context.textTheme.bodyMedium),
+                title: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Unfollow ",
+                        style: context.textTheme.bodyMedium,
+                      ),
+                      TextSpan(
+                        text: "@${widget.notification.postedBy.nickname}",
+                        style: context.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w700),
+                      )
+                    ]
+                  )
+                ),
                 onTap: () {},
               ),
               ListTile(
                 leading: SvgPicture.asset("assets/Block User.svg"),
-                title: Text("Block @${widget.username}",
-                    style: context.textTheme.bodyMedium),
+                title: RichText(
+                    text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Block ",
+                            style: context.textTheme.bodyMedium,
+                          ),
+                          TextSpan(
+                            text: "@${widget.notification.postedBy.nickname}",
+                            style: context.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w700),
+                          )
+                        ]
+                    )
+                ),
                 onTap: () {},
               ),
               ListTile(
                 leading: SvgPicture.asset("assets/Mute User.svg"),
-                title: Text("Mute @${widget.username}",
-                    style: context.textTheme.bodyMedium),
+                title: RichText(
+                    text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Mute ",
+                            style: context.textTheme.bodyMedium,
+                          ),
+                          TextSpan(
+                            text: "@${widget.notification.postedBy.nickname}",
+                            style: context.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w700),
+                          )
+                        ]
+                    )
+                ),
                 onTap: () {},
               ),
             ],
@@ -248,7 +293,7 @@ class _NotificationHeaderState extends State<NotificationHeader> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: () => setState(() => widget.notification.opened = true),
       child: SizedBox(
         width: 390.w,
@@ -299,17 +344,18 @@ class _NotificationHeaderState extends State<NotificationHeader> {
                         SizedBox(
                           width: 250.w,
                           child: RichText(
+                            overflow: TextOverflow.ellipsis,
                             text: TextSpan(
                               children: [
                                 TextSpan(
                                   text: widget.notification.postedBy.username,
-                                  style: context.textTheme.titleSmall!.copyWith(
+                                  style: context.textTheme.bodyLarge!.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 TextSpan(
                                   text: " ${widget.notification.header}",
-                                  style: context.textTheme.titleSmall!.copyWith(
+                                  style: context.textTheme.bodyLarge!.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                                 )
@@ -320,10 +366,13 @@ class _NotificationHeaderState extends State<NotificationHeader> {
                       ],
                     ),
                   ),
-                  Text(
-                    widget.notification.content,
-                    overflow: TextOverflow.visible,
-                    style: context.textTheme.bodyMedium,
+                  SizedBox(
+                    width: 270.w,
+                    child: Text(
+                      widget.notification.content,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.bodyMedium,
+                    ),
                   ),
                   Text(
                     time.format(widget.notification.date),

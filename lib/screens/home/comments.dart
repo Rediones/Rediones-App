@@ -41,7 +41,7 @@ class _PostCommentsState extends State<PostComments> {
     controller.clear();
 
     RedionesResponse<CommentData?> resp =
-    await createComment(widget.postID, text);
+        await createComment(widget.postID, text);
     if (resp.status == Status.success) {
       response.payload.add(resp.payload!);
       setState(() {});
@@ -56,216 +56,210 @@ class _PostCommentsState extends State<PostComments> {
       curve: Curves.decelerate,
       child: SizedBox(
         height: 420.h,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            FutureBuilder(
-              future: widget.future,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Expanded(
+        child: FutureBuilder(
+          future: widget.future,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Column(
+                children: [
+                  Expanded(
                     child: Center(
                       child: CenteredPopup(),
                     ),
-                  );
-                } else if (snapshot.connectionState == ConnectionState.done) {
-                  RedionesResponse<List<CommentData>> response =
+                  ),
+                ],
+              );
+            } else if (snapshot.connectionState == ConnectionState.done) {
+              RedionesResponse<List<CommentData>> response =
                   snapshot.data as RedionesResponse<List<CommentData>>;
-                  if (response.status == Status.failed) {
-                    return Expanded(
+              if (response.status == Status.failed) {
+                return Column(
+                  children: [
+                    Expanded(
                       child: Center(
                         child: Text(
                           response.message,
                           style: context.textTheme.bodyMedium,
                         ),
                       ),
-                    );
-                  }
-
-                  SpecialForm commentSection = SpecialForm(
-                    controller: controller,
-                    suffix: IconButton(
-                      icon: Icon(Icons.send_rounded, size: 18.r, color: appRed),
-                      onPressed: () => onSend(response, controller.text),
-                      splashRadius: 0.01,
                     ),
-                    action: TextInputAction.send,
-                    width: 370.w,
-                    height: 40.h,
-                    hint: "Type your comment here",
-                    onActionPressed: onSend,
-                  );
+                  ],
+                );
+              }
 
-                  if (response.payload.isEmpty) {
-                    return Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: 250.h,
-                            child: Center(
-                              child: Text(
-                                  "Be the first to comment on this post.",
-                                  style: context.textTheme.bodyMedium),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 50.h,
-                            child: Center(child: commentSection),
-                          )
-                        ],
-                      ),
-                    );
-                  }
+              SpecialForm commentSection = SpecialForm(
+                controller: controller,
+                suffix: IconButton(
+                  icon: Icon(Icons.send_rounded, size: 18.r, color: appRed),
+                  onPressed: () => onSend(response, controller.text),
+                  splashRadius: 0.01,
+                ),
+                action: TextInputAction.send,
+                width: 370.w,
+                height: 40.h,
+                hint: "Type your comment here",
+                onActionPressed: onSend,
+              );
 
-                  return Column(
-                    children: [
-                      SizedBox(height: 20.h),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: EdgeInsets.only(right: 15.w),
-                          child: Text(
-                            "${response.payload.length} comment${response.payload.length == 1 ? "" : "s"}",
-                            style: context.textTheme.bodyLarge!
-                                .copyWith(fontWeight: FontWeight.w600),
-                          ),
+              if (response.payload.isEmpty) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 380.h,
+                      child: Center(
+                        child: Text(
+                          "Be the first to comment on this post.",
+                          style: context.textTheme.bodyLarge,
                         ),
                       ),
-                      SizedBox(height: 15.h),
-                      SizedBox(
-                        height: 290.h,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10.w),
-                          child: ListView.separated(
-                            controller: scrollController,
-                            itemCount: response.payload.length + 1,
-                            itemBuilder: (_, index) {
-                              if (index == response.payload.length) {
-                                return SizedBox(height: 10.h);
-                              }
+                    ),
+                    Align(
+                        alignment: Alignment.bottomCenter,
+                        child: commentSection)
+                  ],
+                );
+              }
 
-                              CommentData data = response.payload[index];
-                              bool isLiked() => true;
-                              return Container(
-                                width: 390.w,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w, vertical: 10.h),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: neutral2),
-                                  borderRadius: BorderRadius.circular(15.r),
-                                  color: Colors.transparent,
+              return Column(
+                children: [
+                  SizedBox(height: 20.h),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 15.w),
+                      child: Text(
+                        "${response.payload.length} comment${response.payload.length == 1 ? "" : "s"}",
+                        style: context.textTheme.bodyLarge!
+                            .copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15.h),
+                  SizedBox(
+                    height: 320.h,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      child: ListView.separated(
+                        controller: scrollController,
+                        itemCount: response.payload.length + 1,
+                        itemBuilder: (_, index) {
+                          if (index == response.payload.length) {
+                            return SizedBox(height: 10.h);
+                          }
+
+                          CommentData data = response.payload[index];
+                          bool isLiked() => true;
+                          return Container(
+                            width: 390.w,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10.w, vertical: 10.h),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: neutral2),
+                              borderRadius: BorderRadius.circular(15.r),
+                              color: Colors.transparent,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CachedNetworkImage(
+                                  imageUrl: data.postedBy.profilePicture,
+                                  errorWidget: (context, url, error) =>
+                                      CircleAvatar(
+                                    backgroundColor: neutral2,
+                                    radius: 16.r,
+                                    child: Icon(Icons.person_outline_rounded,
+                                        color: Colors.black, size: 12.r),
+                                  ),
+                                  progressIndicatorBuilder:
+                                      (context, url, download) => Center(
+                                    child: CircularProgressIndicator(
+                                        color: appRed,
+                                        value: download.progress),
+                                  ),
+                                  imageBuilder: (context, provider) =>
+                                      CircleAvatar(
+                                    backgroundImage: provider,
+                                    radius: 16.r,
+                                  ),
                                 ),
-                                child: Row(
+                                SizedBox(width: 10.w),
+                                Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    CachedNetworkImage(
-                                      imageUrl: data.postedBy.profilePicture,
-                                      errorWidget: (context, url, error) =>
-                                          CircleAvatar(
-                                            backgroundColor: neutral2,
-                                            radius: 16.r,
-                                            child: Icon(
-                                                Icons.person_outline_rounded,
-                                                color: Colors.black,
-                                                size: 12.r),
-                                          ),
-                                      progressIndicatorBuilder:
-                                          (context, url, download) => Center(
-                                        child: CircularProgressIndicator(
-                                            color: appRed,
-                                            value: download.progress),
-                                      ),
-                                      imageBuilder: (context, provider) =>
-                                          CircleAvatar(
-                                            backgroundImage: provider,
-                                            radius: 16.r,
-                                          ),
-                                    ),
-                                    SizedBox(width: 10.w),
-                                    Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Text(data.postedBy.username,
-                                            style: context.textTheme.bodyLarge!
-                                                .copyWith(
-                                                fontWeight:
-                                                FontWeight.w600)),
-                                        SizedBox(height: 10.h),
-                                        SizedBox(
-                                            width: 300.w,
-                                            child: Text(data.content,
-                                                style: context
-                                                    .textTheme.bodyMedium)),
-                                        SizedBox(height: 10.h),
-                                        Row(
-                                          mainAxisAlignment:
+                                    Text(data.postedBy.username,
+                                        style: context.textTheme.bodyLarge!
+                                            .copyWith(
+                                                fontWeight: FontWeight.w600)),
+                                    SizedBox(height: 10.h),
+                                    SizedBox(
+                                        width: 300.w,
+                                        child: Text(data.content,
+                                            style:
+                                                context.textTheme.bodyMedium)),
+                                    SizedBox(height: 10.h),
+                                    Row(
+                                      mainAxisAlignment:
                                           MainAxisAlignment.start,
-                                          children: [
-                                            IconButton(
-                                              icon: Icon(
-                                                  isLiked()
-                                                      ? Boxicons.bxs_like
-                                                      : Boxicons.bx_like,
-                                                  color: isLiked()
-                                                      ? niceBlue
-                                                      : null,
-                                                  size: 18.r),
-                                              onPressed: () {},
-                                              splashRadius: 0.01,
-                                            ),
-                                            Text("Like",
-                                                style: context
-                                                    .textTheme.bodySmall),
-                                            SizedBox(
-                                              width: 10.w,
-                                            ),
-                                            IconButton(
-                                              icon: Icon(Boxicons.bx_reply,
-                                                  size: 18.r),
-                                              onPressed: () {},
-                                              splashRadius: 0.01,
-                                            ),
-                                            Text("Reply",
-                                                style: context
-                                                    .textTheme.bodySmall),
-                                            SizedBox(width: 30.w),
-                                            Text(
-                                              time.format(data.created),
-                                              style: context
-                                                  .textTheme.bodySmall!
-                                                  .copyWith(color: appRed),
-                                            ),
-                                          ],
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(
+                                              isLiked()
+                                                  ? Boxicons.bxs_like
+                                                  : Boxicons.bx_like,
+                                              color:
+                                                  isLiked() ? niceBlue : null,
+                                              size: 18.r),
+                                          onPressed: () {},
+                                          splashRadius: 0.01,
+                                        ),
+                                        Text("Like",
+                                            style: context.textTheme.bodySmall),
+                                        SizedBox(
+                                          width: 10.w,
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Boxicons.bx_reply,
+                                              size: 18.r),
+                                          onPressed: () {},
+                                          splashRadius: 0.01,
+                                        ),
+                                        Text("Reply",
+                                            style: context.textTheme.bodySmall),
+                                        SizedBox(width: 30.w),
+                                        Text(
+                                          time.format(data.created),
+                                          style: context.textTheme.bodySmall!
+                                              .copyWith(color: appRed),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
-                              );
-                            },
-                            separatorBuilder: (_, __) => SizedBox(height: 15.h),
-                          ),
-                        ),
+                              ],
+                            ),
+                          );
+                        },
+                        separatorBuilder: (_, __) => SizedBox(height: 15.h),
                       ),
-                      SizedBox(
-                          height: 50.h, child: Center(child: commentSection))
-                    ],
-                  );
-                } else {
-                  return Expanded(
-                    child: Center(
-                      child: Text(
-                          "Could not fetch the comments under this post. Please try again!",
-                          style: context.textTheme.bodyMedium),
                     ),
-                  );
-                }
-              },
-            )
-          ],
+                  ),
+                  commentSection,
+                ],
+              );
+            } else {
+              return SizedBox(
+                height: 420.h,
+                child: Center(
+                  child: Text(
+                    "Could not fetch the comments under this post. Please try again!",
+                    style: context.textTheme.bodyLarge,
+                  ),
+                ),
+              );
+            }
+          },
         ),
       ),
     );

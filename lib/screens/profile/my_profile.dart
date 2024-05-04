@@ -278,7 +278,6 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
             ),
             SliverPersistentHeader(
               delegate: TabHeaderDelegate(
-                color: context.isDark ? Colors.black12 : Colors.white12,
                 tabBar: TabBar(
                   controller: controller,
                   indicatorColor: appRed,

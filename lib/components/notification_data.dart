@@ -12,6 +12,7 @@ class NotificationData extends Equatable {
   final DateTime date;
   final User postedBy;
 
+
   bool opened;
 
   NotificationData({

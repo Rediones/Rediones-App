@@ -270,7 +270,6 @@ class _OtherProfilePageState extends State<OtherProfilePage>
             ),
             SliverPersistentHeader(
               delegate: TabHeaderDelegate(
-                color: context.isDark ? Colors.black12 : Colors.white12,
                 tabBar: TabBar(
                   controller: controller,
                   indicatorColor: appRed,

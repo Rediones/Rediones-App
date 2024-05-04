@@ -15,7 +15,7 @@ import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class AskQuestionPage extends ConsumerStatefulWidget {
-  const AskQuestionPage({Key? key}) : super(key: key);
+  const AskQuestionPage({super.key});
 
   @override
   ConsumerState<AskQuestionPage> createState() => _AskQuestionPageState();
@@ -25,11 +25,23 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
   final TextEditingController controller = TextEditingController();
 
   late List<_ChoiceData> choices;
+  late List<String> pollLengths;
+
+  int pollChoice = -1;
 
   @override
   void initState() {
     super.initState();
     choices = [_ChoiceData(), _ChoiceData()];
+    pollLengths = [
+      "10 minutes",
+      "30 minutes",
+      "1 hour",
+      "2 hours",
+      "6 hours",
+      "12 hours",
+      "1 day",
+    ];
   }
 
   void navigate() => context.router.pop();
@@ -50,7 +62,7 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
               elevation: 0.0,
               centerTitle: true,
               title:
-                  Text("Ask A Question", style: context.textTheme.titleLarge),
+              Text("Ask A Question", style: context.textTheme.titleLarge),
               floating: true,
             ),
             SliverPadding(
@@ -70,8 +82,6 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                     SizedBox(height: 4.h),
                     SpecialForm(
                       controller: controller,
-                      hint:
-                          "e.g What is the answer to life and everything that exists?",
                       height: 50.h,
                       width: 390.w,
                     ),
@@ -91,14 +101,21 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               sliver: SliverList.separated(
-                itemBuilder: (_, index) => _ChoiceContainer(
-                  choice: choices[index],
-                  onRemove: () => setState(() => choices.removeAt(index)),
-                ),
+                itemBuilder: (_, index) =>
+                    _ChoiceContainer(
+                      choice: choices[index],
+                      onRemove: () => setState(() => choices.removeAt(index)),
+                      listener: () {
+                        if (index == choices.length - 1) {
+                          setState(() => choices.add(_ChoiceData()));
+                        }
+                      },
+                    ),
                 itemCount: choices.length,
-                separatorBuilder: (_, __) => SizedBox(
-                  height: 10.h,
-                ),
+                separatorBuilder: (_, __) =>
+                    SizedBox(
+                      height: 10.h,
+                    ),
               ),
             ),
             SliverPadding(
@@ -136,17 +153,34 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                           .copyWith(fontWeight: FontWeight.w500),
                     ),
                     SizedBox(height: 4.h),
-                    Chip(
-                      label: Text(
-                        "1 day",
-                        style: context.textTheme.bodyMedium!
-                            .copyWith(color: appRed),
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 10.r,
+                      children: List.generate(
+                        pollLengths.length,
+                            (index) =>
+                            GestureDetector(
+                              onTap: () => setState(() => pollChoice = index),
+                              child: Chip(
+                                label: Text(
+                                  pollLengths[index],
+                                  style: context.textTheme.bodyMedium!
+                                      .copyWith(color: pollChoice == index
+                                      ? Colors.white
+                                      : appRed),
+                                ),
+                                elevation: 0.0,
+                                shadowColor: Colors.transparent,
+                                backgroundColor: pollChoice == index ? appRed : null,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(35.r),
+                                ),
+                                side: pollChoice != index ? const BorderSide(
+                                  color: neutral2,
+                                ) : null,
+                              ),
+                            ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(35.r),
-                      ),
-                      side: BorderSide(
-                          color: context.isDark ? neutral3 : fadedPrimary),
                     ),
                     SizedBox(height: 50.h),
                   ],
@@ -156,7 +190,7 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               sliver: SliverFillRemaining(
-                child:  Align(
+                child: Align(
                   alignment: Alignment.bottomCenter,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -168,15 +202,16 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
 
                       Future.delayed(
                         Duration.zero,
-                            () => showDialog(
-                          context: context,
-                          builder: (context) {
-                            return const Dialog(
-                                backgroundColor: Colors.transparent,
-                                elevation: 0,
-                                child: CenteredPopup());
-                          },
-                        ),
+                            () =>
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return const Dialog(
+                                    backgroundColor: Colors.transparent,
+                                    elevation: 0,
+                                    child: CenteredPopup());
+                              },
+                            ),
                       );
                     },
                     child: Text(
@@ -197,7 +232,6 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
   }
 }
 
-
 class _ChoiceData {
   late String value;
 
@@ -207,11 +241,13 @@ class _ChoiceData {
 class _ChoiceContainer extends StatefulWidget {
   final _ChoiceData choice;
   final VoidCallback onRemove;
+  final VoidCallback listener;
 
   const _ChoiceContainer({
     super.key,
     required this.choice,
     required this.onRemove,
+    required this.listener,
   });
 
   @override
@@ -226,6 +262,7 @@ class _ChoiceContainerState extends State<_ChoiceContainer> {
   void initState() {
     super.initState();
     controller = TextEditingController(text: widget.choice.value);
+    controller.addListener(widget.listener);
   }
 
   @override

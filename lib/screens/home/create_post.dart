@@ -84,8 +84,8 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                 SizedBox(
                   height: 20.h,
                 ),
-                ComboBox(hint: "", value: visibility, dropdownItems: const ["Public"], onChanged: (val) => setState(() => visibility = val)),
-                SizedBox(height: 4.h),
+                // ComboBox(hint: "", value: visibility, dropdownItems: const ["Public"], onChanged: (val) => setState(() => visibility = val)),
+                // SizedBox(height: 4.h),
                 SpecialForm(
                   controller: controller,
                   hint: "What would you like to share?",
@@ -146,7 +146,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
 
                           Map<String, dynamic> postData = {
                             "content": controller.text.trim(),
-                            "category": Post.fromCategory(postCategory!),
+                            "category": -1,
                             "media":
                             List.generate(mediaBytes.length, (index) {
                               String base64Media =
