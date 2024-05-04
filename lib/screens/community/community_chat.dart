@@ -80,7 +80,7 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
             children: [
               Text(
                 widget.data.name,
-                style: context.textTheme.titleMedium,
+                style: context.textTheme.titleLarge,
               ),
               SizedBox(width: 5.w),
               Icon(Icons.keyboard_arrow_down_rounded, size: 26.r)
@@ -190,12 +190,8 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
                   width: 250.w,
                   height: 40.h,
                   hint: "Type your message",
-                  maxLines: 2,
-                  prefix: SizedBox(
-                    height: 40.h,
-                    width: 40.h,
-                    child: Icon(Icons.emoji_emotions_rounded, size: 24.r),
-                  ),
+                  maxLines: 1,
+                  prefix: Icon(Icons.emoji_emotions_rounded, size: 26.r),
                 ),
                 SizedBox(width: 8.w),
                 GestureDetector(

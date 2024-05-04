@@ -16,6 +16,7 @@ import 'package:rediones/tools/widgets.dart';
 
 class CreatePostPage extends ConsumerStatefulWidget {
   final String? id;
+
   const CreatePostPage({super.key, this.id});
 
   @override
@@ -32,22 +33,19 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
   String? title;
   List<dynamic>? icon;
 
-
   void navigate() => context.router.pop(true);
-
 
   void upload(Map<String, dynamic> postData) async {
     createPost(postData).then((response) {
-      if(!mounted) return;
+      if (!mounted) return;
 
       Navigator.of(context).pop();
-      if(response.payload == null) {
+      if (response.payload == null) {
         showError(response.message);
       } else {
         ref.watch(postsProvider).add(response.payload!);
         navigate();
       }
-
     });
 
     showDialog(
@@ -60,8 +58,6 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -102,25 +98,27 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                     children: [
                       ImageSlide(
                         mediaBytes: mediaBytes,
-                        onDelete: (index) =>
-                            setState(
-                                  () => mediaBytes.removeAt(index),
-                            ),
+                        onDelete: (index) => setState(
+                          () => mediaBytes.removeAt(index),
+                        ),
                       ),
                       SizedBox(height: 20.h),
                       ListTile(
-                        leading: SvgPicture.asset("assets/Add Gallery.svg", color: appRed),
+                        leading: SvgPicture.asset("assets/Add Gallery.svg",
+                            color: appRed),
                         title: Text("Gallery",
                             style: context.textTheme.bodyMedium),
                         onTap: () async {
                           unFocus();
-                          List<Uint8List> images = await FileHandler
-                              .loadToBytes(type: FileType.image);
+                          List<Uint8List> images =
+                              await FileHandler.loadToBytes(
+                                  type: FileType.image);
                           setState(() => mediaBytes.addAll(images));
                         },
                       ),
                       ListTile(
-                        leading: SvgPicture.asset("assets/Profile Location.svg"),
+                        leading:
+                            SvgPicture.asset("assets/Profile Location.svg"),
                         title: Text("Location",
                             style: context.textTheme.bodyMedium),
                         onTap: () {},
@@ -134,23 +132,17 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                         onPressed: () async {
                           unFocus();
 
-                          if (controller.text
-                              .trim()
-                              .isEmpty) {
+                          if (controller.text.trim().isEmpty) {
                             showError("Please enter a description");
-                            return;
-                          } else if (postCategory == null) {
-                            showError("Please select a category");
                             return;
                           }
 
                           Map<String, dynamic> postData = {
                             "content": controller.text.trim(),
                             "category": -1,
-                            "media":
-                            List.generate(mediaBytes.length, (index) {
+                            "media": List.generate(mediaBytes.length, (index) {
                               String base64Media =
-                              FileHandler.convertTo64(mediaBytes[index]);
+                                  FileHandler.convertTo64(mediaBytes[index]);
                               return {
                                 "file": {"name": ""},
                                 "base64": "$imgPrefix$base64Media"
@@ -158,7 +150,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                             })
                           };
 
-                          if(widget.id != null) {
+                          if (widget.id != null) {
                             postData["group"] = widget.id;
                           }
 
@@ -188,7 +180,8 @@ class _ChooseCategoryPage extends ConsumerStatefulWidget {
   const _ChooseCategoryPage({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<_ChooseCategoryPage> createState() => _ChooseCategoryPageState();
+  ConsumerState<_ChooseCategoryPage> createState() =>
+      _ChooseCategoryPageState();
 }
 
 class _ChooseCategoryPageState extends ConsumerState<_ChooseCategoryPage> {
@@ -197,14 +190,16 @@ class _ChooseCategoryPageState extends ConsumerState<_ChooseCategoryPage> {
   @override
   void initState() {
     super.initState();
-    Map<PostCategory, Map<String, List<dynamic>>> postCategories = ref.read(postCategoryProvider);
+    Map<PostCategory, Map<String, List<dynamic>>> postCategories =
+        ref.read(postCategoryProvider);
     postKeys = postCategories.keys.toList();
     postKeys.removeAt(0);
   }
 
   @override
   Widget build(BuildContext context) {
-    Map<PostCategory, Map<String, List<dynamic>>> postCategories = ref.watch(postCategoryProvider);
+    Map<PostCategory, Map<String, List<dynamic>>> postCategories =
+        ref.watch(postCategoryProvider);
 
     return Scaffold(
       appBar: AppBar(

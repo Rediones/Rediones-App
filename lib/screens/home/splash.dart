@@ -61,7 +61,7 @@ class _SplashState extends ConsumerState<Splash>
             opacity: animation,
             child: Text(
               "Rediones",
-              style: context.textTheme.titleLarge!
+              style: context.textTheme.displaySmall!
                   .copyWith(color: theme, fontWeight: FontWeight.bold),
             ),
           ),

@@ -42,7 +42,7 @@ class _CommunitySearchPageState extends ConsumerState<CommunitySearchPage> {
         elevation: 0.0,
         title: Text(
           "Community Practice",
-          style: context.textTheme.titleMedium,
+          style: context.textTheme.titleLarge,
         ),
         actions: [
           GestureDetector(
@@ -71,8 +71,8 @@ class _CommunitySearchPageState extends ConsumerState<CommunitySearchPage> {
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               child: Text(
                 "Explore",
-                style: context.textTheme.bodyMedium!
-                    .copyWith(color: theme, fontWeight: FontWeight.w500),
+                style: context.textTheme.bodyLarge!
+                    .copyWith(color: theme),
               ),
             ),
           ),

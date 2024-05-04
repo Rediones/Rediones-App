@@ -766,19 +766,23 @@ class _PostContainerState extends ConsumerState<PostContainer> {
           GestureDetector(
             onTap: () => setState(() => expandText = !expandText),
             child: RichText(
-                text: TextSpan(children: [
-              TextSpan(
-                text:
-                    "${widget.post.text.substring(0, expandText ? null : (widget.post.text.length >= 150 ? 150 : widget.post.text.length))}"
-                    "${widget.post.text.length >= 150 && !expandText ? "..." : ""}",
-                style: context.textTheme.bodyMedium,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text:
+                        "${widget.post.text.substring(0, expandText ? null : (widget.post.text.length >= 150 ? 150 : widget.post.text.length))}"
+                        "${widget.post.text.length >= 150 && !expandText ? "..." : ""}",
+                    style: context.textTheme.bodyMedium,
+                  ),
+                  if (widget.post.text.length > 150)
+                    TextSpan(
+                      text: expandText ? " Read Less" : " Read More",
+                      style:
+                          context.textTheme.bodyMedium!.copyWith(color: appRed),
+                    ),
+                ],
               ),
-              if (widget.post.text.length > 150)
-                TextSpan(
-                  text: expandText ? " Read Less" : " Read More",
-                  style: context.textTheme.bodyMedium!.copyWith(color: appRed),
-                ),
-            ])),
+            ),
           ),
           SizedBox(height: 10.h),
           if (widget.post.type == MediaType.imageAndText)
@@ -860,7 +864,7 @@ class _PostContainerState extends ConsumerState<PostContainer> {
               ),
             ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 mainAxisSize: MainAxisSize.min,

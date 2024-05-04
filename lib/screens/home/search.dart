@@ -93,7 +93,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             elevation: 0.0,
             floating: true,
             pinned: true,
-            title: Text("Search", style: context.textTheme.headlineSmall),
+            title: Text("Search", style: context.textTheme.titleLarge),
           ),
           SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -127,8 +127,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   SizedBox(height: 20.h),
                   Text(
                     "Recent Searches",
-                    style: context.textTheme.bodyLarge!
-                        .copyWith(fontWeight: FontWeight.w600),
+                    style: context.textTheme.titleSmall!
+                        .copyWith(fontWeight: FontWeight.w700),
                   ),
                   SizedBox(height: 10.h),
                 ],
@@ -143,7 +143,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(recentSearches[index],
-                      style: context.textTheme.bodyMedium),
+                      style: context.textTheme.bodyLarge,),
                   GestureDetector(
                     onTap: () => setState(
                       () => recentSearches.removeAt(index),
@@ -170,8 +170,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   SizedBox(height: 10.h),
                   Text(
                     "Suggested",
-                    style: context.textTheme.bodyLarge!
-                        .copyWith(fontWeight: FontWeight.w600),
+                    style: context.textTheme.titleSmall!
+                        .copyWith(fontWeight: FontWeight.w700),
                   ),
                   SizedBox(height: 10.h),
                   SizedBox(
@@ -194,8 +194,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   SizedBox(height: 15.h),
                   Text(
                     "Communities",
-                    style: context.textTheme.bodyLarge!
-                        .copyWith(fontWeight: FontWeight.w600),
+                    style: context.textTheme.titleSmall!
+                        .copyWith(fontWeight: FontWeight.w700),
                   ),
                   SizedBox(height: 10.h),
                 ],

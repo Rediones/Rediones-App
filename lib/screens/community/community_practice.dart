@@ -34,7 +34,7 @@ class _CommunityPracticePageState extends ConsumerState<CommunityPracticePage> {
         elevation: 0.0,
         title: Text(
           "Community Practice",
-          style: context.textTheme.titleMedium,
+          style: context.textTheme.titleLarge,
         ),
         actions: [
           GestureDetector(
@@ -80,7 +80,7 @@ class _CommunityPracticePageState extends ConsumerState<CommunityPracticePage> {
               SizedBox(height: 20.h),
               Text(
                 "Popular Categories",
-                style: context.textTheme.bodyMedium!
+                style: context.textTheme.bodyLarge!
                     .copyWith(fontWeight: FontWeight.w700),
               ),
               SizedBox(
@@ -92,7 +92,7 @@ class _CommunityPracticePageState extends ConsumerState<CommunityPracticePage> {
                     child: Chip(
                       label: Text(
                         categories[index],
-                        style: context.textTheme.bodySmall!.copyWith(
+                        style: context.textTheme.bodyLarge!.copyWith(
                           color: popularCategory == index
                               ? theme
                               : (darkTheme ? neutral3 : midPrimary),
@@ -170,13 +170,13 @@ class _CommunityContainer extends StatelessWidget {
                 children: [
                   Text(
                     data.name,
-                    style: context.textTheme.bodyLarge!.copyWith(
+                    style: context.textTheme.titleSmall!.copyWith(
                         fontWeight: FontWeight.w600
                     ),
                   ),
                   Text(
                     "${data.members} members",
-                    style: context.textTheme.bodySmall,
+                    style: context.textTheme.bodyMedium,
                   )
                 ],
               )
@@ -185,13 +185,14 @@ class _CommunityContainer extends StatelessWidget {
           SizedBox(height: 10.h),
           Text(
             data.description,
-            style: context.textTheme.bodyMedium,
+            style: context.textTheme.bodyLarge,
           ),
           SizedBox(height: 10.h),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              minimumSize: Size(390.w, 40.h),
+              fixedSize: Size(390.w, 40.h),
               backgroundColor: appRed,
+              elevation: 1.0,
             ),
             onPressed: () => context.router.pushNamed(
               Pages.communityChat,
@@ -200,7 +201,7 @@ class _CommunityContainer extends StatelessWidget {
             child: Text(
               "Join",
               style: context.textTheme.bodyLarge!
-                  .copyWith(color: theme, fontWeight: FontWeight.w500),
+                  .copyWith(color: theme, fontWeight: FontWeight.w600),
             ),
           ),
         ],
