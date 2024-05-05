@@ -80,7 +80,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
         elevation: 0.0,
         title: Text(
           "Inbox",
-          style: context.textTheme.titleMedium,
+          style: context.textTheme.titleLarge,
         ),
         actions: [
           Align(
@@ -139,7 +139,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
                     tabs: [
                       Tab(
                         child:
-                            Text("Chats", style: context.textTheme.bodyMedium),
+                            Text("Chats", style: context.textTheme.bodyLarge),
                       ),
                       Tab(
                         child: RichText(

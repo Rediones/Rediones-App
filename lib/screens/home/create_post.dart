@@ -105,7 +105,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                         leading: SvgPicture.asset("assets/Add Gallery.svg",
                             color: appRed),
                         title: Text("Gallery",
-                            style: context.textTheme.bodyMedium),
+                            style: context.textTheme.bodyLarge),
                         onTap: () async {
                           unFocus();
                           List<Uint8List> images =
@@ -118,10 +118,10 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                         leading:
                             SvgPicture.asset("assets/Profile Location.svg"),
                         title: Text("Location",
-                            style: context.textTheme.bodyMedium),
+                            style: context.textTheme.bodyLarge),
                         onTap: () {},
                       ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 70.h),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(390.w, 40.h),

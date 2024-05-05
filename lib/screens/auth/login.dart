@@ -87,6 +87,8 @@ class _LoginState extends ConsumerState<Login> {
 
   @override
   Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -115,13 +117,13 @@ class _LoginState extends ConsumerState<Login> {
                         width: 390.w,
                         height: 40.h,
                         controller: _emailControl,
-                        fillColor: authFieldBackground,
+                        fillColor: darkTheme ? neutral2 : authFieldBackground,
                         borderColor: Colors.transparent,
                         type: TextInputType.emailAddress,
                         prefix: Icon(
                           Icons.mail_outline_rounded,
                           size: 18.r,
-                          color: primaryPoint2,
+                          color: darkTheme ? offWhite : primaryPoint2,
                         ),
                         onValidate: (value) {
                           if (value!.isEmpty || !value.contains("@")) {
@@ -139,13 +141,13 @@ class _LoginState extends ConsumerState<Login> {
                         height: 40.h,
                         obscure: !_showPassword,
                         controller: _controller,
-                        fillColor: authFieldBackground,
+                        fillColor: darkTheme ? neutral2 : authFieldBackground,
                         borderColor: Colors.transparent,
                         type: TextInputType.text,
                         prefix: Icon(
                           Icons.lock_outline_rounded,
                           size: 18.r,
-                          color: primaryPoint2,
+                          color: darkTheme ? offWhite : primaryPoint2,
                         ),
                         suffix: GestureDetector(
                           child: AnimatedSwitcherTranslation.right(
@@ -156,7 +158,7 @@ class _LoginState extends ConsumerState<Login> {
                                   : Icons.visibility_off,
                               size: 18.r,
                               key: ValueKey<bool>(_showPassword),
-                              color: primaryPoint2,
+                              color: darkTheme ? offWhite : primaryPoint2,
                             ),
                           ),
                           onTap: () =>
@@ -207,14 +209,14 @@ class _LoginState extends ConsumerState<Login> {
                         children: [
                           Text(
                             "Forgot Password? ",
-                            style: context.textTheme.bodyMedium,
+                            style: context.textTheme.bodyLarge,
                           ),
                           SizedBox(
                             width: 5.w,
                           ),
                           Text(
                             "Click Here",
-                            style: context.textTheme.bodyMedium!
+                            style: context.textTheme.bodyLarge!
                                 .copyWith(color: appRed),
                           ),
                         ],
@@ -234,7 +236,7 @@ class _LoginState extends ConsumerState<Login> {
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: theme,
+                          backgroundColor: Colors.transparent,
                           elevation: 0.0,
                           fixedSize: Size(390.w, 40.h),
                           shape: RoundedRectangleBorder(
@@ -263,7 +265,7 @@ class _LoginState extends ConsumerState<Login> {
                         children: [
                           Text(
                             "Don't have an account? ",
-                            style: context.textTheme.bodyMedium,
+                            style: context.textTheme.bodyLarge,
                           ),
                           SizedBox(
                             width: 5.w,
@@ -273,7 +275,7 @@ class _LoginState extends ConsumerState<Login> {
                                 .pushReplacementNamed(Pages.register),
                             child: Text(
                               "Sign Up",
-                              style: context.textTheme.bodyMedium!
+                              style: context.textTheme.bodyLarge!
                                   .copyWith(color: appRed),
                             ),
                           ),

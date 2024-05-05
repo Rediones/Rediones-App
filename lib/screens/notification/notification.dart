@@ -60,29 +60,31 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
     return NestedScrollView(
       headerSliverBuilder: (context, isScrolled) => [
         SliverPadding(
-            padding: EdgeInsets.only(left: 15.w, top: 10.h),
-            sliver: SliverToBoxAdapter(
-              child: Text(
-                "Notifications",
-                style: context.textTheme.titleLarge,
-              ),
-            )),
+          padding: EdgeInsets.only(left: 15.w, top: 10.h),
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              "Notifications",
+              style: context.textTheme.titleLarge,
+            ),
+          ),
+        ),
         SliverPersistentHeader(
           delegate: TabHeaderDelegate(
-              tabBar: TabBar(
-            controller: controller,
-            indicatorColor: appRed,
-            labelColor: appRed,
-            labelStyle: context.textTheme.bodyLarge!
-                .copyWith(fontWeight: FontWeight.w600),
-            unselectedLabelStyle: context.textTheme.bodyLarge!
-                .copyWith(fontWeight: FontWeight.w500),
-            tabs: const [
-              Tab(text: "All"),
-              Tab(text: "Verified"),
-              Tab(text: "Tags & Mention")
-            ],
-          )),
+            tabBar: TabBar(
+              controller: controller,
+              indicatorColor: appRed,
+              labelColor: appRed,
+              labelStyle: context.textTheme.bodyLarge!
+                  .copyWith(fontWeight: FontWeight.w600),
+              unselectedLabelStyle: context.textTheme.bodyLarge!
+                  .copyWith(fontWeight: FontWeight.w500),
+              tabs: const [
+                Tab(text: "All"),
+                Tab(text: "Verified"),
+                Tab(text: "Tags & Mention")
+              ],
+            ),
+          ),
           pinned: true,
         ),
       ],
@@ -235,55 +237,49 @@ class _NotificationHeaderState extends State<NotificationHeader> {
               ListTile(
                 leading: SvgPicture.asset("assets/Unfollow User.svg"),
                 title: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Unfollow ",
-                        style: context.textTheme.bodyMedium,
-                      ),
-                      TextSpan(
-                        text: "@${widget.notification.postedBy.nickname}",
-                        style: context.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w700),
-                      )
-                    ]
+                    text: TextSpan(children: [
+                  TextSpan(
+                    text: "Unfollow ",
+                    style: context.textTheme.bodyMedium,
+                  ),
+                  TextSpan(
+                    text: "@${widget.notification.postedBy.nickname}",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(fontWeight: FontWeight.w700),
                   )
-                ),
+                ])),
                 onTap: () {},
               ),
               ListTile(
                 leading: SvgPicture.asset("assets/Block User.svg"),
                 title: RichText(
-                    text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Block ",
-                            style: context.textTheme.bodyMedium,
-                          ),
-                          TextSpan(
-                            text: "@${widget.notification.postedBy.nickname}",
-                            style: context.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w700),
-                          )
-                        ]
-                    )
-                ),
+                    text: TextSpan(children: [
+                  TextSpan(
+                    text: "Block ",
+                    style: context.textTheme.bodyMedium,
+                  ),
+                  TextSpan(
+                    text: "@${widget.notification.postedBy.nickname}",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(fontWeight: FontWeight.w700),
+                  )
+                ])),
                 onTap: () {},
               ),
               ListTile(
                 leading: SvgPicture.asset("assets/Mute User.svg"),
                 title: RichText(
-                    text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Mute ",
-                            style: context.textTheme.bodyMedium,
-                          ),
-                          TextSpan(
-                            text: "@${widget.notification.postedBy.nickname}",
-                            style: context.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w700),
-                          )
-                        ]
-                    )
-                ),
+                    text: TextSpan(children: [
+                  TextSpan(
+                    text: "Mute ",
+                    style: context.textTheme.bodyMedium,
+                  ),
+                  TextSpan(
+                    text: "@${widget.notification.postedBy.nickname}",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(fontWeight: FontWeight.w700),
+                  )
+                ])),
                 onTap: () {},
               ),
             ],

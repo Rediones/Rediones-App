@@ -66,11 +66,11 @@ class _SignupState extends ConsumerState<Signup> {
   void register() {
     authenticate(_authDetails, Pages.register).then(
       (result) {
-        f.showNewError(
+        f.showError(
             result.status == Status.failed
                 ? result.message
                 : "Account Created Successfully",
-            context);
+        );
 
         if (result.status == Status.success) {
           _controller.clear();
@@ -100,6 +100,8 @@ class _SignupState extends ConsumerState<Signup> {
 
   @override
   Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -127,13 +129,13 @@ class _SignupState extends ConsumerState<Signup> {
                       SpecialForm(
                         width: 390.w,
                         height: 40.h,
-                        fillColor: authFieldBackground,
+                        fillColor: darkTheme ? neutral2 : authFieldBackground,
                         borderColor: Colors.transparent,
                         controller: firstName,
                         prefix: Icon(
                           Icons.person_3_outlined,
                           size: 18.r,
-                          color: primaryPoint2,
+                          color: darkTheme ? offWhite : primaryPoint2,
                         ),
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
@@ -150,13 +152,13 @@ class _SignupState extends ConsumerState<Signup> {
                       SpecialForm(
                         width: 390.w,
                         height: 40.h,
-                        fillColor: authFieldBackground,
+                        fillColor: darkTheme ? neutral2 : authFieldBackground,
                         borderColor: Colors.transparent,
                         controller: lastName,
                         prefix: Icon(
                           Icons.person_3_outlined,
                           size: 18.r,
-                          color: primaryPoint2,
+                          color: darkTheme ? offWhite : primaryPoint2,
                         ),
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
@@ -174,13 +176,13 @@ class _SignupState extends ConsumerState<Signup> {
                       SpecialForm(
                         width: 390.w,
                         height: 40.h,
-                        fillColor: authFieldBackground,
+                        fillColor: darkTheme ? neutral2 : authFieldBackground,
                         borderColor: Colors.transparent,
                         controller: _emailControl,
                         prefix: Icon(
                           Icons.mail_outline_rounded,
                           size: 18.r,
-                          color: primaryPoint2,
+                          color: darkTheme ? offWhite : primaryPoint2,
                         ),
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
@@ -198,14 +200,14 @@ class _SignupState extends ConsumerState<Signup> {
                         obscure: !_showPassword,
                         width: 390.w,
                         height: 40.h,
-                        fillColor: authFieldBackground,
+                        fillColor: darkTheme ? neutral2 : authFieldBackground,
                         borderColor: Colors.transparent,
                         controller: _controller,
                         type: TextInputType.text,
                         prefix: Icon(
                           Icons.lock_outline_rounded,
                           size: 18.r,
-                          color: primaryPoint2,
+                          color: darkTheme ? offWhite : primaryPoint2,
                         ),
                         suffix: GestureDetector(
                           onTap: () =>
@@ -218,7 +220,7 @@ class _SignupState extends ConsumerState<Signup> {
                                   : Icons.visibility_off,
                               size: 18.r,
                               key: ValueKey<bool>(_showPassword),
-                              color: primaryPoint2,
+                              color: darkTheme ? offWhite : primaryPoint2,
                             ),
                           ),
                         ),
@@ -249,13 +251,13 @@ class _SignupState extends ConsumerState<Signup> {
                         height: 40.h,
                         width: 390.w,
                         controller: _confirmControl,
-                        fillColor: authFieldBackground,
+                        fillColor: darkTheme ? neutral2 : authFieldBackground,
                         borderColor: Colors.transparent,
                         type: TextInputType.text,
                         prefix: Icon(
                           Icons.lock_outline_rounded,
                           size: 18.r,
-                          color: primaryPoint2,
+                          color: darkTheme ? offWhite : primaryPoint2,
                         ),
                         suffix: GestureDetector(
                           child: AnimatedSwitcherTranslation.right(
@@ -266,7 +268,7 @@ class _SignupState extends ConsumerState<Signup> {
                                   : Icons.visibility_off,
                               key: ValueKey<bool>(_showConfirmPassword),
                               size: 18.r,
-                              color: primaryPoint2,
+                              color: darkTheme ? offWhite : primaryPoint2,
                             ),
                           ),
                           onTap: () => setState(() =>
@@ -313,7 +315,7 @@ class _SignupState extends ConsumerState<Signup> {
                         children: [
                           Text(
                             "Already have an account? ",
-                            style: context.textTheme.bodyMedium,
+                            style: context.textTheme.bodyLarge,
                           ),
                           SizedBox(
                             width: 5.w,
@@ -323,7 +325,7 @@ class _SignupState extends ConsumerState<Signup> {
                                 .pushReplacementNamed(Pages.login),
                             child: Text(
                               "Log In",
-                              style: context.textTheme.bodyMedium!
+                              style: context.textTheme.bodyLarge!
                                   .copyWith(color: appRed),
                             ),
                           ),
@@ -344,7 +346,7 @@ class _SignupState extends ConsumerState<Signup> {
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: theme,
+                          backgroundColor: Colors.transparent,
                           elevation: 0.0,
                           fixedSize: Size(390.w, 40.h),
                           shape: RoundedRectangleBorder(

@@ -1,4 +1,3 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -104,7 +103,8 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    SvgPicture.asset("assets/Profile School.svg"),
+                                    SvgPicture.asset(
+                                        "assets/Profile School.svg"),
                                     SizedBox(width: 10.w),
                                     SizedBox(
                                       width: 180.w,
@@ -122,7 +122,8 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    SvgPicture.asset("assets/Profile Location.svg"),
+                                    SvgPicture.asset(
+                                        "assets/Profile Location.svg"),
                                     SizedBox(width: 10.w),
                                     SizedBox(
                                       width: 180.w,
@@ -193,72 +194,67 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            height: 32.h,
-                            width: 168.w,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                                color: appRed,
-                                borderRadius: BorderRadius.circular(16.h)),
-                            child: Text(
-                              "Follow",
-                              style: context.textTheme.bodyMedium!
-                                  .copyWith(color: theme),
-                            ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: appRed,
+                            elevation: 1.0,
+                            fixedSize: Size(168.w, 32.h),
+                          ),
+                          child: Text(
+                            "Follow",
+                            style: context.textTheme.bodyMedium!
+                                .copyWith(color: theme),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
+                        ElevatedButton(
+                          onPressed: () {
                             void navigate(Conversation resp) => context.router
                                 .pushNamed(Pages.inbox, extra: resp);
 
                             showDialog(
-                                context: context,
-                                useSafeArea: true,
-                                barrierDismissible: true,
-                                builder: (context) {
-                                  return FutureBuilder<Conversation?>(
-                                    future: createConversation(widget.data.id),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const Popup();
-                                      } else if (snapshot.hasError) {
+                              context: context,
+                              useSafeArea: true,
+                              barrierDismissible: true,
+                              builder: (context) {
+                                return FutureBuilder<Conversation?>(
+                                  future: createConversation(widget.data.id),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Popup();
+                                    } else if (snapshot.hasError) {
+                                      showError(
+                                          "An error occurred. Please try again");
+                                      return const SizedBox.shrink();
+                                    } else {
+                                      Conversation? resp = snapshot.data;
+                                      if (resp == null) {
                                         showError(
-                                            "An error occurred. Please try again");
-                                        return const SizedBox.shrink();
+                                            "An error occurred. Please try again.");
                                       } else {
-                                        Conversation? resp = snapshot.data;
-                                        if (resp == null) {
-                                          showError(
-                                              "An error occurred. Please try again.");
-                                        } else {
-                                          Future.delayed(Duration.zero,
-                                              () => navigate(resp));
-                                        }
-                                        Navigator.of(context).pop();
-                                        return const SizedBox.shrink();
+                                        Future.delayed(Duration.zero,
+                                            () => navigate(resp));
                                       }
-                                    },
-                                  );
-                                },
+                                      Navigator.of(context).pop();
+                                      return const SizedBox.shrink();
+                                    }
+                                  },
+                                );
+                              },
                             );
                           },
-                          child: Container(
-                            height: 32.h,
-                            width: 168.w,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              border: Border.all(
-                                  color: darkTheme ? neutral3 : fadedPrimary),
-                              borderRadius: BorderRadius.circular(16.h),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            elevation: 1.0,
+                            fixedSize: Size(168.w, 40.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.h),
+                              side: const BorderSide(color: neutral2),
                             ),
-                            child: Text("Send Message",
-                                style: context.textTheme.bodyMedium),
                           ),
+                          child: Text("Send Message",
+                              style: context.textTheme.bodyMedium),
                         ),
                       ],
                     ),
@@ -284,6 +280,7 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                   ],
                 ),
               ),
+              pinned: true,
             ),
             SliverToBoxAdapter(
               child: Padding(

@@ -36,6 +36,7 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
   void navigate(RedionesResponse<User?> result) {
     ref.watch(userProvider.notifier).state = result.payload!;
     ref.watch(isNewUserProvider.notifier).state = false;
+    ref.watch(createdProfileProvider.notifier).state = true;
     context.router.pushReplacementNamed(Pages.home);
   }
 
@@ -63,6 +64,8 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
+
     return Scaffold(
         body: SafeArea(
       child: Padding(
@@ -92,13 +95,13 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
                         width: 390.w,
                         height: 40.h,
                         controller: username,
-                        fillColor: authFieldBackground,
+                        fillColor: darkTheme ? neutral2 : authFieldBackground,
                         borderColor: Colors.transparent,
                         type: TextInputType.emailAddress,
                         prefix: Icon(
                           Icons.person,
                           size: 18.r,
-                          color: primaryPoint2,
+                          color: darkTheme ? offWhite : primaryPoint2,
                         ),
                         onValidate: (value) {
                           if (value!.isEmpty) {
@@ -115,13 +118,13 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
                         width: 390.w,
                         height: 40.h,
                         controller: university,
-                        fillColor: authFieldBackground,
+                        fillColor: darkTheme ? neutral2 : authFieldBackground,
                         borderColor: Colors.transparent,
                         type: TextInputType.emailAddress,
                         prefix: Icon(
                           Icons.school,
                           size: 18.r,
-                          color: primaryPoint2,
+                          color: darkTheme ? offWhite : primaryPoint2,
                         ),
                         onValidate: (value) {
                           if (value!.isEmpty) {
@@ -149,7 +152,7 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: profilePicture == null ? neutral : null,
+                        color: profilePicture == null ? neutral2 : null,
                         image: profilePicture != null
                             ? DecorationImage(
                                 image: FileImage(
@@ -173,14 +176,19 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
                   backgroundColor: appRed,
                   elevation: 1.0,
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (page == 1) {
                     if(!validateForm(formKey)) return;
 
                     setState(() => page = 2);
                   } else {
                     if(profilePicture != null) {
-                      authDetails["profilePicture"] = profilePicture;
+                      var data = await FileHandler.convertSingleToData(profilePicture!);
+                      String base64Media = FileHandler.convertTo64(data);
+                      authDetails["profilePicture"] = {
+                        "file": {"name": ""},
+                        "base64": "$imgPrefix$base64Media"
+                      };
                     }
 
                     createProfile();

@@ -188,27 +188,27 @@ class SpecialForm extends StatelessWidget {
             borderRadius:
             BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
             borderSide: BorderSide(
-              color: borderColor ?? border
+              color: borderColor ?? neutral2
             ),
           ),
           border: OutlineInputBorder(
             borderRadius:
             BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
             borderSide: BorderSide(
-                color: borderColor ?? border
+                color: borderColor ?? neutral2
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius:
             BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
             borderSide: BorderSide(
-                color: borderColor ?? border
+                color: borderColor ?? neutral2
             ),
           ),
           hintText: hint,
           hintStyle: hintStyle ??
               context.textTheme.bodyLarge!
-                  .copyWith(fontWeight: FontWeight.w500, color: primaryPoint6),
+                  .copyWith(fontWeight: FontWeight.w500, color: context.isDark ? offWhite : primaryPoint6),
         ),
         onChanged: (value) {
           if (onChange == null) return;
@@ -298,8 +298,8 @@ class ComboBox extends StatelessWidget {
             hint,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
-            style: context.textTheme.bodyMedium!
-                .copyWith(fontWeight: FontWeight.w500),
+            style: context.textTheme.bodyLarge!
+                .copyWith(fontWeight: FontWeight.w500, color: context.isDark ? offWhite : primaryPoint6),
           ),
         ),
         value: value,
@@ -313,7 +313,7 @@ class ComboBox extends StatelessWidget {
                 item,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
-                style: context.textTheme.bodyMedium!
+                style: context.textTheme.bodyLarge!
                     .copyWith(fontWeight: FontWeight.w500),
               ),
             ),
@@ -332,8 +332,8 @@ class ComboBox extends StatelessWidget {
               ? null
               : buttonDecoration ??
               BoxDecoration(
-                borderRadius: BorderRadius.circular(4.r),
-                border: Border.all(color: fadedPrimary),
+                borderRadius: BorderRadius.circular(buttonHeight == null ? 20 : buttonHeight! * 0.5),
+                border: Border.all(color: neutral2),
               ),
           elevation: buttonElevation,
         ),

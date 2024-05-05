@@ -42,7 +42,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
     "schoolAddress": "",
     "username": "",
     "gender": "",
-    "level": ""
+    "level": "100"
   };
   final GlobalKey<FormState> formKey = GlobalKey();
 
@@ -162,7 +162,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     ),
                   ),
                   SizedBox(height: 30.h),
-                  Text("First Name", style: context.textTheme.labelSmall),
+                  Text("First Name", style: context.textTheme.labelLarge),
                   SizedBox(height: 4.h),
                   SpecialForm(
                     controller: firstNameController,
@@ -179,7 +179,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     onSave: (value) => details["firstName"] = value!,
                   ),
                   SizedBox(height: 20.h),
-                  Text("Last Name", style: context.textTheme.labelSmall),
+                  Text("Last Name", style: context.textTheme.labelLarge),
                   SizedBox(height: 4.h),
                   SpecialForm(
                     controller: lastNameController,
@@ -196,7 +196,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     onSave: (value) => details["lastName"] = value!,
                   ),
                   SizedBox(height: 20.h),
-                  Text("Other Name", style: context.textTheme.labelSmall),
+                  Text("Other Name", style: context.textTheme.labelLarge),
                   SizedBox(height: 4.h),
                   SpecialForm(
                     controller: otherNameController,
@@ -213,7 +213,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     onSave: (value) => details["otherName"] = value!,
                   ),
                   SizedBox(height: 20.h),
-                  Text("Username", style: context.textTheme.labelSmall),
+                  Text("Username", style: context.textTheme.labelLarge),
                   SizedBox(height: 4.h),
                   SpecialForm(
                     controller: usernameController,
@@ -230,7 +230,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     onSave: (value) => details["username"] = value!,
                   ),
                   SizedBox(height: 20.h),
-                  Text("Gender", style: context.textTheme.labelSmall),
+                  Text("Gender", style: context.textTheme.labelLarge),
                   SizedBox(height: 4.h),
                   ComboBox(
                     hint: "Select gender",
@@ -240,7 +240,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     onChanged: (g) => setState(() => gender = g),
                   ),
                   SizedBox(height: 20.h),
-                  Text("School", style: context.textTheme.labelSmall),
+                  Text("School", style: context.textTheme.labelLarge),
                   SizedBox(height: 4.h),
                   SpecialForm(
                     controller: schoolController,
@@ -257,24 +257,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     onSave: (value) => details["schoolAddress"] = value!,
                   ),
                   SizedBox(height: 20.h),
-                  Text("Year", style: context.textTheme.labelSmall),
-                  SizedBox(height: 4.h),
-                  SpecialForm(
-                    controller: levelController,
-                    hint: "e.g 100",
-                    width: 390.w,
-                    height: 40.h,
-                    onValidate: (value) {
-                      if (value!.trim().isEmpty) {
-                        showError("Please enter your level");
-                        return '';
-                      }
-                      return null;
-                    },
-                    onSave: (value) => details["level"] = value!,
-                  ),
-                  SizedBox(height: 20.h),
-                  Text("Address", style: context.textTheme.labelSmall),
+                  Text("Address", style: context.textTheme.labelLarge),
                   SizedBox(height: 4.h),
                   SpecialForm(
                     controller: addressController,
@@ -291,7 +274,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     onSave: (value) => details["address"] = value!,
                   ),
                   SizedBox(height: 20.h),
-                  Text("Bio", style: context.textTheme.labelSmall),
+                  Text("Bio", style: context.textTheme.labelLarge),
                   SizedBox(height: 4.h),
                   SpecialForm(
                     controller: bioController,

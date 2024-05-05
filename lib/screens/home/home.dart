@@ -71,6 +71,9 @@ class _HomeState extends ConsumerState<Home> {
       }
     });
 
+    if(ref.read(createdProfileProvider)) {
+      fetchPosts();
+    }
   }
 
   Future<void> _assignInitialPosts(String value) async {
@@ -107,6 +110,7 @@ class _HomeState extends ConsumerState<Home> {
   @override
   Widget build(BuildContext context) {
     ref.listen(isLoggedInProvider, (previous, next) => fetchPosts());
+
 
     List<Post> posts = ref.watch(postsProvider);
     String profilePicture =

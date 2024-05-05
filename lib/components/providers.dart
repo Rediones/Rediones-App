@@ -286,12 +286,14 @@ final StateProvider<List<String>> recentSearchesProvider = StateProvider(
 
 final StateProvider<bool> isNewUserProvider = StateProvider((ref) => false);
 final StateProvider<bool> isLoggedInProvider = StateProvider((ref) => false);
+final StateProvider<bool> createdProfileProvider = StateProvider((ref) => false);
 final StateProvider<bool> initializedProvider = StateProvider((ref) => false);
 final StateProvider<bool> hideBottomProvider = StateProvider((ref) => false);
 final StateProvider<int> dashboardIndexProvider = StateProvider((ref) => 0);
 
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);
+  ref.invalidate(createdProfileProvider);
   ref.invalidate(recentSearchesProvider);
   ref.invalidate(communitiesProvider);
   ref.invalidate(hideBottomProvider);
