@@ -10,8 +10,8 @@ import 'package:rediones/tools/widgets.dart';
 
 class EventsPage extends ConsumerStatefulWidget {
   const EventsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState<EventsPage> createState() => _EventsPageState();
@@ -53,7 +53,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
           onPressed: () => context.router.pop(),
         ),
         elevation: 0.0,
-        title: Text("Events", style: context.textTheme.titleMedium),
+        title: Text("Events", style: context.textTheme.titleLarge),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 15.w),

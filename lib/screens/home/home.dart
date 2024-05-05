@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -72,7 +71,6 @@ class _HomeState extends ConsumerState<Home> {
       }
     });
 
-    fetchPosts();
   }
 
   Future<void> _assignInitialPosts(String value) async {
@@ -108,6 +106,8 @@ class _HomeState extends ConsumerState<Home> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(isLoggedInProvider, (previous, next) => fetchPosts());
+
     List<Post> posts = ref.watch(postsProvider);
     String profilePicture =
         ref.watch(userProvider.select((value) => value.profilePicture));
@@ -398,22 +398,3 @@ class _HomeState extends ConsumerState<Home> {
     );
   }
 }
-
-//   // flexibleSpace: FlexibleSpaceBar(
-//   //   background: SizedBox(
-//   //     height: 120.h,
-//   //     child: Padding(
-//   //       padding: EdgeInsets.symmetric(horizontal: 10.w),
-//   //       child: Column(
-//   //         mainAxisAlignment: MainAxisAlignment.end,
-//   //         children: [
-//   //           SizedBox(height: 10.h)
-//   //         ],
-//   //       ),
-//   //     ),
-//   //   ),
-//   // ),
-// ),
-
-// ],
-// ),

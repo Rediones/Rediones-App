@@ -3,12 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rediones/components/project_data.dart';
 import 'package:rediones/components/providers.dart';
-import 'package:rediones/screens/project/view_project.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class ProjectPage extends ConsumerStatefulWidget {
-  const ProjectPage({Key? key}) : super(key: key);
+  const ProjectPage({super.key});
 
   @override
   ConsumerState<ProjectPage> createState() => _ProjectPageState();
@@ -114,8 +113,7 @@ class _ProjectPageState extends ConsumerState<ProjectPage> {
 class _OngoingProjectContainer extends StatelessWidget {
   final ProjectData data;
 
-  const _OngoingProjectContainer({Key? key, required this.data})
-      : super(key: key);
+  const _OngoingProjectContainer({required this.data});
 
   @override
   Widget build(BuildContext context) {

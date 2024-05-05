@@ -74,7 +74,6 @@ class _RedionesState extends ConsumerState<Rediones>
       builder: (context, widget) => MaterialApp.router(
         title: 'Rediones',
         debugShowCheckedModeBanner: false,
-        themeMode: ThemeMode.light,
         theme: FlexThemeData.light(
           fontFamily: "Nunito",
           useMaterial3: true,

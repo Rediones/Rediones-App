@@ -237,7 +237,6 @@ class _StickyNoteContainer extends StatelessWidget {
   final Color color;
 
   const _StickyNoteContainer({
-    super.key,
     required this.data,
     required this.color,
   });
@@ -444,7 +443,6 @@ class _MessageDataContainer extends StatefulWidget {
   final VoidCallback onCreateNote;
 
   const _MessageDataContainer({
-    super.key,
     required this.data,
     required this.onCreateNote,
   });

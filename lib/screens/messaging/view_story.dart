@@ -11,7 +11,7 @@ import 'package:timeago/timeago.dart';
 class ViewStoryPage extends StatefulWidget {
   final StoryData story;
 
-  const ViewStoryPage({Key? key, required this.story}) : super(key: key);
+  const ViewStoryPage({super.key, required this.story});
 
   @override
   State<ViewStoryPage> createState() => _ViewStoryPageState();

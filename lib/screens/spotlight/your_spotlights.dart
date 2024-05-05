@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rediones/components/media_data.dart';
-import 'package:transparent_image/transparent_image.dart';
-import 'package:rediones/components/message_data.dart' hide MediaType;
 import 'package:rediones/tools/constants.dart';
 
 class YourSpotlightsPage extends StatefulWidget {
   final List<MediaData> saved;
 
   const YourSpotlightsPage({
-    Key? key,
+    super.key,
     this.saved = const [],
-  }) : super(key: key);
+  });
 
   @override
   State<YourSpotlightsPage> createState() => _YourSpotlightsPageState();
@@ -91,7 +89,7 @@ class _YourSpotlightsPageState extends State<YourSpotlightsPage>
                             ),
                             //itemCount: videoPage.items.length,
                       itemCount: 5,
-                            itemBuilder: (context, index) => Text("")
+                            itemBuilder: (context, index) => const Text("")
                             //     _SpotlightContainer(
                             //   header: "some plays",
                             //   data: videoPage.items[index],
@@ -111,7 +109,7 @@ class _YourSpotlightsPageState extends State<YourSpotlightsPage>
                       //   data: videoPage.items[index],
                       //   onClick: () {},
                       // ),
-                      Text("")
+                      const Text("")
                     )
                   ],
                 ),

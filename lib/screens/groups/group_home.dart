@@ -89,7 +89,7 @@ class _GroupHomeState extends State<GroupHome> {
                   title: AnimatedOpacity(
                     duration: const Duration(milliseconds: 200),
                     opacity: isCollapsed ? 1 : 0,
-                    child: Text("Group", style: context.textTheme.titleMedium),
+                    child: Text("Group", style: context.textTheme.titleLarge),
                   ),
                   pinned: true,
                   leading: IconButton(

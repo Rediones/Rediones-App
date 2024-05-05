@@ -282,9 +282,9 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                   controller: controller,
                   indicatorColor: appRed,
                   labelColor: appRed,
-                  labelStyle: context.textTheme.bodyMedium!
-                      .copyWith(fontWeight: FontWeight.w500),
-                  unselectedLabelStyle: context.textTheme.bodyMedium!
+                  labelStyle: context.textTheme.bodyLarge!
+                      .copyWith(fontWeight: FontWeight.w600),
+                  unselectedLabelStyle: context.textTheme.bodyLarge!
                       .copyWith(fontWeight: FontWeight.w500),
                   tabs: const [
                     Tab(text: "Posts"),
@@ -409,7 +409,6 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                               ),
                             ),
                           ),
-                SizedBox(),
               ],
             ),
           ),

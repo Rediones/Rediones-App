@@ -7,7 +7,7 @@ import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class CreateStoryPage extends StatefulWidget {
-  const CreateStoryPage({Key? key}) : super(key: key);
+  const CreateStoryPage({super.key});
 
   @override
   State<CreateStoryPage> createState() => _CreateStoryPageState();

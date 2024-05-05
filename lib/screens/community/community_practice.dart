@@ -141,7 +141,6 @@ class _CommunityContainer extends StatelessWidget {
   final CommunityData data;
 
   const _CommunityContainer({
-    super.key,
     required this.data,
   });
 

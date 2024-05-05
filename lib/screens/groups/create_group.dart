@@ -1,11 +1,8 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rediones/components/group_data.dart';
-import 'package:rediones/components/providers.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/group_service.dart';
 import 'package:rediones/tools/constants.dart';
@@ -14,8 +11,8 @@ import 'package:rediones/tools/widgets.dart';
 
 class CreateGroupPage extends ConsumerStatefulWidget {
   const CreateGroupPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState<CreateGroupPage> createState() => _CreateGroupPageState();
@@ -74,7 +71,7 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
         ),
         elevation: 0.0,
         centerTitle: true,
-        title: Text("Create Group", style: context.textTheme.titleMedium),
+        title: Text("Create Group", style: context.textTheme.titleLarge),
       ),
       body: SafeArea(
         child: Padding(

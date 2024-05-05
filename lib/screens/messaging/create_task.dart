@@ -9,7 +9,7 @@ import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class CreateTaskPage extends ConsumerStatefulWidget {
-  const CreateTaskPage({Key? key}) : super(key: key);
+  const CreateTaskPage({super.key});
 
   @override
   ConsumerState<CreateTaskPage> createState() => _CreateTaskPageState();

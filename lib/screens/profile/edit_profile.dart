@@ -11,7 +11,7 @@ import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
-  const EditProfilePage({Key? key}) : super(key: key);
+  const EditProfilePage({super.key});
 
   @override
   ConsumerState<EditProfilePage> createState() => _MyProfilePageState();
@@ -62,6 +62,38 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
     gender = user.gender.isEmpty ? null : user.gender;
   }
 
+  void navigate(RedionesResponse<User?> result) {
+    ref.watch(userProvider.notifier).state = result.payload!;
+    if (ref.watch(isNewUserProvider.notifier).state) {
+      ref.watch(isNewUserProvider.notifier).state = false;
+      context.pushReplacementNamed(Pages.home);
+    } else {
+      context.router.pop();
+    }
+  }
+
+  void edit() {
+    updateUser(details).then(
+      (result) {
+        if (!mounted) return;
+
+        if (result.status == Status.success) {
+          navigate(result);
+        } else {
+          showNewError(result.message, context);
+          Navigator.of(context).pop();
+        }
+      },
+    );
+
+    showDialog(
+      useSafeArea: true,
+      barrierDismissible: false,
+      context: context,
+      builder: (_) => const Popup(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +106,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
         ),
         elevation: 0.0,
         centerTitle: true,
-        title: Text("Edit Profile", style: context.textTheme.headlineSmall),
+        title: Text("Edit Profile", style: context.textTheme.titleLarge),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -293,47 +325,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                             currentState.save();
                             details["gender"] = gender ?? "";
 
-                            void navigate(RedionesResponse<User?> result) {
-                              ref
-                                  .watch(userProvider.notifier)
-                                  .state = result.payload!;
-                              if (ref.watch(isNewUserProvider.notifier).state) {
-                                ref.watch(isNewUserProvider.notifier).state = false;
-                                context.pushReplacementNamed(Pages.home);
-                              } else {
-                                context.router.pop();
-                              }
-                            }
-
-                            void snackBar(String message) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(message),
-                                    duration: const Duration(seconds: 1),
-                                    dismissDirection:
-                                        DismissDirection.horizontal),
-                              );
-                            }
-
-                            showDialog(
-                              useSafeArea: true,
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (context) {
-                                updateUser(user, details).then(
-                                  (result) {
-                                    Navigator.of(context).pop();
-                                    snackBar(result.message);
-
-                                    if (result.status == Status.success) {
-                                      navigate(result);
-                                    }
-                                  },
-                                );
-
-                                return const Popup();
-                              },
-                            );
+                            edit();
                           }
                         },
                         child: Text(

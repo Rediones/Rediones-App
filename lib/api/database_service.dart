@@ -1,6 +1,4 @@
 import 'package:path/path.dart';
-import 'package:rediones/api/base.dart';
-import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:sqflite/sqflite.dart';
 

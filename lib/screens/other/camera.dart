@@ -13,12 +13,11 @@ import 'package:flutter_boxicons/flutter_boxicons.dart';
 //import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 
 import 'package:rediones/tools/constants.dart';
-import 'media_view.dart';
 
 /// Camera example home widget.
 class CameraApp extends StatefulWidget {
   /// Default Constructor
-  const CameraApp({Key? key}) : super(key: key);
+  const CameraApp({super.key});
 
   @override
   State<CameraApp> createState() => _CameraAppState();

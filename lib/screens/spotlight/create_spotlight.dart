@@ -1,22 +1,18 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_video_info/flutter_video_info.dart';
 //import 'package:media_gallery2/media_gallery2.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
-import 'package:rediones/tools/widgets.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 import 'package:rediones/api/spotlight_service.dart';
 
 class CreateSpotlightPage extends StatefulWidget {
-  const CreateSpotlightPage({Key? key}) : super(key: key);
+  const CreateSpotlightPage({super.key});
 
   @override
   State<CreateSpotlightPage> createState() => _CreateSpotlightPageState();

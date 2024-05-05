@@ -18,7 +18,7 @@ import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class CreateEventsPage extends ConsumerStatefulWidget {
-  const CreateEventsPage({Key? key}) : super(key: key);
+  const CreateEventsPage({super.key});
 
   @override
   ConsumerState<CreateEventsPage> createState() => _CreateEventsPageState();
@@ -89,10 +89,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
         ),
         elevation: 0.0,
         centerTitle: true,
-        title: Text(
-          "Create An Event",
-          style: context.textTheme.titleMedium,
-        ),
+        title: Text("Create An Event", style: context.textTheme.titleLarge),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

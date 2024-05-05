@@ -14,7 +14,7 @@ import 'package:rediones/tools/functions.dart';
 class EventContainer extends StatefulWidget {
   final EventData data;
 
-  const EventContainer({Key? key, required this.data}) : super(key: key);
+  const EventContainer({super.key, required this.data});
 
   @override
   State<EventContainer> createState() => _EventContainerState();

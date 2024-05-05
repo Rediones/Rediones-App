@@ -7,7 +7,6 @@ import 'package:rediones/components/user_data.dart';
 import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' as f;
-import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class Login extends ConsumerStatefulWidget {

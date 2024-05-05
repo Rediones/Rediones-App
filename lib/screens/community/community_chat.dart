@@ -5,7 +5,6 @@ import 'package:rediones/components/community_data.dart';
 import 'package:rediones/components/providers.dart';
 import 'package:rediones/tools/constants.dart';
 
-import 'dart:developer' show log;
 
 import 'package:rediones/tools/widgets.dart';
 
@@ -214,7 +213,6 @@ class _CommunityChatContainer extends ConsumerWidget {
   final CommunityChatData data;
 
   const _CommunityChatContainer({
-    super.key,
     required this.data,
   });
 

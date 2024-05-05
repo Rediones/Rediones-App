@@ -12,7 +12,7 @@ import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class CreateProjectPage extends ConsumerStatefulWidget {
-  const CreateProjectPage({Key? key}) : super(key: key);
+  const CreateProjectPage({super.key});
 
   @override
   ConsumerState<CreateProjectPage> createState() => _CreateProjectPageState();

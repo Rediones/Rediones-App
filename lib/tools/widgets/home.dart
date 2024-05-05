@@ -304,7 +304,7 @@ class BottomNavItem extends StatelessWidget {
   final VoidCallback onSelect;
 
   const BottomNavItem({
-    Key? key,
+    super.key,
     this.color,
     this.invertColor = false,
     this.activeSVG = "",
@@ -313,7 +313,7 @@ class BottomNavItem extends StatelessWidget {
     required this.height,
     required this.selected,
     required this.onSelect,
-  }) : super(key: key);
+  });
 
   Color getColor(bool darkTheme) {
     if (color != null) {

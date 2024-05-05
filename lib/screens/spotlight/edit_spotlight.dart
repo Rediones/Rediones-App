@@ -3,19 +3,16 @@ import 'dart:io';
 
 
 import 'package:flutter/material.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 //import 'package:media_gallery2/media_gallery2.dart' as mg;
 import 'package:rediones/tools/constants.dart';
-import 'package:rediones/tools/widgets.dart';
 
 class EditSpotlightPage extends StatefulWidget {
   final dynamic spotlight;
 
-  const EditSpotlightPage({Key? key, required this.spotlight})
-      : super(key: key);
+  const EditSpotlightPage({super.key, required this.spotlight});
 
   @override
   State<EditSpotlightPage> createState() => _EditSpotlightPageState();
@@ -118,9 +115,9 @@ class _EditSpotlightPageState extends State<EditSpotlightPage> {
           child: !loaded
               ? Center(child: SpinKitWave(color: appRed, size: 40.r))
               : Stack(children: [
-                  Align(
+                  const Align(
                     alignment: Alignment.center,
-                    child: const SizedBox(),
+                    child: SizedBox(),
                   ),
                   Positioned(
                     top: 10.h,
@@ -182,7 +179,7 @@ class _EditSpotlightPageState extends State<EditSpotlightPage> {
 }
 
 class _AddCaptionPage extends StatefulWidget {
-  const _AddCaptionPage({Key? key}) : super(key: key);
+  const _AddCaptionPage();
 
   @override
   State<_AddCaptionPage> createState() => _AddCaptionPageState();

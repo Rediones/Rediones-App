@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'constants.dart';
 
+import 'package:rediones/screens/auth/create_profile.dart';
 import 'package:rediones/screens/auth/login.dart';
 import 'package:rediones/screens/auth/signup.dart';
 import 'package:rediones/screens/events/create_events.dart';
@@ -126,8 +127,7 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.editSpotlight.path,
     name: Pages.editSpotlight,
-    builder: (_, state) =>
-        EditSpotlightPage(spotlight: state.extra as dynamic),
+    builder: (_, state) => EditSpotlightPage(spotlight: state.extra as dynamic),
   ),
   GoRoute(
     path: Pages.yourSpotlight.path,
@@ -172,8 +172,7 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.viewMedia.path,
     name: Pages.viewMedia,
-    builder: (_, state) =>
-        PreviewPictures(data: state.extra as PreviewData),
+    builder: (_, state) => PreviewPictures(data: state.extra as PreviewData),
   ),
   GoRoute(
     path: Pages.askQuestion.path,
@@ -212,5 +211,10 @@ final List<GoRoute> routes = [
     path: Pages.communitySearch.path,
     name: Pages.communitySearch,
     builder: (_, __) => const CommunitySearchPage(),
+  ),
+  GoRoute(
+    path: Pages.createProfile.path,
+    name: Pages.createProfile,
+    builder: (_, __) => const CreateProfilePage(),
   ),
 ];

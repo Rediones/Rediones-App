@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +19,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 class OtherProfilePage extends StatefulWidget {
   final User data;
 
-  const OtherProfilePage({Key? key, required this.data}) : super(key: key);
+  const OtherProfilePage({super.key, required this.data});
 
   @override
   State<OtherProfilePage> createState() => _OtherProfilePageState();
@@ -274,9 +273,9 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                   controller: controller,
                   indicatorColor: appRed,
                   labelColor: appRed,
-                  labelStyle: context.textTheme.bodyMedium!
-                      .copyWith(fontWeight: FontWeight.w500),
-                  unselectedLabelStyle: context.textTheme.bodyMedium!
+                  labelStyle: context.textTheme.bodyLarge!
+                      .copyWith(fontWeight: FontWeight.w600),
+                  unselectedLabelStyle: context.textTheme.bodyLarge!
                       .copyWith(fontWeight: FontWeight.w500),
                   tabs: const [
                     Tab(text: "Posts"),
@@ -388,8 +387,8 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                   },
                 ),
               ),
-              SizedBox(),
-              SizedBox(),
+              const SizedBox(),
+              const SizedBox(),
             ],
           ),
         ),

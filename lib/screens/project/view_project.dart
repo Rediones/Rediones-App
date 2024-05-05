@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/components/project_data.dart';
 import 'package:rediones/tools/constants.dart';
-import 'package:rediones/tools/widgets.dart';
 
 class ViewProjectPage extends StatefulWidget {
   final ProjectData data;
 
-  const ViewProjectPage({Key? key, required this.data}) : super(key: key);
+  const ViewProjectPage({super.key, required this.data});
 
   @override
   State<ViewProjectPage> createState() => _ViewProjectPageState();

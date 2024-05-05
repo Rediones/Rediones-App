@@ -1,7 +1,5 @@
-import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
@@ -61,8 +59,7 @@ class PostPreview extends StatelessWidget {
   final VoidCallback onDelete;
 
   const PostPreview(
-      {Key? key, required this.bytes, this.duration, required this.onDelete})
-      : super(key: key);
+      {super.key, required this.bytes, this.duration, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {

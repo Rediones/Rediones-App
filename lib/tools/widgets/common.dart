@@ -67,8 +67,8 @@ class WidgetHeaderDelegate extends SliverPersistentHeaderDelegate {
 
 class Popup extends StatelessWidget {
   const Popup({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => const AlertDialog(
@@ -79,10 +79,10 @@ class Popup extends StatelessWidget {
 }
 
 class CenteredPopup extends StatelessWidget {
-  const CenteredPopup({Key? key}) : super(key: key);
+  const CenteredPopup({super.key});
 
   @override
-  Widget build(BuildContext context) => Center(child: loader);
+  Widget build(BuildContext context) => const Center(child: loader);
 }
 
 class SpecialForm extends StatelessWidget {

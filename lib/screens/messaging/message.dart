@@ -385,7 +385,7 @@ class StoryContainer extends StatelessWidget {
 // ),
 
 class _AddStory extends ConsumerWidget {
-  const _AddStory({super.key});
+  const _AddStory();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -473,11 +473,11 @@ class LastMessageContainer extends StatelessWidget {
   final VoidCallback onOpen;
 
   const LastMessageContainer({
-    Key? key,
+    super.key,
     required this.data,
     required this.currentID,
     required this.onOpen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

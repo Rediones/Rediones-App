@@ -1,5 +1,4 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +21,16 @@ class _SignupState extends ConsumerState<Signup> {
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _emailControl = TextEditingController();
   final TextEditingController _confirmControl = TextEditingController();
-  final Map<String, String> _authDetails = {"email": "", "password": ""};
+  final TextEditingController firstName = TextEditingController();
+  final TextEditingController lastName = TextEditingController();
+
+  final Map<String, String> _authDetails = {
+    "email": "",
+    "password": "",
+    "firstName": "",
+    "lastName": "",
+  };
+
   bool _showPassword = false;
   bool _showConfirmPassword = false;
   bool validPassword = false, passwordMatch = true;
@@ -33,13 +41,14 @@ class _SignupState extends ConsumerState<Signup> {
     _controller.addListener(() {
       setState(() => passwordMatch = _controller.text == _confirmControl.text);
 
-      if(!validPassword && _controller.text.length >= 6) {
+      if (!validPassword && _controller.text.length >= 6) {
         setState(() => validPassword = true);
-      } else if(validPassword && _controller.text.length < 6) {
+      } else if (validPassword && _controller.text.length < 6) {
         setState(() => validPassword = false);
       }
     });
-    _confirmControl.addListener(() => setState(() => passwordMatch = _controller.text == _confirmControl.text));
+    _confirmControl.addListener(() => setState(
+        () => passwordMatch = _controller.text == _confirmControl.text));
   }
 
   void submit() {
@@ -86,7 +95,7 @@ class _SignupState extends ConsumerState<Signup> {
     saveAuthDetails(_authDetails, ref);
     ref.watch(userProvider.notifier).state = result.payload!;
     ref.watch(isNewUserProvider.notifier).state = true;
-    context.router.pushReplacementNamed(Pages.editProfile);
+    context.router.pushReplacementNamed(Pages.createProfile);
   }
 
   @override
@@ -115,6 +124,53 @@ class _SignupState extends ConsumerState<Signup> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      SpecialForm(
+                        width: 390.w,
+                        height: 40.h,
+                        fillColor: authFieldBackground,
+                        borderColor: Colors.transparent,
+                        controller: firstName,
+                        prefix: Icon(
+                          Icons.person_3_outlined,
+                          size: 18.r,
+                          color: primaryPoint2,
+                        ),
+                        type: TextInputType.emailAddress,
+                        onValidate: (value) {
+                          if (value!.isEmpty) {
+                            f.showNewError("Invalid Name Provided", context);
+                            return '';
+                          }
+                          return null;
+                        },
+                        onSave: (value) => _authDetails["firstName"] = value!,
+                        hint: "First Name",
+                      ),
+                      SizedBox(height: 10.h),
+                      SpecialForm(
+                        width: 390.w,
+                        height: 40.h,
+                        fillColor: authFieldBackground,
+                        borderColor: Colors.transparent,
+                        controller: lastName,
+                        prefix: Icon(
+                          Icons.person_3_outlined,
+                          size: 18.r,
+                          color: primaryPoint2,
+                        ),
+                        type: TextInputType.emailAddress,
+                        onValidate: (value) {
+                          if (value!.isEmpty) {
+                            f.showNewError("Invalid Name Provided", context);
+                            return '';
+                          }
+                          return null;
+                        },
+                        onSave: (value) => _authDetails["lastName"] = value!,
+                        hint: "Last Name",
+                      ),
+                      SizedBox(height: 10.h),
+
                       SpecialForm(
                         width: 390.w,
                         height: 40.h,
@@ -183,9 +239,7 @@ class _SignupState extends ConsumerState<Signup> {
                         child: Text(
                           "Password must be at least 6 characters",
                           style: context.textTheme.bodySmall!.copyWith(
-                            color: !validPassword
-                                ? appRed
-                                : possibleGreen,
+                            color: !validPassword ? appRed : possibleGreen,
                           ),
                         ),
                       ),
@@ -227,16 +281,16 @@ class _SignupState extends ConsumerState<Signup> {
                         },
                         hint: "Confirm Password",
                       ),
-                      if(!passwordMatch)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Passwords do not match",
-                          style: context.textTheme.bodySmall!.copyWith(
-                            color: appRed,
+                      if (!passwordMatch)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Passwords do not match",
+                            style: context.textTheme.bodySmall!.copyWith(
+                              color: appRed,
+                            ),
                           ),
                         ),
-                      ),
                       SizedBox(
                         height: 40.h,
                       ),

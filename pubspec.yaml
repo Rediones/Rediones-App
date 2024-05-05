@@ -71,6 +71,7 @@ dependencies:
   curved_labeled_navigation_bar:
 
 
+  sqflite: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

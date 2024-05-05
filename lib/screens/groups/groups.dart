@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,10 +7,7 @@ import 'package:timeago/timeago.dart' as time;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:rediones/components/group_data.dart';
-import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/providers.dart';
-import 'package:rediones/components/user_data.dart';
-import 'package:rediones/screens/groups/group_home.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/widgets.dart';
 
@@ -72,7 +68,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage>
           onPressed: () => context.router.pop(),
         ),
         elevation: 0.0,
-        title: Text("Groups", style: context.textTheme.titleMedium),
+        title: Text("Groups", style: context.textTheme.titleLarge),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 15.w),
@@ -197,7 +193,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage>
 class _GroupDataContainer extends StatefulWidget {
   final GroupData data;
 
-  const _GroupDataContainer({super.key, required this.data});
+  const _GroupDataContainer({required this.data});
 
   @override
   State<_GroupDataContainer> createState() => _GroupDataContainerState();
@@ -290,7 +286,7 @@ class _GroupDataContainerState extends State<_GroupDataContainer> {
 class _ForYouContainer extends StatelessWidget {
   final GroupData data;
 
-  const _ForYouContainer({super.key, required this.data});
+  const _ForYouContainer({required this.data});
 
   @override
   Widget build(BuildContext context) {

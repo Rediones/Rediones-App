@@ -1,15 +1,8 @@
-import 'dart:developer';
-import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:rediones/components/post_data.dart';
-import 'package:rediones/api/file_handler.dart';
-import 'package:rediones/api/post_service.dart';
-import 'package:rediones/components/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
@@ -235,7 +228,7 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
 class _ChoiceData {
   late String value;
 
-  _ChoiceData({this.value = ""});
+  _ChoiceData();
 }
 
 class _ChoiceContainer extends StatefulWidget {
@@ -244,7 +237,6 @@ class _ChoiceContainer extends StatefulWidget {
   final VoidCallback listener;
 
   const _ChoiceContainer({
-    super.key,
     required this.choice,
     required this.onRemove,
     required this.listener,

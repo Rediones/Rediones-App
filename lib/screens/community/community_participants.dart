@@ -126,7 +126,7 @@ class _CommunityParticipantsPageState
 class _ParticipantContainer extends StatelessWidget {
   final User participant;
 
-  const _ParticipantContainer({super.key, required this.participant});
+  const _ParticipantContainer({required this.participant});
 
   @override
   Widget build(BuildContext context) {

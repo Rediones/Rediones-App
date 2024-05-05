@@ -1,14 +1,8 @@
-import 'dart:developer';
-import 'dart:io';
 
-import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:rediones/api/file_handler.dart';
-import 'package:rediones/api/spotlight_service.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/providers.dart';
 import 'package:rediones/tools/constants.dart';
@@ -20,7 +14,7 @@ import 'package:fijkplayer/fijkplayer.dart';
 
 
 class SpotlightPage extends ConsumerStatefulWidget {
-  const SpotlightPage({Key? key}) : super(key: key);
+  const SpotlightPage({super.key});
 
   @override
   ConsumerState<SpotlightPage> createState() => _SpotlightPageState();
@@ -73,7 +67,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
         children: [
           SizedBox(
             height: height,
-            child: fetching ? Center(child: loader) : PageView.builder(
+            child: fetching ? const Center(child: loader) : PageView.builder(
               onPageChanged: (index) {
                 if (index != 0) {
                   //controllers[index - 1].pause();

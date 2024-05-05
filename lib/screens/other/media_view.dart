@@ -13,8 +13,7 @@ class MediaViewPage extends StatefulWidget {
   final List<String> images;
   final List<String> video;
 
-  const MediaViewPage({Key? key, required this.images, required this.video})
-      : super(key: key);
+  const MediaViewPage({super.key, required this.images, required this.video});
 
   @override
   State<MediaViewPage> createState() => _MediaViewPageState();
@@ -148,9 +147,9 @@ class PreviewPictures extends StatefulWidget {
   final PreviewData data;
 
   const PreviewPictures({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<PreviewPictures> createState() => _PreviewPicturesState();

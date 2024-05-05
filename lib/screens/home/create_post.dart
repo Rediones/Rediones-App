@@ -1,8 +1,6 @@
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -177,7 +175,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
 }
 
 class _ChooseCategoryPage extends ConsumerStatefulWidget {
-  const _ChooseCategoryPage({Key? key}) : super(key: key);
+  const _ChooseCategoryPage();
 
   @override
   ConsumerState<_ChooseCategoryPage> createState() =>

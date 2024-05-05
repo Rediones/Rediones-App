@@ -10,7 +10,7 @@ import 'common.dart' show SpecialForm;
 class ProjectContainer extends StatelessWidget {
   final ProjectData data;
 
-  const ProjectContainer({Key? key, required this.data}) : super(key: key);
+  const ProjectContainer({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +215,7 @@ class TextFieldCombo extends StatefulWidget {
   final double height;
 
   const TextFieldCombo({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onChanged,
     required this.hint,
@@ -224,7 +224,7 @@ class TextFieldCombo extends StatefulWidget {
     this.onValidate,
     required this.width,
     required this.height,
-  }) : super(key: key);
+  });
 
   @override
   State<TextFieldCombo> createState() => _TextFieldComboState();

@@ -9,7 +9,6 @@ import 'package:rediones/screens/home/home.dart';
 import 'package:rediones/screens/notification/notification.dart';
 import 'package:rediones/screens/spotlight/spotlight.dart';
 import 'package:rediones/tools/constants.dart';
-import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class LandingPage extends ConsumerStatefulWidget {

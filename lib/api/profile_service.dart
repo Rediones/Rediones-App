@@ -43,11 +43,11 @@ Future<RedionesResponse<User?>> authenticate(
     log(res);
     if (res.contains("403")) {
       return RedionesResponse(
-          message: !isLogin
-              ? "This username or email already exists"
-              : "Incorrect password",
-          payload: null,
-          status: Status.failed,
+        message: !isLogin
+            ? "This username or email already exists"
+            : "Incorrect password",
+        payload: null,
+        status: Status.failed,
       );
     }
 
@@ -90,11 +90,16 @@ Future<RedionesResponse> followUser(String userID) async {
   );
 }
 
-Future<RedionesResponse<User>> updateUser(
-    User oldUser, Map<String, dynamic> data) async {
+Future<RedionesResponse<User?>> updateUser(Map<String, dynamic> data) async {
+  log(accessToken!);
+  log(data.toString());
+
   try {
-    Response response = await dio.patch("/auth/update-profile",
-        data: data, options: configuration(accessToken!));
+    Response response = await dio.patch(
+      "/auth/update-profile",
+      data: data,
+      options: configuration(accessToken!),
+    );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       Map<String, dynamic> processedUser =
@@ -105,12 +110,12 @@ Future<RedionesResponse<User>> updateUser(
           message: "Successful", payload: user, status: Status.success);
     }
   } catch (e) {
-    log(e.toString());
+    log("Update User Error: $e");
   }
 
-  return RedionesResponse(
+  return const RedionesResponse(
     message: "An error occurred. Please try again later.",
-    payload: oldUser,
+    payload: null,
     status: Status.failed,
   );
 }
@@ -124,15 +129,16 @@ List<String> fromArrayString(List<dynamic> data) {
 }
 
 void processUser(Map<String, dynamic> data) {
+  data["profilePicture"] ??= "https://gravatar.com/avatar/${data["_id"].hashCode.toString()}?s=400&d=robohash&r=x";
+
   data["following"] = fromArrayString(data["following"]);
   data["followers"] = fromArrayString(data["followers"]);
   data["saved"] = fromArrayString(data["saved"]);
 }
 
-
 List<User> processUsers(List<dynamic> list) {
   List<User> result = [];
-  for(Map<String, dynamic> element in list) {
+  for (Map<String, dynamic> element in list) {
     processUser(element);
     User user = User.fromJson(element);
     result.add(user);

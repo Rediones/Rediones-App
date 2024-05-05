@@ -1,6 +1,5 @@
 import 'package:rediones/components/group_data.dart';
 import 'package:rediones/components/post_data.dart';
-import 'package:rediones/components/user_data.dart';
 import 'base.dart';
 import 'package:rediones/api/profile_service.dart';
 import 'post_service.dart';
