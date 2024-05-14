@@ -41,6 +41,10 @@ class _HomeState extends ConsumerState<Home> {
   void fetchPosts() => getPosts().then((response) {
         if (!mounted) return;
 
+        if(ref.watch(createdProfileProvider)) {
+          ref.watch(createdProfileProvider.notifier).state = false;
+        }
+
         List<Post> p = response.payload;
         if (response.status == Status.failed) {
           showToast(response.message);
@@ -74,9 +78,11 @@ class _HomeState extends ConsumerState<Home> {
     if(ref.read(createdProfileProvider)) {
       fetchPosts();
     }
+
+    //_assignInitialPosts();
   }
 
-  Future<void> _assignInitialPosts(String value) async {
+  Future<void> _assignInitialPosts() async {
     final PostRepository repository = GetIt.I.get();
     List<Post> posts = await repository.getAll();
     ref.watch(postsProvider.notifier).state.addAll(posts);

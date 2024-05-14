@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,39 +100,44 @@ class _RedionesState extends ConsumerState<Rediones>
     );
   }
 
+
+
+  Future<void> _savePosts(List<Post> posts) async {
+    final PostRepository postRepository = GetIt.I.get();
+    if (posts.isNotEmpty) {
+      postRepository.deleteAll();
+      postRepository.addAll(posts);
+    }
+  }
+
+  Future<void> _saveUser(User user) async {
+    final UserRepository userRepository = GetIt.I.get();
+    if (user != dummyUser) {
+      userRepository.updateByIdAndColumn(user.id, "serverID", user);
+    }
+  }
+
+  Future<List<Post>> _loadPosts(String message) async {
+    final PostRepository postRepository = GetIt.I.get();
+    return postRepository.getAll();
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
-      final PostRepository postRepository = GetIt.I.get();
       final List<Post> posts = ref.watch(postsProvider);
-      log("Pausing with ${posts.length}");
-
-      if (posts.isNotEmpty) {
-        postRepository.deleteAll();
-        postRepository.addAll(posts);
-      }
-
-      final UserRepository userRepository = GetIt.I.get();
       final User user = ref.watch(userProvider);
-      // if (user != dummyUser) {
-      //   userRepository.update(user.id, user);
-      // }
+      log("Pausing with ${posts.length} posts");
+      await compute(_savePosts, posts);
+      await compute(_saveUser, user);
     } else if (state == AppLifecycleState.resumed) {
-      final PostRepository postRepository = GetIt.I.get();
-      List<Post> posts = await postRepository.getAll();
+      List<Post> posts = await compute(_loadPosts, "");
       log("Resuming with ${posts.length}");
-
       if (posts.isNotEmpty) {
         ref.watch(postsProvider).clear();
         ref.watch(postsProvider).addAll(posts);
       }
-
-      // final UserRepository userRepository = GetIt.I.get();
-      // final User user = userRepository;
-      // if (user != dummyUser) {
-      //   userRepository.updateUser(user);
-      // }
     }
   }
 }
