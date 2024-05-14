@@ -15,7 +15,6 @@ class User extends Equatable {
   final String address;
   final String description;
   final String gender;
-  final String level;
 
   const User({
     required this.id,
@@ -32,7 +31,6 @@ class User extends Equatable {
     this.address = "",
     this.description = "",
     this.school = "",
-    this.level = "",
   });
 
   String get username => "$firstName $lastName";
@@ -59,7 +57,7 @@ class User extends Equatable {
       description: map["bio"],
       school: map["schoolAddress"] ?? "",
       gender: map["gender"] ?? "",
-      level: map["level"] ?? "");
+  );
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -73,7 +71,6 @@ class User extends Equatable {
         'address': address,
         'description': description,
         'gender': gender,
-        'level': level,
         'followers': followers,
         'following': following,
         'saved': []

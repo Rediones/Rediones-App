@@ -29,7 +29,6 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
   final TextEditingController bioController = TextEditingController();
   final TextEditingController schoolController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
-  final TextEditingController levelController = TextEditingController();
 
   String? gender;
 
@@ -58,8 +57,20 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
     bioController.text = user.description;
     usernameController.text = user.nickname;
     schoolController.text = user.school;
-    levelController.text = user.level;
     gender = user.gender.isEmpty ? null : user.gender;
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    otherNameController.dispose();
+    addressController.dispose();
+    bioController.dispose();
+    usernameController.dispose();
+    schoolController.dispose();
+    super.dispose();
   }
 
   void navigate(RedionesResponse<User?> result) {

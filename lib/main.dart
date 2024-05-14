@@ -32,8 +32,7 @@ void main() async {
   c.currentCamera = 0;
 
   await ScreenUtil.ensureScreenSize();
-
-  await DatabaseManager.initialize();
+  await DatabaseManager.init();
 
   runApp(const ProviderScope(child: Rediones()));
 }
@@ -109,18 +108,18 @@ class _RedionesState extends ConsumerState<Rediones>
       log("Pausing with ${posts.length}");
 
       if (posts.isNotEmpty) {
-        postRepository.clearAll();
-        postRepository.addPosts(posts);
+        postRepository.deleteAll();
+        postRepository.addAll(posts);
       }
 
       final UserRepository userRepository = GetIt.I.get();
       final User user = ref.watch(userProvider);
-      if (user != dummyUser) {
-        userRepository.updateUser(user);
-      }
+      // if (user != dummyUser) {
+      //   userRepository.update(user.id, user);
+      // }
     } else if (state == AppLifecycleState.resumed) {
       final PostRepository postRepository = GetIt.I.get();
-      final List<Post> posts = await postRepository.getAllPosts();
+      List<Post> posts = await postRepository.getAll();
       log("Resuming with ${posts.length}");
 
       if (posts.isNotEmpty) {

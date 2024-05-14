@@ -14,7 +14,6 @@ Future<RedionesResponse<User?>> authenticate(
   try {
     Response response = await dio.post(
       "/auth/${isLogin ? "sign-in" : "sign-up"}",
-      // "/search?q=Hello",
       data: authDetails,
     );
 
@@ -40,7 +39,7 @@ Future<RedionesResponse<User?>> authenticate(
     }
   } catch (e) {
     String res = e.toString();
-    log(res);
+    log("Auth Error: $e");
     if (res.contains("403")) {
       return RedionesResponse(
         message: !isLogin
@@ -50,12 +49,6 @@ Future<RedionesResponse<User?>> authenticate(
         status: Status.failed,
       );
     }
-
-    return RedionesResponse(
-      message: e.toString(),
-      payload: null,
-      status: Status.failed,
-    );
   }
 
   return const RedionesResponse(

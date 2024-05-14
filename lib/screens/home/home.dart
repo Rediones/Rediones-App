@@ -78,7 +78,7 @@ class _HomeState extends ConsumerState<Home> {
 
   Future<void> _assignInitialPosts(String value) async {
     final PostRepository repository = GetIt.I.get();
-    List<Post> posts = await repository.getAllPosts();
+    List<Post> posts = await repository.getAll();
     ref.watch(postsProvider.notifier).state.addAll(posts);
   }
 

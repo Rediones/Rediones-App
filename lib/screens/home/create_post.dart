@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:rediones/components/post_data.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/providers.dart';
@@ -27,7 +26,6 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
 
   String? visibility;
 
-  PostCategory? postCategory;
   String? title;
   List<dynamic>? icon;
 
@@ -168,63 +166,6 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ChooseCategoryPage extends ConsumerStatefulWidget {
-  const _ChooseCategoryPage();
-
-  @override
-  ConsumerState<_ChooseCategoryPage> createState() =>
-      _ChooseCategoryPageState();
-}
-
-class _ChooseCategoryPageState extends ConsumerState<_ChooseCategoryPage> {
-  late List<PostCategory> postKeys;
-
-  @override
-  void initState() {
-    super.initState();
-    Map<PostCategory, Map<String, List<dynamic>>> postCategories =
-        ref.read(postCategoryProvider);
-    postKeys = postCategories.keys.toList();
-    postKeys.removeAt(0);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Map<PostCategory, Map<String, List<dynamic>>> postCategories =
-        ref.watch(postCategoryProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.chevron_left, size: 26.r),
-          onPressed: () => Navigator.pop(context),
-        ),
-        elevation: 0.0,
-        centerTitle: true,
-        title: Text(
-          "Post Category",
-          style: context.textTheme.headlineSmall,
-        ),
-      ),
-      body: SafeArea(
-        child: ListView.builder(
-          itemBuilder: (context, index) {
-            String title = postCategories[postKeys[index]]!.keys.first;
-            List<dynamic> icon = postCategories[postKeys[index]]![title]!;
-            return ListTile(
-              contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
-              leading: Icon(icon[0], color: icon[1], size: 18.r),
-              title: Text(title, style: context.textTheme.bodyMedium),
-              onTap: () => Navigator.pop(context, postKeys[index]),
-            );
-          },
-          itemCount: postKeys.length,
         ),
       ),
     );

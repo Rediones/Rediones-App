@@ -1,38 +1,72 @@
-import 'package:get_it/get_it.dart';
-import 'package:sembast/sembast.dart';
-
 import 'package:rediones/components/post_data.dart';
+import 'package:rediones/repositories/base_repository.dart';
+import 'package:rediones/repositories/string_list_repository.dart';
+import 'package:rediones/repositories/user_repository.dart';
 
-class PostRepository {
-  final Database _database = GetIt.I.get();
-  final StoreRef _store = stringMapStoreFactory.store("post_store");
+class PostRepository extends BaseRepository<Post> {
 
-  Future addPost(Post post) async {
-    return await _store.record(post.id).add(_database, post.toJson());
+  static const String postsTable = "Posts";
+
+  static const String mediaTable = "PostMedia";
+  static const String likesTable = "PostLikes";
+
+  final StringListModelRepository mediaRepository =
+      StringListModelRepository(tableName: mediaTable);
+  final StringListModelRepository likesRepository =
+      StringListModelRepository(tableName: likesTable);
+
+  final UserRepository userRepository = UserRepository();
+
+  @override
+  String get table => postsTable;
+
+  @override
+  Future<Post> fromJson(Map<String, dynamic> map) async {
+    var response = await mediaRepository.getAll(
+        where: "${StringListModel.referenceColumn} = ?",
+        whereArgs: [map["serverID"]]);
+    List<String> media = response.map((resp) => resp.value).toList();
+
+    response = await likesRepository.getAll(
+        where: "${StringListModel.referenceColumn} = ?",
+        whereArgs: [map["serverID"]]);
+    List<String> likes = response.map((resp) => resp.value).toList();
+
+    var poster = await userRepository.getById(map["posterID"]);
+
+    return Post(
+      text: map["content"],
+      id: map["serverID"],
+      shares: map["shares"],
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map["createdAt"]),
+      media: media,
+      likes: likes,
+      poster: poster!,
+    );
   }
 
-  Future addPosts(List<Post> posts) async {
-    return await _store.records(posts.map((post) => post.id)).add(
-        _database, posts.map((post) => post.toJson()).toList(growable: false));
+  @override
+  Future<Map<String, dynamic>> toJson(Post value) async {
+
+    var response = value.likes.map((val) => StringListModel(referenceID: value.id, value: val)).toList();
+    await likesRepository.addAll(response);
+
+    response = value.media.map((val) => StringListModel(referenceID: value.id, value: val)).toList();
+    await mediaRepository.addAll(response);
+
+    userRepository.add(value.poster);
+
+    return {
+      'content': value.text,
+      'serverID': value.id,
+      'shares': value.shares,
+      'createdAt': value.timestamp.millisecondsSinceEpoch,
+      'posterID': value.poster.id,
+    };
   }
 
-  Future updateCake(Post post) async {
-    await _store.record(post.id).update(_database, post.toJson());
-  }
-
-  Future deletePost(String postId) async {
-    await _store.record(postId).delete(_database);
-  }
-
-  Future clearAll() async {
-    await _store.drop(_database);
-  }
-
-  Future<List<Post>> getAllPosts() async {
-    final snapshots = await _store.find(_database);
-    return snapshots
-        .map(
-            (snapshot) => Post.fromJson(snapshot.value as Map<String, dynamic>))
-        .toList(growable: false);
+  Future<Post?> getById(String id) async {
+    Post? post = await super.getByIdAndColumn("serverID", id);
+    return post;
   }
 }

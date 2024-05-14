@@ -248,27 +248,12 @@ final StateProvider<List<String>> communityCategoriesProvider = StateProvider(
   ],
 );
 
-final StateProvider<Map<PostCategory, Map<String, List<dynamic>>>>
-    postCategoryProvider = StateProvider((ref) => {
-          PostCategory.none: {"": []},
-          PostCategory.personal: {
-            "Personal": [Icons.stacked_bar_chart_rounded, niceBlue]
-          },
-          PostCategory.life: {
-            "Life": [Icons.favorite_outlined, possibleGreen]
-          },
-          PostCategory.travel: {
-            "Travel": [Icons.travel_explore_rounded, goodYellow]
-          }
-        });
-
 final List<Post> dummyPosts = List.generate(
   4,
   (index) => Post(
     poster: dummyUser,
     id: "Dummy Post ID: $index",
     text: loremIpsum,
-    postCategory: 0,
     timestamp: DateTime(1900),
     shares: 0,
   ),

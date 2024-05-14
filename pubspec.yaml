@@ -55,7 +55,7 @@ dependencies:
   crop_image:
   skeletonizer:
   path:
-  sembast:
+  sqflite:
   get_it:
   is_lock_screen:
   fluttertoast:
@@ -68,10 +68,8 @@ dependencies:
   is_first_run:
   awesome_dialog:
   awesome_notifications:
-  curved_labeled_navigation_bar:
 
 
-  sqflite: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
