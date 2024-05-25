@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:rediones/repositories/conversation_repository.dart';
 import 'package:rediones/repositories/messages_repository.dart';
+import 'package:rediones/repositories/poll_repository.dart';
+import 'package:rediones/repositories/post_object_repository.dart';
 import 'package:rediones/repositories/post_repository.dart';
 import 'package:rediones/repositories/string_list_repository.dart';
 import 'package:rediones/repositories/user_repository.dart';
@@ -41,6 +43,18 @@ class DatabaseManager {
  ''');
 
         await db.execute('''
+   CREATE TABLE ${PollRepository.pollsTable} (
+     id INTEGER PRIMARY KEY AUTOINCREMENT,
+     serverID TEXT NOT NULL,
+     votes INTEGER NOT NULL,
+     content TEXT NOT NULL,
+     shares INTEGER NOT NULL,
+     createdAt INTEGER NOT NULL,
+     posterID TEXT NOT NULL
+   )
+ ''');
+
+        await db.execute('''
     CREATE TABLE ${UserRepository.followerTable} (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ${StringListModel.referenceColumn} TEXT NOT NULL,
@@ -66,6 +80,14 @@ class DatabaseManager {
 
         await db.execute('''
     CREATE TABLE ${PostRepository.likesTable} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ${StringListModel.referenceColumn} TEXT NOT NULL,
+      ${StringListModel.valueColumn} TEXT NOT NULL
+    )
+ ''');
+
+        await db.execute('''
+    CREATE TABLE ${PollRepository.likesTable} (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ${StringListModel.referenceColumn} TEXT NOT NULL,
       ${StringListModel.valueColumn} TEXT NOT NULL
@@ -104,8 +126,10 @@ class DatabaseManager {
       },
     );
     GetIt.I.registerSingleton<Database>(database);
-    GetIt.I.registerLazySingleton<PostRepository>(() => PostRepository());
     GetIt.I.registerLazySingleton<UserRepository>(() => UserRepository());
+    GetIt.I.registerLazySingleton<PostRepository>(() => PostRepository());
+    GetIt.I.registerLazySingleton<PollRepository>(() => PollRepository());
+    GetIt.I.registerLazySingleton<PostObjectRepository>(() => PostObjectRepository());
     GetIt.I.registerLazySingleton<ConversationRepository>(
         () => ConversationRepository());
     GetIt.I.registerLazySingleton<MessageRepository>(() => MessageRepository());

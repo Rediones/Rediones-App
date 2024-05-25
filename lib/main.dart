@@ -8,8 +8,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/repositories/conversation_repository.dart';
 import 'package:rediones/repositories/messages_repository.dart';
+import 'package:rediones/repositories/post_object_repository.dart';
 
 import 'api/file_handler.dart';
 
@@ -102,9 +104,9 @@ class _RedionesState extends ConsumerState<Rediones>
     );
   }
 
-  Future<void> _savePosts(List<Post> posts) async {
-    final PostRepository postRepository = GetIt.I.get();
-    postRepository.clearAllAndAddAll(posts);
+  Future<void> _savePosts(List<PostObject> posts) async {
+    final PostObjectRepository repository = GetIt.I.get();
+    await repository.clearAllAndAddAll(posts);
   }
 
   Future<void> _saveUser(User user) async {
@@ -124,9 +126,9 @@ class _RedionesState extends ConsumerState<Rediones>
     return null;
   }
 
-  Future<List<Post>> _loadPosts() async {
-    final PostRepository postRepository = GetIt.I.get();
-    return postRepository.getAll();
+  Future<List<PostObject>> _loadPosts() async {
+    final PostObjectRepository repository = GetIt.I.get();
+    return repository.getAll();
   }
 
   Future<void> _saveConversations(List<Conversation> conversations) async {
@@ -144,7 +146,7 @@ class _RedionesState extends ConsumerState<Rediones>
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
 
-      final List<Post> posts = ref.watch(postsProvider);
+      final List<PostObject> posts = ref.watch(postsProvider);
       final List<Conversation> conversations = ref.watch(conversationsProvider);
 
       final User user = ref.watch(userProvider);
@@ -155,7 +157,7 @@ class _RedionesState extends ConsumerState<Rediones>
 
     } else if (state == AppLifecycleState.resumed) {
 
-      List<Post> posts = await _loadPosts();
+      List<PostObject> posts = await _loadPosts();
       ref.watch(postsProvider).clear();
       ref.watch(postsProvider).addAll(posts);
 

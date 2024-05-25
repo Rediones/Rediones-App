@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
@@ -14,13 +13,12 @@ import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/providers.dart';
-import 'package:rediones/repositories/post_repository.dart';
+import 'package:rediones/repositories/post_object_repository.dart';
+import 'package:rediones/screens/home/comments.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' show showToast, unFocus;
 import 'package:rediones/tools/widgets.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-
-import 'package:rediones/screens/home/comments.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
@@ -59,7 +57,7 @@ class _HomeState extends ConsumerState<Home> {
     posts.clear();
     posts.addAll(p);
 
-    final PostRepository repository = GetIt.I.get();
+    final PostObjectRepository repository = GetIt.I.get();
     repository.clearAllAndAddAll(p);
 
     setState(() => loading = false);
@@ -83,7 +81,7 @@ class _HomeState extends ConsumerState<Home> {
   }
 
   Future<void> getLocalPosts() async {
-    final PostRepository repository = GetIt.I.get();
+    final PostObjectRepository repository = GetIt.I.get();
     List<PostObject> posts = await repository.getAll();
     if (posts.isEmpty) {
       fetchPosts();
