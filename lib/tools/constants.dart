@@ -21,6 +21,7 @@ const Color primaryPoint2 = Color.fromRGBO(0, 0, 0, 0.2);
 const Color primaryPoint6 = Color.fromRGBO(0, 0, 0, 0.6);
 const Color gray = Color(0xFF808080);
 const Color gray2 = Color.fromRGBO(65, 65, 65, 0.5);
+const Color gray3 = Color(0xFFD9D9D9);
 const Color border = Color.fromRGBO(31, 31, 31, 0.15);
 
 const Color authFieldBackground = Color.fromRGBO(242, 242, 242, 0.7);

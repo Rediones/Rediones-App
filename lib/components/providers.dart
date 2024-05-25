@@ -11,6 +11,7 @@ import 'package:rediones/components/notification_data.dart';
 import 'package:rediones/components/pocket_data.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/post_data.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/project_data.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/user_data.dart';
@@ -23,7 +24,7 @@ import 'community_data.dart';
 const User dummyUser = User(id: "dummy");
 final StateProvider<User> userProvider = StateProvider((ref) => dummyUser);
 
-final StateProvider<List<Post>> postsProvider = StateProvider((ref) => []);
+final StateProvider<List<PostObject>> postsProvider = StateProvider((ref) => []);
 
 final StateProvider<List<SpotlightData>> spotlightsProvider =
     StateProvider((ref) => []);

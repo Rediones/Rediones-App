@@ -10,7 +10,9 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rediones/api/post_service.dart';
+import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/providers.dart';
 import 'package:rediones/repositories/post_repository.dart';
 import 'package:rediones/tools/constants.dart';
@@ -46,14 +48,14 @@ class _HomeState extends ConsumerState<Home> {
       ref.watch(createdProfileProvider.notifier).state = false;
     }
 
-    List<Post> p = response.payload;
+    List<PostObject> p = response.payload;
     if (response.status == Status.failed) {
       showToast(response.message);
       setState(() => loading = false);
       return;
     }
 
-    List<Post> posts = ref.watch(postsProvider.notifier).state;
+    List<PostObject> posts = ref.watch(postsProvider.notifier).state;
     posts.clear();
     posts.addAll(p);
 
@@ -82,7 +84,7 @@ class _HomeState extends ConsumerState<Home> {
 
   Future<void> getLocalPosts() async {
     final PostRepository repository = GetIt.I.get();
-    List<Post> posts = await repository.getAll();
+    List<PostObject> posts = await repository.getAll();
     if (posts.isEmpty) {
       fetchPosts();
     } else {
@@ -116,9 +118,30 @@ class _HomeState extends ConsumerState<Home> {
     fetchPosts();
   }
 
+  Widget child(PostObject object) {
+    if (object is Post) {
+      return PostContainer(
+        post: object,
+        onCommentClicked: () => onCommentClicked(
+          object.id,
+          getComments(object.id),
+        ),
+      );
+    } else if (object is PollData) {
+      return PollContainer(
+        poll: object,
+        onCommentClicked: () => onCommentClicked(
+          object.id,
+          getComments(object.id),
+        ),
+      );
+    }
+    return const SizedBox();
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<Post> posts = ref.watch(postsProvider);
+    List<PostObject> posts = ref.watch(postsProvider);
     String profilePicture =
         ref.watch(userProvider.select((value) => value.profilePicture));
     String username = ref.watch(userProvider.select((value) => value.username));
@@ -381,22 +404,14 @@ class _HomeState extends ConsumerState<Home> {
                               return SizedBox(height: 100.h);
                             }
 
-                            Post post = posts[index - 1];
+                            PostObject post = posts[index - 1];
 
                             return AnimationConfiguration.staggeredList(
                               position: index,
                               duration: const Duration(milliseconds: 750),
                               child: SlideAnimation(
                                 verticalOffset: 25.h,
-                                child: FadeInAnimation(
-                                  child: PostContainer(
-                                    post: post,
-                                    onCommentClicked: () => onCommentClicked(
-                                      post.id,
-                                      getComments(post.id),
-                                    ),
-                                  ),
-                                ),
+                                child: FadeInAnimation(child: child(post)),
                               ),
                             );
                           },

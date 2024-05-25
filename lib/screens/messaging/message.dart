@@ -82,6 +82,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
       fetchConversations();
     } else {
       ref.watch(conversationsProvider.notifier).state.addAll(c);
+      fetchConversations();
       setState(() => loadingConversations = false);
     }
   }
