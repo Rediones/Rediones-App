@@ -46,6 +46,11 @@ abstract class BaseRepository<T> {
     );
   }
 
+  Future<void> clearAllAndAddAll(List<T> t) async {
+    await deleteAll();
+    await addAll(t);
+  }
+
   Future<void> deleteAll() async {
     await _database.delete(table);
   }

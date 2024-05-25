@@ -41,7 +41,7 @@ class _HomeState extends ConsumerState<Home> {
   void fetchPosts() => getPosts().then((response) {
         if (!mounted) return;
 
-        if(ref.watch(createdProfileProvider)) {
+        if (ref.watch(createdProfileProvider)) {
           ref.watch(createdProfileProvider.notifier).state = false;
         }
 
@@ -58,9 +58,8 @@ class _HomeState extends ConsumerState<Home> {
         posts.clear();
         posts.addAll(p);
 
-        // final PostRepository repository = GetIt.I.get();
-        // repository.clearAll();
-        // repository.addPosts(p);
+        final PostRepository repository = GetIt.I.get();
+        repository.clearAllAndAddAll(p);
 
         setState(() => loading = false);
       });
@@ -75,17 +74,22 @@ class _HomeState extends ConsumerState<Home> {
       }
     });
 
-    if(ref.read(createdProfileProvider)) {
+    if (ref.read(createdProfileProvider)) {
       fetchPosts();
     }
 
-    //_assignInitialPosts();
+    _assignInitialPosts();
   }
 
   Future<void> _assignInitialPosts() async {
     final PostRepository repository = GetIt.I.get();
     List<Post> posts = await repository.getAll();
-    ref.watch(postsProvider.notifier).state.addAll(posts);
+    if (posts.isEmpty) {
+      fetchPosts();
+    } else {
+      ref.watch(postsProvider.notifier).state.addAll(posts);
+      setState(() => loading = false);
+    }
   }
 
   @override
@@ -115,9 +119,6 @@ class _HomeState extends ConsumerState<Home> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(isLoggedInProvider, (previous, next) => fetchPosts());
-
-
     List<Post> posts = ref.watch(postsProvider);
     String profilePicture =
         ref.watch(userProvider.select((value) => value.profilePicture));

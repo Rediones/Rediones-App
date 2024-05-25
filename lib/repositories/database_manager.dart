@@ -8,6 +8,7 @@ class DatabaseManager {
   static Future<void> init() async {
     Database database = await openDatabase(
       "rediones.db",
+      version: 1,
       onCreate: (db, version) async {
         await db.execute('''
    CREATE TABLE ${UserRepository.userTable} (

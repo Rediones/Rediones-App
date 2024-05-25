@@ -202,7 +202,8 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                                 return const Dialog(
                                     backgroundColor: Colors.transparent,
                                     elevation: 0,
-                                    child: CenteredPopup());
+                                    child: CenteredPopup(),
+                                );
                               },
                             ),
                       );
@@ -226,9 +227,8 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
 }
 
 class _ChoiceData {
-  late String value;
-
-  _ChoiceData();
+  final String value;
+  _ChoiceData({this.value = ""});
 }
 
 class _ChoiceContainer extends StatefulWidget {

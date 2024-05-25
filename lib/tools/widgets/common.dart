@@ -208,7 +208,7 @@ class SpecialForm extends StatelessWidget {
           hintText: hint,
           hintStyle: hintStyle ??
               context.textTheme.bodyLarge!
-                  .copyWith(fontWeight: FontWeight.w500, color: context.isDark ? offWhite : primaryPoint6),
+                  .copyWith(fontWeight: FontWeight.w500, color: context.isDark ? Colors.white54 : primaryPoint6),
         ),
         onChanged: (value) {
           if (onChange == null) return;

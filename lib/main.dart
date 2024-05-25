@@ -117,7 +117,7 @@ class _RedionesState extends ConsumerState<Rediones>
     }
   }
 
-  Future<List<Post>> _loadPosts(String message) async {
+  Future<List<Post>> _loadPosts() async {
     final PostRepository postRepository = GetIt.I.get();
     return postRepository.getAll();
   }
@@ -129,10 +129,10 @@ class _RedionesState extends ConsumerState<Rediones>
       final List<Post> posts = ref.watch(postsProvider);
       final User user = ref.watch(userProvider);
       log("Pausing with ${posts.length} posts");
-      await compute(_savePosts, posts);
-      await compute(_saveUser, user);
+      await _savePosts(posts);
+      await _saveUser(user);
     } else if (state == AppLifecycleState.resumed) {
-      List<Post> posts = await compute(_loadPosts, "");
+      List<Post> posts = await _loadPosts();
       log("Resuming with ${posts.length}");
       if (posts.isNotEmpty) {
         ref.watch(postsProvider).clear();
