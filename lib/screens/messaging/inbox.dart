@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:chatview/chatview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
+import 'package:uuid/uuid.dart';
 import 'package:rediones/api/message_service.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
+import 'package:rediones/repositories/messages_repository.dart';
 
 class Inbox extends ConsumerStatefulWidget {
   final Conversation details;
@@ -29,7 +33,9 @@ class _InboxState extends ConsumerState<Inbox> {
   late String currentUserID, otherID, conversationID;
   late User otherUser;
 
-  bool loading = true;
+  bool loading = true, hasError = false;
+
+  final Uuid uuid = const Uuid();
 
   @override
   void initState() {
@@ -61,20 +67,68 @@ class _InboxState extends ConsumerState<Inbox> {
       scrollController: ScrollController(),
       chatUsers: users,
     );
+  }
 
-    getMessagesFor(conversationID, otherID).then((response) {
-      for (MessageData data in response) {
-        messageList.add(
-          Message(
-            id: data.id,
-            createdAt: data.timestamp,
-            message: data.content,
-            sendBy: data.sender,
+  Future<void> getLocalMessages() async {
+    final MessageRepository messageRepository = GetIt.I.get();
+    List<MessageData> msgs =
+        await messageRepository.getMessagesWith(conversationID);
+    if (msgs.isEmpty) {
+      fetchMessages();
+    } else {
+      assignMessages(msgs);
+      fetchMessages();
+    }
+  }
+
+  void assignMessages(List<MessageData> messages,
+      {bool online = false, bool consistent = true}) {
+    List<Message> msgs = messages
+        .map(
+          (msg) => Message(
+            message: msg.content,
+            createdAt: msg.timestamp,
+            sendBy: msg.sender,
+            id: msg.id,
           ),
-        );
+        )
+        .toList();
+
+    if (online) {
+      chatController.clearMessages();
+    }
+
+    chatController.addAll(msgs);
+    setState(() {
+      if (!online) {
+        loading = false;
+        hasError = false;
       }
-      setState(() => loading = false);
     });
+  }
+
+  Future<void> fetchMessages() async {
+    var response = await getMessagesFor(conversationID, otherID);
+    if (!mounted) return;
+
+    if (response.status == Status.failed) {
+      showError(response.message);
+      setState(() {
+        loading = false;
+        hasError = true;
+      });
+      return;
+    }
+
+    bool consistent = true;
+    if (response.payload.length != chatController.numberOfMessages) {
+      final MessageRepository messageRepository = GetIt.I.get();
+      messageRepository.deleteAllWhere(where: "conversationID = ?", whereArgs: [conversationID]);
+      messageRepository.addAll(response.payload);
+      consistent = false;
+    }
+
+    assignMessages(response.payload, online: true, consistent: consistent);
   }
 
   @override
@@ -85,25 +139,28 @@ class _InboxState extends ConsumerState<Inbox> {
 
   void onSendTap(
       String rawMessage, ReplyMessage replyMessage, MessageType messageType) {
+    final message = Message(
+      id: uuid.v4(),
+      message: rawMessage,
+      createdAt: DateTime.now(),
+      sendBy: currentUserID,
+      replyMessage: replyMessage,
+      messageType: messageType,
+    );
+    chatController.addMessage(message);
+
     sendMessage(
       MessageData(
         timestamp: DateTime.now(),
-        id: "",
+        id: uuid.v4(),
         content: rawMessage,
         sender: currentUserID,
         conversationID: conversationID,
       ),
     ).then((resp) {
       if (resp.payload == null) return;
-      final message = Message(
-        id: resp.payload!.id,
-        message: resp.payload!.content,
-        createdAt: resp.payload!.timestamp,
-        sendBy: currentUserID,
-        replyMessage: replyMessage,
-        messageType: messageType,
-      );
-      chatController.addMessage(message);
+      final MessageRepository messageRepository = GetIt.I.get();
+      messageRepository.add(resp.payload!);
     });
   }
 
@@ -116,7 +173,8 @@ class _InboxState extends ConsumerState<Inbox> {
           chatController: chatController,
           appBar: ChatViewAppBar(
             elevation: 0.0,
-            backGroundColor: context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
+            backGroundColor:
+                context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
             leading: IconButton(
               iconSize: 26.r,
               splashRadius: 20.r,
@@ -143,7 +201,8 @@ class _InboxState extends ConsumerState<Inbox> {
           onSendTap: onSendTap,
           chatViewState: ChatViewState.hasMessages,
           chatBackgroundConfig: ChatBackgroundConfiguration(
-              backgroundColor: context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
+            backgroundColor:
+                context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
           ),
           // Add this state once data is available.
           featureActiveConfig: const FeatureActiveConfig(
@@ -158,7 +217,8 @@ class _InboxState extends ConsumerState<Inbox> {
             closeIconColor: context.isDark ? theme : primary,
             allowRecordingVoice: false,
             defaultSendButtonColor: appRed,
-            textFieldBackgroundColor: context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
+            textFieldBackgroundColor:
+                context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
             textFieldConfig: TextFieldConfiguration(
               textStyle: context.textTheme.bodyMedium!,
             ),
@@ -173,22 +233,20 @@ class _InboxState extends ConsumerState<Inbox> {
                 topLeft: Radius.circular(12),
                 bottomLeft: Radius.circular(12),
               ),
-              textStyle: context.textTheme.bodyMedium!.copyWith(
-                  color: theme,
-                  fontWeight: FontWeight.w500),
+              textStyle: context.textTheme.bodyMedium!
+                  .copyWith(color: theme, fontWeight: FontWeight.w500),
               color: appRed,
             ),
             inComingChatBubbleConfig: ChatBubble(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-              ),
-              textStyle: context.textTheme.bodyMedium!.copyWith(
-                  color: context.isDark ? theme : midPrimary,
-                  fontWeight: FontWeight.w500),
-              color: context.isDark ? primary : theme
-            ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+                textStyle: context.textTheme.bodyMedium!.copyWith(
+                    color: context.isDark ? theme : midPrimary,
+                    fontWeight: FontWeight.w500),
+                color: context.isDark ? primary : theme),
           ),
           loadingWidget: loader,
         ),

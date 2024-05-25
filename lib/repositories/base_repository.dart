@@ -51,6 +51,14 @@ abstract class BaseRepository<T> {
     await addAll(t);
   }
 
+  Future<void> deleteAllWhere({String where = "", List<String> whereArgs = const []}) async {
+    await _database.delete(
+      table,
+      where: where,
+      whereArgs: whereArgs,
+    );
+  }
+
   Future<void> deleteAll() async {
     await _database.delete(table);
   }

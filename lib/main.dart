@@ -9,6 +9,7 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rediones/repositories/conversation_repository.dart';
+import 'package:rediones/repositories/messages_repository.dart';
 
 import 'api/file_handler.dart';
 
@@ -145,6 +146,7 @@ class _RedionesState extends ConsumerState<Rediones>
 
       final List<Post> posts = ref.watch(postsProvider);
       final List<Conversation> conversations = ref.watch(conversationsProvider);
+
       final User user = ref.watch(userProvider);
 
       await _savePosts(posts);

@@ -68,6 +68,7 @@ dependencies:
   is_first_run:
   awesome_dialog:
   awesome_notifications:
+  uuid:
 
 
 dev_dependencies:

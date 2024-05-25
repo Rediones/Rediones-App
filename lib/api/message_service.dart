@@ -126,10 +126,8 @@ List<User> _getUsers(List<dynamic> list) {
   return users;
 }
 
-Future<List<MessageData>> getMessagesFor(
+Future<RedionesResponse<List<MessageData>>> getMessagesFor(
     String conversationID, String otherID) async {
-  List<MessageData> messages = [];
-
   try {
     Response response = await dio.get(
       "/messages/$conversationID",
@@ -138,6 +136,7 @@ Future<List<MessageData>> getMessagesFor(
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       log(response.data.toString());
       List<dynamic> result = response.data as List<dynamic>;
+      List<MessageData> messages = [];
       for (var element in result) {
         String? message = element["messageContent"];
         if (message == null || message.isEmpty) {
@@ -157,13 +156,21 @@ Future<List<MessageData>> getMessagesFor(
         messages.add(data);
       }
 
-      return messages;
+      return RedionesResponse(
+        message: "Success",
+        payload: messages,
+        status: Status.success,
+      );
     }
   } catch (e) {
     log("Get Message Error: $e");
   }
 
-  return messages;
+  return const RedionesResponse(
+    message: "An error occurred. Please try again",
+    payload: [],
+    status: Status.failed,
+  );
 }
 
 Future<RedionesResponse<PocketResponse?>> getPocket() async {
