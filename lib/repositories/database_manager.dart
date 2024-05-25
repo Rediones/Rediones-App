@@ -1,4 +1,6 @@
 import 'package:get_it/get_it.dart';
+import 'package:rediones/repositories/conversation_repository.dart';
+import 'package:rediones/repositories/messages_repository.dart';
 import 'package:rediones/repositories/post_repository.dart';
 import 'package:rediones/repositories/string_list_repository.dart';
 import 'package:rediones/repositories/user_repository.dart';
@@ -77,10 +79,35 @@ class DatabaseManager {
       ${StringListModel.valueColumn} TEXT NOT NULL
     )
  ''');
+
+        await db.execute('''
+    CREATE TABLE ${ConversationRepository.conversationTable} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+     serverID TEXT NOT NULL,
+      lastMessage TEXT NOT NULL,
+      firstUser TEXT NOT NULL,
+      secondUser TEXT NOT NULL,
+      timestamp INTEGER NOT NULL
+    )
+ ''');
+
+        await db.execute('''
+    CREATE TABLE ${MessageRepository.messagesTable} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+     serverID TEXT NOT NULL,
+      content TEXT NOT NULL,
+      sentBy TEXT NOT NULL,
+      conversationID TEXT NOT NULL,
+      createdAt INTEGER NOT NULL
+    )
+ ''');
       },
     );
     GetIt.I.registerSingleton<Database>(database);
     GetIt.I.registerLazySingleton<PostRepository>(() => PostRepository());
     GetIt.I.registerLazySingleton<UserRepository>(() => UserRepository());
+    GetIt.I.registerLazySingleton<ConversationRepository>(
+        () => ConversationRepository());
+    GetIt.I.registerLazySingleton<MessageRepository>(() => MessageRepository());
   }
 }

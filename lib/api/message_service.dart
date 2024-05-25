@@ -18,7 +18,7 @@ bool _has(List<Conversation> conversations, String conversationID) {
   return false;
 }
 
-Future<void> initConversations(WidgetRef ref) async {
+Future<RedionesResponse<List<Conversation>>> getConversations() async {
   try {
     Response response = await dio.get(
       "/conversations/user-conversations",
@@ -27,8 +27,7 @@ Future<void> initConversations(WidgetRef ref) async {
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       List<dynamic> conversationData = response.data as List<dynamic>;
-      List<Conversation> conversations = ref.watch(conversationsProvider);
-      conversations.clear();
+      List<Conversation> conversations = [];
 
       for (var element in conversationData) {
         List<dynamic> memberList = element["members"] as List<dynamic>;
@@ -41,11 +40,23 @@ Future<void> initConversations(WidgetRef ref) async {
         body["lastMessage"] = element["lastMessage"];
         body["timestamp"] = element["timestamp"];
         conversations.add(Conversation.fromJson(body));
+
+        return RedionesResponse(
+          message: "Success",
+          payload: conversations,
+          status: Status.success,
+        );
       }
     }
   } catch (e) {
     log("Init Conversation Error: $e");
   }
+
+  return const RedionesResponse(
+    message: "An error occurred. Please try again.",
+    payload: [],
+    status: Status.failed,
+  );
 }
 
 Future<Conversation?> createConversation(String id) async {
@@ -171,7 +182,7 @@ Future<RedionesResponse<PocketResponse?>> getPocket() async {
       List<PocketMessageData> pocket = [];
       List<StickyData> sticky = [];
 
-      for(var element in pocketData) {
+      for (var element in pocketData) {
         pocket.add(PocketMessageData.fromJson(element));
       }
 
@@ -226,7 +237,6 @@ Future<RedionesResponse<PocketMessageData?>> createPocketMessageData(
   );
 }
 
-
 Future<RedionesResponse<StickyData?>> makeSticky(String id) async {
   try {
     Response response = await dio.patch(
@@ -239,7 +249,7 @@ Future<RedionesResponse<StickyData?>> makeSticky(String id) async {
         payload: StickyData.fromJson(response.data),
         status: Status.success,
       );
-     }
+    }
   } catch (e) {
     log("Create Sticky Note Error: $e");
   }
@@ -250,7 +260,6 @@ Future<RedionesResponse<StickyData?>> makeSticky(String id) async {
     status: Status.failed,
   );
 }
-
 
 class PocketResponse {
   final List<StickyData> stickyNotes;

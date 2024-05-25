@@ -30,20 +30,6 @@ class MessageData {
       };
 }
 
-class LastMessageData {
-  final DateTime timestamp;
-  final User sender;
-  final String content;
-  final int count;
-
-  const LastMessageData({
-    required this.timestamp,
-    required this.count,
-    required this.sender,
-    required this.content,
-  });
-}
-
 class Conversation {
   final String id;
   final List<User> users;

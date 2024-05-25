@@ -38,31 +38,30 @@ class _HomeState extends ConsumerState<Home> {
 
   void refreshPosts() {}
 
-  void fetchPosts() => getPosts().then((response) {
-        if (!mounted) return;
+  Future<void> fetchPosts() async {
+    var response = await getPosts();
+    if (!mounted) return;
 
-        if (ref.watch(createdProfileProvider)) {
-          ref.watch(createdProfileProvider.notifier).state = false;
-        }
+    if (ref.watch(createdProfileProvider)) {
+      ref.watch(createdProfileProvider.notifier).state = false;
+    }
 
-        List<Post> p = response.payload;
-        if (response.status == Status.failed) {
-          showToast(response.message);
-          setState(() => loading = false);
-          return;
-        }
+    List<Post> p = response.payload;
+    if (response.status == Status.failed) {
+      showToast(response.message);
+      setState(() => loading = false);
+      return;
+    }
 
-        log("Assigning new posts");
+    List<Post> posts = ref.watch(postsProvider.notifier).state;
+    posts.clear();
+    posts.addAll(p);
 
-        List<Post> posts = ref.watch(postsProvider.notifier).state;
-        posts.clear();
-        posts.addAll(p);
+    final PostRepository repository = GetIt.I.get();
+    repository.clearAllAndAddAll(p);
 
-        final PostRepository repository = GetIt.I.get();
-        repository.clearAllAndAddAll(p);
-
-        setState(() => loading = false);
-      });
+    setState(() => loading = false);
+  }
 
   @override
   void initState() {
@@ -78,10 +77,10 @@ class _HomeState extends ConsumerState<Home> {
       fetchPosts();
     }
 
-    _assignInitialPosts();
+    getLocalPosts();
   }
 
-  Future<void> _assignInitialPosts() async {
+  Future<void> getLocalPosts() async {
     final PostRepository repository = GetIt.I.get();
     List<Post> posts = await repository.getAll();
     if (posts.isEmpty) {

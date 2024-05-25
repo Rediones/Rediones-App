@@ -84,6 +84,7 @@ const String johnDoeID = "6547e80c1e04b4e42ff06db7";
 
 const String loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque feugiat at risus sit amet scelerisque. Curabitur sollicitudin tincidunt erat, sed vehicula ligula ullamcorper at. In in tortor ipsum.";
 
+const String currentUserID = "currentUserID";
 
 class Holder<T> {
   T value;

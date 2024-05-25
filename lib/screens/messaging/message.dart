@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get_it/get_it.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/components/providers.dart';
+import 'package:rediones/repositories/conversation_repository.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
@@ -49,14 +51,44 @@ class _MessagePageState extends ConsumerState<MessagePage>
 
     userID = ref.read(userProvider).id;
 
-    initConversations(ref)
-        .then((value) => setState(() => loadingConversations = false));
+    getLocalConversations();
+  }
+
+  Future<void> fetchConversations() async {
+    var response = await getConversations();
+    if (!mounted) return;
+
+    List<Conversation> p = response.payload;
+    if (response.status == Status.failed) {
+      showToast(response.message);
+      setState(() => loadingConversations = false);
+      return;
+    }
+
+    List<Conversation> con = ref.watch(conversationsProvider.notifier).state;
+    con.clear();
+    con.addAll(p);
+
+    final ConversationRepository repository = GetIt.I.get();
+    repository.clearAllAndAddAll(p);
+
+    setState(() => loadingConversations = false);
+  }
+
+  Future<void> getLocalConversations() async {
+    final ConversationRepository repository = GetIt.I.get();
+    List<Conversation> c = await repository.getAll();
+    if (c.isEmpty) {
+      fetchConversations();
+    } else {
+      ref.watch(conversationsProvider.notifier).state.addAll(c);
+      setState(() => loadingConversations = false);
+    }
   }
 
   Future<void> refresh() async {
     setState(() => loadingConversations = true);
-    initConversations(ref)
-        .then((value) => setState(() => loadingConversations = false));
+    fetchConversations();
   }
 
   void openInbox(Conversation conversation) =>
@@ -67,7 +99,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
     bool darkTheme = context.isDark;
     List<StoryData> stories = ref.watch(storiesProvider);
     List<Conversation> lastMessages = ref.watch(conversationsProvider);
-    List<LastMessageData> requests = [];
+    List<Conversation> requests = [];
 
     return Scaffold(
       appBar: AppBar(
@@ -87,9 +119,11 @@ class _MessagePageState extends ConsumerState<MessagePage>
             alignment: Alignment.centerRight,
             child: Padding(
               padding: EdgeInsets.only(right: 10.w),
-              child: SizedBox(height: 40.h,
+              child: SizedBox(
+                height: 40.h,
                 width: 40.h,
-                child: SvgPicture.asset("assets/Search Icon.svg",
+                child: SvgPicture.asset(
+                  "assets/Search Icon.svg",
                   width: 20.h,
                   height: 20.h,
                   color: darkTheme ? Colors.white54 : Colors.black45,
@@ -190,59 +224,59 @@ class _MessagePageState extends ConsumerState<MessagePage>
                     height: 465.h,
                     child: loadingConversations
                         ? Skeletonizer(
-                          enabled: true,
-                          child: ListView.separated(
-                            itemCount: dummyConversations.length,
-                            itemBuilder: (_, index) => LastMessageContainer(
-                              data: dummyConversations[index],
-                              currentID: userID,
-                              onOpen: () {},
+                            enabled: true,
+                            child: ListView.separated(
+                              itemCount: dummyConversations.length,
+                              itemBuilder: (_, index) => LastMessageContainer(
+                                data: dummyConversations[index],
+                                currentID: userID,
+                                onOpen: () {},
+                              ),
+                              separatorBuilder: (_, __) =>
+                                  SizedBox(height: 20.h),
                             ),
-                            separatorBuilder: (_, __) =>
-                                SizedBox(height: 20.h),
-                          ),
-                        )
+                          )
                         : TabBarView(
                             controller: controller,
                             children: [
                               lastMessages.isEmpty
                                   ? GestureDetector(
-                                onTap: refresh,
-                                child: Center(
-                                  child: Text(
-                                    "No conversations available. Tap to refresh",
-                                    style: context.textTheme.bodyLarge,
-                                  ),
-                                ),
-                              )
+                                      onTap: refresh,
+                                      child: Center(
+                                        child: Text(
+                                          "No conversations available. Tap to refresh",
+                                          style: context.textTheme.bodyLarge,
+                                        ),
+                                      ),
+                                    )
                                   : AnimationLimiter(
-                                child: RefreshIndicator(
-                                  onRefresh: refresh,
-                                  child: ListView.separated(
-                                    itemBuilder: (_, index) =>
-                                        AnimationConfiguration
-                                            .staggeredList(
-                                          position: index,
-                                          duration: const Duration(
-                                              milliseconds: 750),
-                                          child: SlideAnimation(
-                                            verticalOffset: 25.h,
-                                            child: FadeInAnimation(
-                                              child: LastMessageContainer(
-                                                currentID: userID,
-                                                onOpen: () => openInbox(
-                                                    lastMessages[index]),
-                                                data: lastMessages[index],
+                                      child: RefreshIndicator(
+                                        onRefresh: refresh,
+                                        child: ListView.separated(
+                                          itemBuilder: (_, index) =>
+                                              AnimationConfiguration
+                                                  .staggeredList(
+                                            position: index,
+                                            duration: const Duration(
+                                                milliseconds: 750),
+                                            child: SlideAnimation(
+                                              verticalOffset: 25.h,
+                                              child: FadeInAnimation(
+                                                child: LastMessageContainer(
+                                                  currentID: userID,
+                                                  onOpen: () => openInbox(
+                                                      lastMessages[index]),
+                                                  data: lastMessages[index],
+                                                ),
                                               ),
                                             ),
                                           ),
+                                          separatorBuilder: (_, __) =>
+                                              SizedBox(height: 15.h),
+                                          itemCount: lastMessages.length,
                                         ),
-                                    separatorBuilder: (_, __) =>
-                                        SizedBox(height: 15.h),
-                                    itemCount: lastMessages.length,
-                                  ),
-                                ),
-                              ),
+                                      ),
+                                    ),
                               SizedBox(
                                 height: 470.h,
                                 child: ListView.separated(
@@ -549,20 +583,20 @@ class LastMessageContainer extends StatelessWidget {
             ),
           ),
           Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: Skeleton.ignore(
-              ignore: true,
-              child: bg.Badge(
-                badgeStyle: const bg.BadgeStyle(
-                  badgeColor: appRed,
-                  elevation: 1.0,
+              alignment: AlignmentDirectional.centerEnd,
+              child: Skeleton.ignore(
+                ignore: true,
+                child: bg.Badge(
+                  badgeStyle: const bg.BadgeStyle(
+                    badgeColor: appRed,
+                    elevation: 1.0,
+                  ),
+                  showBadge: true,
+                  badgeContent: Text("0",
+                      style:
+                          context.textTheme.bodySmall!.copyWith(color: theme)),
                 ),
-                showBadge: true,
-                badgeContent: Text("0",
-                    style: context.textTheme.bodySmall!.copyWith(color: theme)),
-              ),
-            )
-          )
+              ))
         ],
       ),
     );
