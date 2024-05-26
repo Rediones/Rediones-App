@@ -26,9 +26,6 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
 
   String? visibility;
 
-  String? title;
-  List<dynamic>? icon;
-
   void navigate() => context.router.pop(true);
 
   void upload(Map<String, dynamic> postData) async {
@@ -97,6 +94,10 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                         onDelete: (index) => setState(
                           () => mediaBytes.removeAt(index),
                         ),
+                        onPictureTaken: (res) {
+                          if(res == null) return;
+                          mediaBytes.add(res as Uint8List);
+                        },
                       ),
                       SizedBox(height: 20.h),
                       ListTile(

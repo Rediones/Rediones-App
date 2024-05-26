@@ -1,23 +1,23 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rediones/screens/other/camera.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
-
-
 
 class ImageSlide extends StatelessWidget {
   final List<Uint8List> mediaBytes;
   final Function onDelete;
+  final Function onPictureTaken;
 
   const ImageSlide({
     super.key,
     required this.mediaBytes,
     required this.onDelete,
+    required this.onPictureTaken,
   });
 
   @override
@@ -29,6 +29,13 @@ class ImageSlide extends StatelessWidget {
         itemBuilder: (_, index) {
           if (index == 0) {
             return GestureDetector(
+              onTap: () {
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(builder: (_) => const CameraPage()),
+                    )
+                    .then((res) => onPictureTaken(res));
+              },
               child: Container(
                 height: 80.h,
                 width: 100.w,
@@ -51,7 +58,6 @@ class ImageSlide extends StatelessWidget {
     );
   }
 }
-
 
 class PostPreview extends StatelessWidget {
   final Uint8List bytes;
@@ -103,8 +109,6 @@ class PostPreview extends StatelessWidget {
   }
 }
 
-
-
 class MultiMemberImage extends StatelessWidget {
   final List<String> images;
   final double size;
@@ -139,39 +143,39 @@ class MultiMemberImage extends StatelessWidget {
             child: Stack(
               children: List.generate(
                 count,
-                    (index) => Positioned(
+                (index) => Positioned(
                   left: 22.5.w * (index + 1),
                   child: (index == count - 1)
                       ? CircleAvatar(
-                    backgroundColor: border,
-                    radius: size,
-                    child: CircleAvatar(
-                      foregroundColor: Colors.transparent,
-                      backgroundColor: Colors.transparent,
-                      radius: size * 0.9,
-                      child: Text(
-                        "+${total - images.length}",
-                        style: context.textTheme.bodyMedium!.copyWith(
-                            fontWeight: FontWeight.w600, color: primary),
-                      ),
-                    ),
-                  )
-                      : CachedNetworkImage(
-                    imageUrl: images[0],
-                    errorWidget: (_, url, error) => CircleAvatar(
-                      radius: size,
-                      backgroundColor: neutral2,
-                    ),
-                    progressIndicatorBuilder: (_, url, error) =>
-                        CircleAvatar(
+                          backgroundColor: border,
                           radius: size,
-                          backgroundColor: neutral2,
+                          child: CircleAvatar(
+                            foregroundColor: Colors.transparent,
+                            backgroundColor: Colors.transparent,
+                            radius: size * 0.9,
+                            child: Text(
+                              "+${total - images.length}",
+                              style: context.textTheme.bodyMedium!.copyWith(
+                                  fontWeight: FontWeight.w600, color: primary),
+                            ),
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: images[0],
+                          errorWidget: (_, url, error) => CircleAvatar(
+                            radius: size,
+                            backgroundColor: neutral2,
+                          ),
+                          progressIndicatorBuilder: (_, url, error) =>
+                              CircleAvatar(
+                            radius: size,
+                            backgroundColor: neutral2,
+                          ),
+                          imageBuilder: (_, provider) => CircleAvatar(
+                            backgroundColor: border,
+                            radius: size,
+                          ),
                         ),
-                    imageBuilder: (_, provider) => CircleAvatar(
-                      backgroundColor: border,
-                      radius: size,
-                    ),
-                  ),
                 ),
               ),
             ),

@@ -111,6 +111,7 @@ class _CreateStoryPageState extends State<CreateStoryPage> {
                         onDelete: (index) => setState(
                           () => mediaBytes.removeAt(index),
                         ),
+                        onPictureTaken: (res) {},
                       ),
                       SizedBox(height: 50.h),
                       ClipRRect(

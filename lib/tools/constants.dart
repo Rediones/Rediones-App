@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 const Color theme = Color.fromARGB(255, 245, 245, 245);
 const Color appRed = Color.fromARGB(255, 217, 74, 74);
+const Color appRed2 = Color.fromARGB(255, 255, 125, 125);
 const Color niceBlue =  Color.fromARGB(255, 73, 121, 209);
 const Color possibleGreen = Color.fromARGB(255, 0, 158, 96);
 const Color goodYellow = Color.fromARGB(255, 252, 163, 17);
