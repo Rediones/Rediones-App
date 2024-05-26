@@ -72,6 +72,8 @@ void showToast(String message,
 
 void unFocus() => FocusManager.instance.primaryFocus?.unfocus();
 
+String formatRawAmount(int price) => formatAmount(price.toString());
+
 String formatAmount(String price) {
   String priceInText = "";
   int counter = 0;

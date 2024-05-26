@@ -1356,6 +1356,13 @@ class _PollContainerState extends ConsumerState<PollContainer> {
               },
             ),
           ),
+          SizedBox(height: 5.h),
+          Padding(
+            padding: EdgeInsets.only(left: 20.r + 5.w),
+            child: Text("${formatRawAmount(widget.poll.totalVotes)} votes",
+              style: context.textTheme.bodyMedium,
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

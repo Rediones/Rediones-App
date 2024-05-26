@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,8 +54,9 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
               elevation: 0.0,
               centerTitle: true,
               title:
-              Text("Ask A Question", style: context.textTheme.titleLarge),
+                  Text("Ask A Question", style: context.textTheme.titleLarge),
               floating: true,
+              pinned: true,
             ),
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -94,21 +94,19 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               sliver: SliverList.separated(
-                itemBuilder: (_, index) =>
-                    _ChoiceContainer(
-                      choice: choices[index],
-                      onRemove: () => setState(() => choices.removeAt(index)),
-                      listener: () {
-                        if (index == choices.length - 1) {
-                          setState(() => choices.add(_ChoiceData()));
-                        }
-                      },
-                    ),
+                itemBuilder: (_, index) => _ChoiceContainer(
+                  choice: choices[index],
+                  onRemove: () => setState(() => choices.removeAt(index)),
+                  listener: () {
+                    if (index == choices.length - 1) {
+                      setState(() => choices.add(_ChoiceData()));
+                    }
+                  },
+                ),
                 itemCount: choices.length,
-                separatorBuilder: (_, __) =>
-                    SizedBox(
-                      height: 10.h,
-                    ),
+                separatorBuilder: (_, __) => SizedBox(
+                  height: 10.h,
+                ),
               ),
             ),
             SliverPadding(
@@ -151,28 +149,30 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                       spacing: 10.r,
                       children: List.generate(
                         pollLengths.length,
-                            (index) =>
-                            GestureDetector(
-                              onTap: () => setState(() => pollChoice = index),
-                              child: Chip(
-                                label: Text(
-                                  pollLengths[index],
-                                  style: context.textTheme.bodyMedium!
-                                      .copyWith(color: pollChoice == index
+                        (index) => GestureDetector(
+                          onTap: () => setState(() => pollChoice = index),
+                          child: Chip(
+                            label: Text(
+                              pollLengths[index],
+                              style: context.textTheme.bodyMedium!.copyWith(
+                                  color: pollChoice == index
                                       ? Colors.white
                                       : appRed),
-                                ),
-                                elevation: 0.0,
-                                shadowColor: Colors.transparent,
-                                backgroundColor: pollChoice == index ? appRed : null,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(35.r),
-                                ),
-                                side: pollChoice != index ? const BorderSide(
-                                  color: neutral2,
-                                ) : null,
-                              ),
                             ),
+                            elevation: 0.0,
+                            shadowColor: Colors.transparent,
+                            backgroundColor:
+                                pollChoice == index ? appRed : null,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(35.r),
+                            ),
+                            side: pollChoice != index
+                                ? const BorderSide(
+                                    color: neutral2,
+                                  )
+                                : null,
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(height: 50.h),
@@ -195,17 +195,16 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
 
                       Future.delayed(
                         Duration.zero,
-                            () =>
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return const Dialog(
-                                    backgroundColor: Colors.transparent,
-                                    elevation: 0,
-                                    child: CenteredPopup(),
-                                );
-                              },
-                            ),
+                        () => showDialog(
+                          context: context,
+                          builder: (context) {
+                            return const Dialog(
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              child: CenteredPopup(),
+                            );
+                          },
+                        ),
                       );
                     },
                     child: Text(
@@ -228,6 +227,7 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
 
 class _ChoiceData {
   final String value;
+
   _ChoiceData({this.value = ""});
 }
 
@@ -248,7 +248,6 @@ class _ChoiceContainer extends StatefulWidget {
 
 class _ChoiceContainerState extends State<_ChoiceContainer> {
   late TextEditingController controller;
-  final FocusNode node = FocusNode();
 
   @override
   void initState() {
@@ -267,7 +266,6 @@ class _ChoiceContainerState extends State<_ChoiceContainer> {
   Widget build(BuildContext context) {
     return SpecialForm(
       controller: controller,
-      focus: node,
       width: 390.w,
       height: 40.h,
       hint: "Choice",

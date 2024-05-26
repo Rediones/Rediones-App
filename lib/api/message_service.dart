@@ -1,8 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/pocket_data.dart';
 import 'package:rediones/components/user_data.dart';
-import 'package:rediones/components/providers.dart';
 import 'profile_service.dart';
 
 import 'base.dart';

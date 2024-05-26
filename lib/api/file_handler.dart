@@ -21,8 +21,9 @@ class FileHandler {
     String? email = instance.getString("user_rediones_email");
     String? password = instance.getString("user_rediones_password");
 
-    if (email == null || password == null || email.isEmpty || password.isEmpty)
+    if (email == null || password == null || email.isEmpty || password.isEmpty) {
       return null;
+    }
     return {"email": email, "password": password};
   }
 

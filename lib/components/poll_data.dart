@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:rediones/components/postable.dart';
 
 class PollChoice {
