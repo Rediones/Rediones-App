@@ -14,8 +14,7 @@ class NetworkConnection
 
   void initialize() async
   {
-    ConnectivityResult result = await _connectivity.checkConnectivity();
-    _checkStatus(result);
+
     _connectivity.onConnectivityChanged.listen((res) {});
   }
 

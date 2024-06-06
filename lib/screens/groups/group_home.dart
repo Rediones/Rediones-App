@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/api/group_service.dart';
 import 'package:rediones/components/group_data.dart';
+import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/screens/other/media_view.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
@@ -20,7 +22,7 @@ class GroupHome extends StatefulWidget {
 
 class _GroupHomeState extends State<GroupHome> {
   bool fetching = false, isCollapsed = false;
-  final List<Post> posts = [];
+  final List<PostObject> posts = [];
 
   final ScrollController scrollController = ScrollController();
 
@@ -70,10 +72,10 @@ class _GroupHomeState extends State<GroupHome> {
             onNotification: (notification) {
               WidgetsBinding.instance.addPostFrameCallback(
                 (_) {
-                  if(!scrollController.hasClients) return;
-                  if(scrollController.offset > 300.h && !isCollapsed) {
+                  if (!scrollController.hasClients) return;
+                  if (scrollController.offset > 300.h && !isCollapsed) {
                     setState(() => isCollapsed = true);
-                  } else if(scrollController.offset < 300.h && isCollapsed) {
+                  } else if (scrollController.offset < 300.h && isCollapsed) {
                     setState(() => isCollapsed = false);
                   }
                 },
@@ -255,7 +257,15 @@ class _GroupHomeState extends State<GroupHome> {
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10.r),
                                       color: darkTheme ? midPrimary : neutral),
-                                  child: Text(widget.data.groupDescription.substring(0, (widget.data.groupDescription.length >= 250 ? 250 : widget.data.groupDescription.length)),
+                                  child: Text(
+                                      widget.data.groupDescription.substring(
+                                          0,
+                                          (widget.data.groupDescription
+                                                      .length >=
+                                                  250
+                                              ? 250
+                                              : widget.data.groupDescription
+                                                  .length)),
                                       style: context.textTheme.bodyMedium),
                                 ),
                                 SizedBox(height: 30.h),
@@ -279,10 +289,17 @@ class _GroupHomeState extends State<GroupHome> {
                               return SizedBox(height: 50.h);
                             }
 
-                            return PostContainer(
-                              post: posts[index],
-                              onCommentClicked: () {},
-                            );
+                            PostObject post = posts[index];
+
+                            return post is Post
+                                ? PostContainer(
+                                    post: post,
+                                    onCommentClicked: () {},
+                                  )
+                                : post is PollData
+                                    ? PollContainer(
+                                        poll: post, onCommentClicked: () {})
+                                    : const SizedBox();
                           },
                           separatorBuilder: (_, __) => SizedBox(height: 25.h),
                           itemCount: posts.length + 1,

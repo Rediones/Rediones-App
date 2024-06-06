@@ -1,74 +1,77 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
+def localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
+    localPropertiesFile.withReader("UTF-8") { reader ->
         localProperties.load(reader)
     }
 }
 
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
-}
-
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
 if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
+    flutterVersionCode = "1"
 }
 
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
+def flutterVersionName = localProperties.getProperty("flutter.versionName")
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
+    flutterVersionName = "1.0"
 }
-
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
 
 android {
-    compileSdkVersion 34
-    buildToolsVersion "34.0.0"
-    ndkVersion "25.1.8937393"
+    namespace = "com.rediones.rediones"
+    compileSdkVersion = 34
+    ndkVersion = "25.1.8937393"
+
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
-        applicationId "com.rediones.rediones"
-        minSdkVersion 29
-        targetSdkVersion 34
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
-        multiDexEnabled true
+        applicationId = "com.rediones.rediones"
+        minSdk = 29
+        targetSdk = 34
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
     }
 
     // signingConfigs {
     //     release {
-    //         storeFile file(RELEASE_STORE_FILE)
-    //         storePassword RELEASE_STORE_PASSWORD
-    //         keyAlias RELEASE_KEY_ALIAS
-    //         keyPassword RELEASE_KEY_PASSWORD
+    //         storeFile = file(RELEASE_STORE_FILE)
+    //         storePassword = RELEASE_STORE_PASSWORD
+    //         keyAlias = RELEASE_KEY_ALIAS
+    //         keyPassword = RELEASE_KEY_PASSWORD
     //     }
-
     // }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.debug
+        }
+
+        debug {
+            manifestPlaceholders = [
+                    auth0Domain: "your_auth0_domain",
+                    auth0Scheme: "demo"
+            ]
         }
     }
 
     // buildTypes {
     //     release {
-    //         signingConfig signingConfigs.release
-    //         minifyEnabled true
+    //         signingConfig = signingConfigs.release
+    //         minifyEnabled = true
     //     }
     // }
 }
 
 flutter {
-    source '../..'
+    source = "../.."
 }

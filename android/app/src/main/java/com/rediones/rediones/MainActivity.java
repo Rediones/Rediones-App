@@ -1,4 +1,4 @@
-package com.red.rediones;
+package com.rediones.rediones;
 
 import io.flutter.embedding.android.FlutterActivity;
 

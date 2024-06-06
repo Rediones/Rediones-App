@@ -6,7 +6,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/message_data.dart';
+import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/providers.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/api/message_service.dart';
@@ -321,7 +323,7 @@ class _OtherProfilePageState extends State<OtherProfilePage>
             children: [
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                child: FutureBuilder<RedionesResponse<List<Post>>>(
+                child: FutureBuilder<RedionesResponse<List<PostObject>>>(
                   future: getUsersPosts(id: widget.data.id),
                   builder: (_, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -347,7 +349,7 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                         ),
                       );
                     } else {
-                      List<Post> posts = snapshot.data!.payload;
+                      List<PostObject> posts = snapshot.data!.payload;
 
                       return AnimationLimiter(
                         child: RefreshIndicator(
@@ -361,7 +363,7 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                 return SizedBox(height: 100.h);
                               }
 
-                              Post post = posts[index];
+                              PostObject post = posts[index];
 
                               return AnimationConfiguration.staggeredList(
                                 position: index,
@@ -369,10 +371,17 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                 child: SlideAnimation(
                                   verticalOffset: 25.h,
                                   child: FadeInAnimation(
-                                    child: PostContainer(
+                                    child: post is Post
+                                        ? PostContainer(
                                       post: post,
                                       onCommentClicked: () {},
-                                    ),
+                                    )
+                                        : post is PollData
+                                        ? PollContainer(
+                                      poll: post,
+                                      onCommentClicked: () {},
+                                    )
+                                        : const SizedBox(),
                                   ),
                                 ),
                               );

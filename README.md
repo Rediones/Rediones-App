@@ -1,6 +1,6 @@
 # rediones
 
-A social media platform with the sole aim of connecting young people all across the world
+A new Flutter project.
 
 ## Getting Started
 

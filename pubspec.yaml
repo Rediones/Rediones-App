@@ -57,7 +57,6 @@ dependencies:
   path:
   sqflite:
   get_it:
-  is_lock_screen:
   fluttertoast:
   flex_color_scheme:
   video_player:
@@ -66,9 +65,9 @@ dependencies:
   animated_snack_bar:
   flutter_media_downloader:
   is_first_run:
-  awesome_dialog:
   awesome_notifications:
   uuid:
+#  device_preview:
 
 
 dev_dependencies:

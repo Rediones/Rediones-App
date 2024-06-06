@@ -322,29 +322,4 @@ void saveAuthDetails(Map<String, String> authDetails, WidgetRef ref) {
 void goToTab(int index, WidgetRef ref) =>
     ref.watch(dashboardIndexProvider.notifier).state = index;
 
-class NetworkManager extends ChangeNotifier {
-  ConnectivityResult _connectionStatus = ConnectivityResult.none;
-  final Connectivity _connectivity = Connectivity();
 
-  ConnectivityResult get network => _connectionStatus;
-
-  NetworkManager() {
-    try {
-      Future<ConnectivityResult> result = _connectivity.checkConnectivity();
-      result.then((val) {
-        _updateConnectionStatus(val);
-        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-      });
-    } catch (e) {
-      developer.log("Couldn't check connectivity status", error: e);
-      return;
-    }
-  }
-
-  void _updateConnectionStatus(ConnectivityResult result) {
-    _connectionStatus = result;
-    notifyListeners();
-  }
-
-  bool get isConnected => _connectionStatus != ConnectivityResult.none;
-}

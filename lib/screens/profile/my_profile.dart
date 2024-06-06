@@ -6,7 +6,9 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rediones/api/post_service.dart';
+import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/components/providers.dart';
 import 'package:rediones/tools/constants.dart';
@@ -26,7 +28,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
   late TabController controller;
 
   bool loadingPosts = false, loadingSaved = false, loadingEvents = false;
-  final List<Post> posts = [], savedPosts = [];
+  final List<PostObject> posts = [], savedPosts = [];
 
   @override
   void initState() {
@@ -336,7 +338,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                     return SizedBox(height: 100.h);
                                   }
 
-                                  Post post = posts[index];
+                                  PostObject post = posts[index];
 
                                   return AnimationConfiguration.staggeredList(
                                     position: index,
@@ -344,10 +346,17 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                     child: SlideAnimation(
                                       verticalOffset: 25.h,
                                       child: FadeInAnimation(
-                                        child: PostContainer(
-                                          post: post,
-                                          onCommentClicked: () {},
-                                        ),
+                                        child: post is Post
+                                            ? PostContainer(
+                                                post: post,
+                                                onCommentClicked: () {},
+                                              )
+                                            : post is PollData
+                                                ? PollContainer(
+                                                    poll: post,
+                                                    onCommentClicked: () {},
+                                        )
+                                                : const SizedBox(),
                                       ),
                                     ),
                                   );
@@ -390,7 +399,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                     return SizedBox(height: 100.h);
                                   }
 
-                                  Post post = savedPosts[index];
+                                  PostObject post = savedPosts[index];
 
                                   return AnimationConfiguration.staggeredList(
                                     position: index,
@@ -398,10 +407,17 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                     child: SlideAnimation(
                                       verticalOffset: 25.h,
                                       child: FadeInAnimation(
-                                        child: PostContainer(
+                                        child: post is Post
+                                            ? PostContainer(
                                           post: post,
                                           onCommentClicked: () {},
-                                        ),
+                                        )
+                                            : post is PollData
+                                            ? PollContainer(
+                                          poll: post,
+                                          onCommentClicked: () {},
+                                        )
+                                            : const SizedBox(),
                                       ),
                                     ),
                                   );

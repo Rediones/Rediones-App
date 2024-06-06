@@ -1,21 +1,26 @@
 import 'dart:async';
 
 import 'package:rediones/api/base.dart';
+import 'package:rediones/components/postable.dart';
+import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/comment_data.dart';
 import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/components/providers.dart' show dummyPosts;
 
 export 'package:rediones/api/base.dart' show RedionesResponse, Status;
 
-Future<RedionesResponse<Post?>> createPost(Map<String, dynamic> data) async {
+Future<RedionesResponse<PostObject?>> createPost(Map<String, dynamic> data) async {
   try {
     Response response = await dio.post("/post/create-post",
         data: data, options: configuration(accessToken!));
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
+
       Map<String, dynamic> result =
           response.data["payload"] as Map<String, dynamic>;
-      Post post = processPost(result);
+      log(result["poll"].toString());
+      PostObject post = processPost(result);
       return RedionesResponse(
           message: "Post Created", payload: post, status: Status.success);
     }
@@ -30,34 +35,44 @@ Future<RedionesResponse<Post?>> createPost(Map<String, dynamic> data) async {
   );
 }
 
-Post processPost(Map<String, dynamic> result) {
+PostObject processPost(Map<String, dynamic> result) {
   Map<String, dynamic> user = result["postedBy"] as Map<String, dynamic>;
   processUser(user);
 
   result["postedBy"] = user;
-  result["category"] = (result["category"] as num).toInt();
   result["likes"] = fromArrayString(result["likes"] as List<dynamic>);
-  result["media"] = fromArrayString(result["media"] as List<dynamic>);
 
-  //log("$result");
+  // if (result["type"] == "POST") {
+    log(result.toString());
+    result["media"] = fromArrayString(result["media"] as List<dynamic>);
+    return Post.fromJson(result);
+  // }
 
-  return Post.fromJson(result);
+  // if (result["poll"] != null) {
+  //   log(result.toString());
+  //   return PollData.fromJson(result);
+  // }
+
+  return dummyPosts.first;
 }
 
-Future<RedionesResponse<List<Post>>> getPosts() async {
+Future<RedionesResponse<List<PostObject>>> getPosts() async {
   try {
     Response response =
         await dio.get("/posts/all", options: configuration(accessToken!));
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
-      List<Post> posts = [];
+      List<PostObject> posts = [];
       for (var element in postList) {
         posts.add(processPost(element as Map<String, dynamic>));
       }
 
       return RedionesResponse(
-          message: "Posts Fetched", payload: posts, status: Status.success);
+        message: "Posts Fetched",
+        payload: posts,
+        status: Status.success,
+      );
     }
   } catch (e) {
     log("Get Posts Error: $e");
@@ -70,20 +85,24 @@ Future<RedionesResponse<List<Post>>> getPosts() async {
   );
 }
 
-Future<RedionesResponse<List<Post>>> getUsersPosts({required String id}) async {
+Future<RedionesResponse<List<PostObject>>> getUsersPosts(
+    {required String id}) async {
   try {
     Response response = await dio.post("/post/get-post-by-user",
         data: {"userId": id}, options: configuration(accessToken!));
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
-      List<Post> posts = [];
+      List<PostObject> posts = [];
       for (var element in postList) {
         posts.add(processPost(element as Map<String, dynamic>));
       }
 
       return RedionesResponse(
-          message: "Posts Fetched", payload: posts, status: Status.success);
+        message: "Posts Fetched",
+        payload: posts,
+        status: Status.success,
+      );
     }
   } catch (e) {
     log("Get User Posts Error: $e");
@@ -96,14 +115,14 @@ Future<RedionesResponse<List<Post>>> getUsersPosts({required String id}) async {
   );
 }
 
-Future<RedionesResponse<List<Post>>> getUsersSavedPosts() async {
+Future<RedionesResponse<List<PostObject>>> getUsersSavedPosts() async {
   try {
     Response response =
         await dio.get("/auth/saved", options: configuration(accessToken!));
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
-      List<Post> posts = [];
+      List<PostObject> posts = [];
       for (var element in postList) {
         posts.add(processPost(element as Map<String, dynamic>));
       }
@@ -206,6 +225,26 @@ Future<RedionesResponse<List<String>>> likePost(String postID) async {
   return const RedionesResponse<List<String>>(
     message: "An error occurred. Please try again!",
     payload: [],
+    status: Status.failed,
+  );
+}
+
+Future<RedionesResponse> votePoll(String pollOptionID) async {
+  try {
+    Response response = await dio.patch(
+      "/post/vote/$pollOptionID",
+      options: configuration(accessToken!),
+    );
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      log(response.data.toString());
+    }
+  } catch (e) {
+    log("Vote Poll Error: $e");
+  }
+
+  return const RedionesResponse(
+    message: "An error occurred. Please try again!",
+    payload: null,
     status: Status.failed,
   );
 }

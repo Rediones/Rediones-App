@@ -1,5 +1,6 @@
 import 'package:rediones/components/group_data.dart';
 import 'package:rediones/components/post_data.dart';
+import 'package:rediones/components/postable.dart';
 import 'base.dart';
 import 'package:rediones/api/profile_service.dart';
 import 'post_service.dart';
@@ -35,7 +36,7 @@ Future<RedionesResponse<List<GroupData>>> getGroups() async {
   );
 }
 
-Future<RedionesResponse<List<Post>>> getGroupPosts(String id) async {
+Future<RedionesResponse<List<PostObject>>> getGroupPosts(String id) async {
   try {
     Response response =
     await dio.get("/post/by-group/$id", options: configuration(accessToken!));
@@ -43,7 +44,7 @@ Future<RedionesResponse<List<Post>>> getGroupPosts(String id) async {
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       //log(response.data.toString());
       List<dynamic> eventList = response.data["payload"] as List<dynamic>;
-      List<Post> posts = [];
+      List<PostObject> posts = [];
       for (var element in eventList) {
         posts.add(processPost(element as Map<String, dynamic>));
       }

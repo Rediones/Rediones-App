@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rediones/api/post_service.dart';
+import 'package:rediones/components/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
@@ -17,29 +19,65 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
   final TextEditingController controller = TextEditingController();
 
   late List<_ChoiceData> choices;
-  late List<String> pollLengths;
+  late Map<String, int> pollLengths;
+  late List<String> pollKeys;
+
+  final GlobalKey<FormState> formKey = GlobalKey();
+
 
   int pollChoice = -1;
+
+  final Map<String, dynamic> postData = {
+    "type": "POLL",
+    "title": "",
+    "options": [],
+    "duration": 0,
+  };
 
   @override
   void initState() {
     super.initState();
     choices = [_ChoiceData(), _ChoiceData()];
-    pollLengths = [
-      "10 minutes",
-      "30 minutes",
-      "1 hour",
-      "2 hours",
-      "6 hours",
-      "12 hours",
-      "1 day",
-    ];
+    pollLengths = {
+      "1 hour": 1,
+      "2 hours": 2,
+      "3 hours": 3,
+      "4 hours": 4,
+      "6 hours": 6,
+      "12 hours": 12,
+      "18 hours": 18,
+      "24 hours": 24,
+    };
+
+    pollKeys = pollLengths.keys.toList();
   }
 
-  void navigate() => context.router.pop();
+  void navigate() => context.router.pop(true);
+
+  void upload() async {
+    createPost(postData).then((response) {
+      if (!mounted) return;
+
+      Navigator.of(context).pop();
+      if (response.payload == null) {
+        showError(response.message);
+      } else {
+        ref.watch(postsProvider).add(response.payload!);
+        navigate();
+      }
+    });
+
+    showDialog(
+      context: context,
+      useSafeArea: true,
+      barrierDismissible: false,
+      builder: (context) => const Popup(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
@@ -54,59 +92,76 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
               elevation: 0.0,
               centerTitle: true,
               title:
-                  Text("Ask A Question", style: context.textTheme.titleLarge),
+              Text("Ask A Question", style: context.textTheme.titleLarge),
               floating: true,
               pinned: true,
             ),
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 20.h,
-                    ),
-                    Text(
-                      "Question",
-                      style: context.textTheme.titleSmall!
-                          .copyWith(fontWeight: FontWeight.w500),
-                    ),
-                    SizedBox(height: 4.h),
-                    SpecialForm(
-                      controller: controller,
-                      height: 50.h,
-                      width: 390.w,
-                    ),
-                    SizedBox(
-                      height: 20.h,
-                    ),
-                    Text(
-                      "Options",
-                      style: context.textTheme.titleSmall!
-                          .copyWith(fontWeight: FontWeight.w500),
-                    ),
-                    SizedBox(height: 4.h),
-                  ],
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 20.h,
+                      ),
+                      Text(
+                        "Question",
+                        style: context.textTheme.titleSmall!
+                            .copyWith(fontWeight: FontWeight.w500),
+                      ),
+                      SizedBox(height: 4.h),
+                      SpecialForm(
+                        controller: controller,
+                        height: 50.h,
+                        width: 390.w,
+                        onValidate: (value) {
+                          if (value!.isEmpty) {
+                            showNewError("Provide a title for your poll", context);
+                            return '';
+                          }
+                          return null;
+                        },
+                        onSave: (value) => postData["title"] = value!,
+                      ),
+                      SizedBox(
+                        height: 20.h,
+                      ),
+                      Text(
+                        "Options",
+                        style: context.textTheme.titleSmall!
+                            .copyWith(fontWeight: FontWeight.w500),
+                      ),
+                      SizedBox(height: 4.h),
+                    ],
+                  ),
                 ),
               ),
             ),
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               sliver: SliverList.separated(
-                itemBuilder: (_, index) => _ChoiceContainer(
-                  choice: choices[index],
-                  onRemove: () => setState(() => choices.removeAt(index)),
-                  listener: () {
-                    if (index == choices.length - 1) {
-                      setState(() => choices.add(_ChoiceData()));
-                    }
-                  },
-                ),
+                itemBuilder: (_, index) =>
+                    _ChoiceContainer(
+                      choice: choices[index],
+                      onRemove: () => setState(() => choices.removeAt(index)),
+                      listener: () {
+                        if (index == choices.length - 1) {
+                          setState(() => choices.add(_ChoiceData()));
+                        }
+                      },
+                      onSave: (val) {
+                        _ChoiceData data = choices[index];
+                        data.value = val!;
+                      },
+                    ),
                 itemCount: choices.length,
-                separatorBuilder: (_, __) => SizedBox(
-                  height: 10.h,
-                ),
+                separatorBuilder: (_, __) =>
+                    SizedBox(
+                      height: 10.h,
+                    ),
               ),
             ),
             SliverPadding(
@@ -144,37 +199,44 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                           .copyWith(fontWeight: FontWeight.w500),
                     ),
                     SizedBox(height: 4.h),
+
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 10.r,
                       children: List.generate(
-                        pollLengths.length,
-                        (index) => GestureDetector(
-                          onTap: () => setState(() => pollChoice = index),
-                          child: Chip(
-                            label: Text(
-                              pollLengths[index],
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                  color: pollChoice == index
-                                      ? Colors.white
-                                      : appRed),
-                            ),
-                            elevation: 0.0,
-                            shadowColor: Colors.transparent,
-                            backgroundColor:
+                        pollKeys.length,
+                            (index) =>
+                            GestureDetector(
+                              onTap: () => setState(() {
+                                pollChoice = index;
+                                postData["duration"] = pollLengths[pollKeys[index]];
+                              }),
+                              child: Chip(
+                                label: Text(
+                                  pollKeys[index],
+                                  style: context.textTheme.bodyMedium!.copyWith(
+                                      color: pollChoice == index
+                                          ? Colors.white
+                                          : appRed),
+                                ),
+                                elevation: 0.0,
+                                shadowColor: Colors.transparent,
+                                backgroundColor:
                                 pollChoice == index ? appRed : null,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(35.r),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(35.r),
+                                ),
+                                side: pollChoice != index
+                                    ? const BorderSide(
+                                  color: neutral2,
+                                )
+                                    : null,
+                              ),
                             ),
-                            side: pollChoice != index
-                                ? const BorderSide(
-                                    color: neutral2,
-                                  )
-                                : null,
-                          ),
-                        ),
                       ),
                     ),
+
+
                     SizedBox(height: 50.h),
                   ],
                 ),
@@ -191,21 +253,23 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                       backgroundColor: appRed,
                     ),
                     onPressed: () {
-                      unFocus();
+                      if(!validateForm(formKey)) return;
 
-                      Future.delayed(
-                        Duration.zero,
-                        () => showDialog(
-                          context: context,
-                          builder: (context) {
-                            return const Dialog(
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                              child: CenteredPopup(),
-                            );
-                          },
-                        ),
-                      );
+                      if(choices.length < 2) {
+                        showNewError("Provide at least 2 poll options", context);
+                        return;
+                      }
+
+                      List<String> answers = [];
+                      for(var ch in choices) {
+                        if(ch.value.isNotEmpty) {
+                          answers.add(ch.value);
+                        }
+                      }
+
+                      postData["options"] = answers;
+
+                      upload();
                     },
                     child: Text(
                       "Post",
@@ -226,7 +290,7 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
 }
 
 class _ChoiceData {
-  final String value;
+  String value;
 
   _ChoiceData({this.value = ""});
 }
@@ -235,11 +299,14 @@ class _ChoiceContainer extends StatefulWidget {
   final _ChoiceData choice;
   final VoidCallback onRemove;
   final VoidCallback listener;
+  final Function onSave;
 
   const _ChoiceContainer({
     required this.choice,
     required this.onRemove,
     required this.listener,
+    required this.onSave,
+
   });
 
   @override
@@ -269,6 +336,15 @@ class _ChoiceContainerState extends State<_ChoiceContainer> {
       width: 390.w,
       height: 40.h,
       hint: "Choice",
+      onChange: (val) => widget.choice.value = val,
+      onValidate: (value) {
+        if (value!.isEmpty) {
+          showNewError("Input a choice", context);
+          return '';
+        }
+        return null;
+      },
+      onSave: widget.onSave,
       suffix: GestureDetector(
         onTap: widget.onRemove,
         child: Icon(
