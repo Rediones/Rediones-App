@@ -227,8 +227,10 @@ class _HomeState extends ConsumerState<Home> {
               ),
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
-                leading: SvgPicture.asset("assets/Community.svg",
-                    color: !darkTheme ? Colors.black : null),
+                leading: SvgPicture.asset(
+                  "assets/Community.svg",
+                  color: !darkTheme ? Colors.black : null,
+                ),
                 title: Text("Community Practice",
                     style: context.textTheme.bodyLarge),
                 onTap: () {

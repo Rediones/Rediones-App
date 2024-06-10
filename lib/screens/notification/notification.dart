@@ -73,6 +73,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
             tabBar: TabBar(
               controller: controller,
               indicatorColor: appRed,
+              dividerColor: Colors.black12,
               labelColor: appRed,
               labelStyle: context.textTheme.bodyLarge!
                   .copyWith(fontWeight: FontWeight.w600),

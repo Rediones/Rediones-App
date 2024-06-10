@@ -93,7 +93,7 @@ class BottomNavBar extends ConsumerWidget {
                                       ),
                                       SizedBox(height: 15.h),
                                       ColoredBox(
-                                        color: Colors.grey,
+                                        color: Colors.black12,
                                         child: SizedBox(
                                           width: 80.w,
                                           height: 1.h,
@@ -255,6 +255,7 @@ class BottomNavBar extends ConsumerWidget {
                                 ],
                               ),
                             ),
+
                             SizedBox(
                               width: 160.w,
                               child: Row(
@@ -266,8 +267,8 @@ class BottomNavBar extends ConsumerWidget {
                                     color: currentTab == 1 ? offWhite : null,
                                     height: 70.h,
                                     text: "Communities",
-                                    activeSVG: "assets/project.svg",
-                                    inactiveSVG: "assets/project.svg",
+                                    activeSVG: "assets/Community.svg",
+                                    inactiveSVG: "assets/Community.svg",
                                     onSelect: () {
                                       unFocus();
                                       ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
@@ -1313,6 +1314,7 @@ class _PollContainerState extends ConsumerState<PollContainer> {
               (index) {
                 double percentage = widget.poll.polls[index].count /
                     widget.poll.totalVotes;
+                // percentage = 0.5;
                 return Column(
                   children: [
                     Row(

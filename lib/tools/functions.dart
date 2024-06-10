@@ -31,7 +31,7 @@ void showNewError(String message, BuildContext context) {
         ),
       ),
     ),
-    mobileSnackBarPosition: MobileSnackBarPosition.bottom,
+    mobileSnackBarPosition: MobileSnackBarPosition.top,
     animationCurve: Curves.ease,
     snackBarStrategy: RemoveSnackBarStrategy(),
     duration: const Duration(seconds: 4),
