@@ -9,46 +9,34 @@ import 'package:rediones/tools/constants.dart';
 void showNewError(String message, BuildContext context) {
   HapticFeedback.vibrate();
   AnimatedSnackBar snackBar = AnimatedSnackBar(
-      builder: (context) => ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: 220.w,
-              minHeight: 40.h,
-            ),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
-              decoration: BoxDecoration(
-                color: appRed,
-                borderRadius: BorderRadius.circular(5.r),
-              ),
-              alignment: Alignment.center,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Icon(
-                    Icons.error_outline_outlined,
-                    color: theme,
-                    size: 20.r,
-                  ),
-                  SizedBox(
-                    width: 160.w,
-                    child: Text(
-                      message,
-                      style: context.textTheme.bodySmall!.copyWith(
-                        color: theme,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    builder: (context) => ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: 100.w,
+        maxWidth: 220.w,
+        minHeight: 40.h,
+      ),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
+        decoration: BoxDecoration(
+          color: appRed,
+          borderRadius: BorderRadius.circular(5.r),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          message,
+          style: context.textTheme.bodySmall!.copyWith(
+            color: theme,
+            fontWeight: FontWeight.w700,
           ),
-      mobileSnackBarPosition: MobileSnackBarPosition.bottom,
-      animationCurve: Curves.ease,
-      snackBarStrategy: RemoveSnackBarStrategy(),
-      duration: const Duration(seconds: 4),
-      animationDuration: const Duration(milliseconds: 350));
+        ),
+      ),
+    ),
+    mobileSnackBarPosition: MobileSnackBarPosition.bottom,
+    animationCurve: Curves.ease,
+    snackBarStrategy: RemoveSnackBarStrategy(),
+    duration: const Duration(seconds: 4),
+    animationDuration: const Duration(milliseconds: 350),
+  );
   snackBar.show(context);
 }
 

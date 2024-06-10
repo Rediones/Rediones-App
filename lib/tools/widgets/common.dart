@@ -358,10 +358,10 @@ class ComboBox extends StatelessWidget {
           scrollbarTheme: ScrollbarThemeData(
             radius: scrollbarRadius ?? const Radius.circular(40),
             thickness: scrollbarThickness != null
-                ? MaterialStateProperty.all<double>(scrollbarThickness!)
+                ? WidgetStateProperty.all<double>(scrollbarThickness!)
                 : null,
             thumbVisibility: scrollbarAlwaysShow != null
-                ? MaterialStateProperty.all<bool>(scrollbarAlwaysShow!)
+                ? WidgetStateProperty.all<bool>(scrollbarAlwaysShow!)
                 : null,
           ),
         ),

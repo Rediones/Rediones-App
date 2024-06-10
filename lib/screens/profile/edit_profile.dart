@@ -310,7 +310,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                       height: 40.h,
                       child: TextButton(
                         style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(appRed)),
+                            backgroundColor: WidgetStateProperty.all(appRed)),
                         onPressed: () {
                           unFocus();
                           FormState? currentState = formKey.currentState;

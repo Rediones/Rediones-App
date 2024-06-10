@@ -135,6 +135,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                           }
 
                           Map<String, dynamic> postData = {
+                            "type": "POST",
                             "content": controller.text.trim(),
                             "category": -1,
                             "media": List.generate(mediaBytes.length, (index) {

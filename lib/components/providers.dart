@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rediones/components/event_data.dart';
 import 'package:rediones/components/group_data.dart';
@@ -24,10 +21,36 @@ import 'community_data.dart';
 const User dummyUser = User(id: "dummy");
 final StateProvider<User> userProvider = StateProvider((ref) => dummyUser);
 
-final StateProvider<List<PostObject>> postsProvider = StateProvider((ref) => []);
+final StateProvider<List<PostObject>> postsProvider =
+    StateProvider((ref) => []);
 
 final StateProvider<List<SpotlightData>> spotlightsProvider =
-    StateProvider((ref) => []);
+    StateProvider((ref) => const [
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+            poster: dummyUser,
+          ),
+        ]);
 
 final StateProvider<List<NotificationData>> notificationsProvider =
     StateProvider((ref) => []);
@@ -272,13 +295,16 @@ final StateProvider<List<String>> recentSearchesProvider = StateProvider(
 
 final StateProvider<bool> isNewUserProvider = StateProvider((ref) => false);
 final StateProvider<bool> isLoggedInProvider = StateProvider((ref) => false);
-final StateProvider<bool> createdProfileProvider = StateProvider((ref) => false);
+final StateProvider<bool> createdProfileProvider =
+    StateProvider((ref) => false);
 final StateProvider<bool> initializedProvider = StateProvider((ref) => false);
 final StateProvider<bool> hideBottomProvider = StateProvider((ref) => false);
 final StateProvider<int> dashboardIndexProvider = StateProvider((ref) => 0);
+final StateProvider<bool> spotlightsPlayStatusProvider = StateProvider((ref) => false);
 
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);
+  ref.invalidate(spotlightsPlayStatusProvider);
   ref.invalidate(createdProfileProvider);
   ref.invalidate(recentSearchesProvider);
   ref.invalidate(communitiesProvider);
@@ -321,5 +347,3 @@ void saveAuthDetails(Map<String, String> authDetails, WidgetRef ref) {
 
 void goToTab(int index, WidgetRef ref) =>
     ref.watch(dashboardIndexProvider.notifier).state = index;
-
-

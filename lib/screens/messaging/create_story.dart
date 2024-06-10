@@ -122,7 +122,7 @@ class _CreateStoryPageState extends State<CreateStoryPage> {
                           child: TextButton(
                             style: ButtonStyle(
                                 backgroundColor:
-                                    MaterialStateProperty.all(appRed)),
+                                    WidgetStateProperty.all(appRed)),
                             onPressed: () {},
                             child: Text("Post",
                                 style: context.textTheme.bodyLarge!

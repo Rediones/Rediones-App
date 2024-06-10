@@ -345,7 +345,7 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
                   height: 40.h,
                   child: TextButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(appRed),
+                      backgroundColor: WidgetStateProperty.all(appRed),
                     ),
                     onPressed: () {
                       if (projectCover == null) {
@@ -414,7 +414,7 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
                 height: 40.h,
                 child: TextButton(
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(appRed),
+                    backgroundColor: WidgetStateProperty.all(appRed),
                   ),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(

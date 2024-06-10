@@ -42,16 +42,14 @@ PostObject processPost(Map<String, dynamic> result) {
   result["postedBy"] = user;
   result["likes"] = fromArrayString(result["likes"] as List<dynamic>);
 
-  // if (result["type"] == "POST") {
-    log(result.toString());
+  if (result["type"] == "POST") {
     result["media"] = fromArrayString(result["media"] as List<dynamic>);
+    log(result.toString());
     return Post.fromJson(result);
-  // }
-
-  // if (result["poll"] != null) {
-  //   log(result.toString());
-  //   return PollData.fromJson(result);
-  // }
+  } else if(result["type"] == "POLL") {
+    log(result.toString());
+    return PollData.fromJson(result);
+  }
 
   return dummyPosts.first;
 }

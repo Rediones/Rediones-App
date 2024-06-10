@@ -131,7 +131,7 @@ class _ViewProjectPageState extends State<ViewProjectPage> {
                           child: TextButton(
                             style: ButtonStyle(
                                 backgroundColor:
-                                    MaterialStateProperty.all(appRed)),
+                                    WidgetStateProperty.all(appRed)),
                             onPressed: () {},
                             child: Text("Library",
                                 style: Theme.of(context)

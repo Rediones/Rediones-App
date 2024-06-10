@@ -230,6 +230,7 @@ class BottomNavBar extends ConsumerWidget {
                                             .watch(
                                                 dashboardIndexProvider.notifier)
                                             .state = 0;
+                                        ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
                                       }
                                     },
                                   ),
@@ -269,6 +270,7 @@ class BottomNavBar extends ConsumerWidget {
                                     inactiveSVG: "assets/project.svg",
                                     onSelect: () {
                                       unFocus();
+                                      ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
                                       context.router
                                           .pushNamed(Pages.communityPractice);
                                     },
@@ -288,6 +290,7 @@ class BottomNavBar extends ConsumerWidget {
                                             .watch(
                                                 dashboardIndexProvider.notifier)
                                             .state = 3;
+                                        ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
                                       }
                                     },
                                   ),

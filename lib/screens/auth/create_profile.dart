@@ -42,7 +42,7 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
 
   void createProfile() {
     updateUser(authDetails).then(
-          (result) {
+      (result) {
         if (!mounted) return;
 
         if (result.status == Status.success) {
@@ -133,7 +133,8 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
                           }
                           return null;
                         },
-                        onSave: (value) => authDetails["schoolAddress"] = value!,
+                        onSave: (value) =>
+                            authDetails["schoolAddress"] = value!,
                         hint: "School",
                       ),
                     ],
@@ -178,12 +179,13 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
                 ),
                 onPressed: () async {
                   if (page == 1) {
-                    if(!validateForm(formKey)) return;
+                    if (!validateForm(formKey)) return;
 
                     setState(() => page = 2);
                   } else {
-                    if(profilePicture != null) {
-                      var data = await FileHandler.convertSingleToData(profilePicture!);
+                    if (profilePicture != null) {
+                      var data = await FileHandler.convertSingleToData(
+                          profilePicture!);
                       String base64Media = FileHandler.convertTo64(data);
                       authDetails["profilePicture"] = {
                         "file": {"name": ""},
@@ -196,8 +198,10 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
                 },
                 child: Text(
                   page == 1 ? "Continue" : "Finish",
-                  style: context.textTheme.bodyLarge!
-                      .copyWith(color: theme, fontWeight: FontWeight.w600),
+                  style: context.textTheme.bodyLarge!.copyWith(
+                    color: theme,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],

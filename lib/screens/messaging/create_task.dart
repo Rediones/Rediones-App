@@ -183,7 +183,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
                     height: 40.h,
                     child: TextButton(
                       style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(appRed)),
+                          backgroundColor: WidgetStateProperty.all(appRed)),
                       onPressed: () {
                         title.text.trim();
                         details.text.trim();
