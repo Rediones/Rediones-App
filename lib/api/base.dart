@@ -81,12 +81,3 @@ void removeHandler(String key, Function handler) => _socketManager[key]?.remove(
 void emit(String signal, Map<String, dynamic> data) => _socket?.emit(signal, data);
 
 void shutdown() => _socket?.disconnect();
-
-
-List<String> toStringList(List<dynamic> data) {
-  List<String> result = [];
-  for(var element in data) {
-    result.add(element as String);
-  }
-  return result;
-}

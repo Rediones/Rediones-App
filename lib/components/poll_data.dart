@@ -1,22 +1,31 @@
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
+import 'package:rediones/tools/functions.dart';
 
 class PollChoice {
   final String name;
-  final int count;
+  final List<String> voters;
   final String id;
+  final String rootID;
 
   const PollChoice({
     this.id = "",
+    this.rootID = "",
     this.name = "",
-    this.count = 0,
+    this.voters = const [],
   });
+
+  @override
+  String toString() {
+    return "Choice {name: $name, id: $id, voters: ${voters.length}";
+  }
 }
 
 class PollData extends PostObject {
   final int totalVotes;
   final List<PollChoice> polls;
   final int durationInHours;
+
 
   const PollData({
     super.id,
@@ -40,14 +49,15 @@ class PollData extends PostObject {
     List<dynamic> options = poll["options"];
     int count = 0;
     for (var element in options) {
-      int votes = element["voters"].length;
+      List<String> voters = toStringList(element["voters"]);
       PollChoice choice = PollChoice(
         name: element["title"],
         id: element["_id"],
-        count: votes,
+        voters: voters,
+        rootID: poll["_id"],
       );
       choices.add(choice);
-      count += votes;
+      count += voters.length;
     }
 
     return PollData(

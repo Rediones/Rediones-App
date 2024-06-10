@@ -1,6 +1,6 @@
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/repositories/base_repository.dart';
-import 'package:rediones/repositories/object_pair_repository.dart';
+import 'package:rediones/repositories/poll_choice_repository.dart';
 import 'package:rediones/repositories/string_list_repository.dart';
 import 'package:rediones/repositories/user_repository.dart';
 
@@ -11,9 +11,8 @@ class PollRepository extends BaseRepository<PollData> {
 
   final StringListModelRepository likesRepository =
       StringListModelRepository(tableName: likesTable);
-  final ObjectPairRepository<String, int> pollsDataRepository =
-      ObjectPairRepository(tableName: pollsDataTable);
 
+  final PollChoiceRepository pollChoiceRepository = PollChoiceRepository();
   final UserRepository userRepository = UserRepository();
 
   @override
@@ -27,12 +26,10 @@ class PollRepository extends BaseRepository<PollData> {
     );
     List<String> likes = response.map((resp) => resp.value).toList();
 
-    var pollsResponse = await pollsDataRepository.getAll(
-        where: "${ObjectPair.referenceColumn} = ?",
-        whereArgs: [map["serverID"]]);
-    List<PollChoice> polls = pollsResponse
-        .map((res) => PollChoice(name: res.f, count: res.s))
-        .toList();
+    List<PollChoice> choices = await pollChoiceRepository.getAll(
+      where: "pollID = ?",
+      whereArgs: [map["serverID"]]
+    );
 
     var poster = await userRepository.getById(map["posterID"]);
 
@@ -42,7 +39,7 @@ class PollRepository extends BaseRepository<PollData> {
       shares: map["shares"],
       timestamp: DateTime.fromMillisecondsSinceEpoch(map["createdAt"]),
       totalVotes: map["votes"],
-      polls: polls,
+      polls: choices,
       likes: likes,
       poster: poster!,
     );
@@ -53,16 +50,9 @@ class PollRepository extends BaseRepository<PollData> {
     var response = value.likes
         .map((val) => StringListModel(referenceID: value.id, value: val))
         .toList();
-    await likesRepository.addAll(response);
 
-    var pollsResponse = value.polls
-        .map((val) => ObjectPair<String, int>(
-              f: val.name,
-              s: val.count,
-              reference: value.id,
-            ))
-        .toList();
-    await pollsDataRepository.addAll(pollsResponse);
+    await likesRepository.addAll(response);
+    await pollChoiceRepository.addAll(value.polls);
 
     userRepository.add(value.poster);
 

@@ -7,10 +7,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rediones/api/base.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/providers.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/screens/other/media_view.dart';
@@ -230,7 +232,10 @@ class BottomNavBar extends ConsumerWidget {
                                             .watch(
                                                 dashboardIndexProvider.notifier)
                                             .state = 0;
-                                        ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+                                        ref
+                                            .watch(spotlightsPlayStatusProvider
+                                                .notifier)
+                                            .state = false;
                                       }
                                     },
                                   ),
@@ -255,7 +260,6 @@ class BottomNavBar extends ConsumerWidget {
                                 ],
                               ),
                             ),
-
                             SizedBox(
                               width: 160.w,
                               child: Row(
@@ -271,7 +275,10 @@ class BottomNavBar extends ConsumerWidget {
                                     inactiveSVG: "assets/Community.svg",
                                     onSelect: () {
                                       unFocus();
-                                      ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+                                      ref
+                                          .watch(spotlightsPlayStatusProvider
+                                              .notifier)
+                                          .state = false;
                                       context.router
                                           .pushNamed(Pages.communityPractice);
                                     },
@@ -291,7 +298,10 @@ class BottomNavBar extends ConsumerWidget {
                                             .watch(
                                                 dashboardIndexProvider.notifier)
                                             .state = 3;
-                                        ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+                                        ref
+                                            .watch(spotlightsPlayStatusProvider
+                                                .notifier)
+                                            .state = false;
                                       }
                                     },
                                   ),
@@ -477,41 +487,53 @@ class TriangleClipper extends CustomClipper<Path> {
   bool shouldReclip(TriangleClipper oldClipper) => false;
 }
 
-class PostContainer extends ConsumerStatefulWidget {
-  final Post post;
+class PostObjectContainer extends ConsumerStatefulWidget {
+  final PostObject postObject;
   final VoidCallback onCommentClicked;
 
-  const PostContainer({
+  const PostObjectContainer({
     super.key,
-    required this.post,
+    required this.postObject,
     required this.onCommentClicked,
   });
 
   @override
-  ConsumerState<PostContainer> createState() => _PostContainerState();
+  ConsumerState<PostObjectContainer> createState() =>
+      _PostObjectContainerState();
 }
 
-class _PostContainerState extends ConsumerState<PostContainer> {
-  late int length;
+class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
+  int length = 0;
   bool liked = false;
   bool bookmarked = false;
   bool expandText = false;
   late String currentUserID;
   late Future<int> commentsFuture;
 
+  late bool isPost, mediaAndText;
+
   @override
   void initState() {
     super.initState();
-    length = widget.post.media.length;
+    if (widget.postObject is Post) {
+      Post post = widget.postObject as Post;
+      length = post.media.length;
+      isPost = true;
+      mediaAndText = post.type == MediaType.imageAndText;
+    } else {
+      isPost = false;
+      mediaAndText = false;
+    }
+
     User user = ref.read(userProvider);
     currentUserID = user.id;
-    liked = widget.post.likes.contains(currentUserID);
-    bookmarked = user.savedPosts.contains(widget.post.id);
+    liked = widget.postObject.likes.contains(currentUserID);
+    bookmarked = user.savedPosts.contains(widget.postObject.id);
     commentsFuture = _getCommentsCount();
   }
 
   Future<int> _getCommentsCount() async {
-    int value = (await getComments(widget.post.id)).payload.length;
+    int value = (await getComments(widget.postObject.id)).payload.length;
     return value;
   }
 
@@ -577,15 +599,15 @@ class _PostContainerState extends ConsumerState<PostContainer> {
 
   void onLike() {
     setState(() => liked = !liked);
-    likePost(widget.post.id).then((response) {
+    likePost(widget.postObject.id).then((response) {
       if (response.status == Status.success) {
         showToast(response.message);
         if (response.payload.contains(currentUserID) &&
-            !widget.post.likes.contains(currentUserID)) {
-          widget.post.likes.add(currentUserID);
+            !widget.postObject.likes.contains(currentUserID)) {
+          widget.postObject.likes.add(currentUserID);
         } else if (!response.payload.contains(currentUserID) &&
-            widget.post.likes.contains(currentUserID)) {
-          widget.post.likes.remove(currentUserID);
+            widget.postObject.likes.contains(currentUserID)) {
+          widget.postObject.likes.remove(currentUserID);
         }
         setState(() {});
       } else {
@@ -595,10 +617,9 @@ class _PostContainerState extends ConsumerState<PostContainer> {
     });
   }
 
-  void onBookmark(bool condition) {
-    if ((bookmarked && condition) || (!bookmarked && !condition)) return;
-    setState(() => bookmarked = condition);
-    savePost(widget.post.id).then((value) {
+  void onBookmark() {
+    setState(() => bookmarked = !bookmarked);
+    savePost(widget.postObject.id).then((value) {
       if (value.status == Status.success) {
         showToast(value.message);
         compute(
@@ -619,20 +640,22 @@ class _PostContainerState extends ConsumerState<PostContainer> {
 
   bool get shouldFollow {
     User currentUser = ref.watch(userProvider);
-    if (widget.post.poster == currentUser) return false;
-    if (widget.post.poster.followers.contains(currentUserID) ||
-        currentUser.following.contains(widget.post.poster.id)) return false;
+    if (widget.postObject.poster == currentUser) return false;
+    if (widget.postObject.poster.followers.contains(currentUserID) ||
+        currentUser.following.contains(widget.postObject.poster.id)) {
+      return false;
+    }
     return true;
   }
 
   void goToProfile() {
     User currentUser = ref.watch(userProvider);
-    if (widget.post.poster == currentUser) {
+    if (widget.postObject.poster == currentUser) {
       context.router.pushNamed(Pages.profile);
     } else {
       context.router.pushNamed(
         Pages.otherProfile,
-        extra: widget.post.poster,
+        extra: widget.postObject.poster,
       );
     }
   }
@@ -652,138 +675,13 @@ class _PostContainerState extends ConsumerState<PostContainer> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 40.r,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CachedNetworkImage(
-                  imageUrl: widget.post.poster.profilePicture,
-                  errorWidget: (context, url, error) => CircleAvatar(
-                    backgroundColor: neutral2,
-                    radius: 20.r,
-                    child: Icon(
-                      Icons.person_outline_rounded,
-                      color: Colors.black,
-                      size: 16.r,
-                    ),
-                  ),
-                  progressIndicatorBuilder: (context, url, download) {
-                    return Container(
-                      width: 40.r,
-                      height: 40.r,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: neutral2,
-                      ),
-                    );
-                  },
-                  imageBuilder: (context, provider) {
-                    return GestureDetector(
-                      onTap: goToProfile,
-                      child: CircleAvatar(
-                        backgroundImage: provider,
-                        radius: 20.r,
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(width: 10.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 18.r,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: !shouldFollow ? 180.w : 140.w,
-                            child: GestureDetector(
-                              onTap: goToProfile,
-                              child: Text(
-                                widget.post.poster.username,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.bodyLarge!
-                                    .copyWith(fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                          ),
-                          if (shouldFollow)
-                            Skeleton.ignore(
-                              ignore: true,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(width: 10.w),
-                                  SizedBox(
-                                    height: 18.r,
-                                    width: 1.2.w,
-                                    child: ColoredBox(
-                                      color: darkTheme ? neutral : primary1,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      await followUser(widget.post.poster.id);
-                                    },
-                                    child: Container(
-                                      height: 18.r,
-                                      width: 18.r,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: darkTheme ? appRed : primary,
-                                        borderRadius:
-                                            BorderRadius.circular(6.r),
-                                      ),
-                                      child: Icon(
-                                        Icons.add_rounded,
-                                        color: theme,
-                                        size: 16.r,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      "@${widget.post.poster.nickname}",
-                      style: context.textTheme.labelMedium,
-                    ),
-                  ],
-                ),
-                SizedBox(width: 20.w),
-                SizedBox(
-                  width: 80.w,
-                  height: 18.r,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        time.format(widget.post.timestamp),
-                        style: context.textTheme.labelMedium!
-                            .copyWith(color: gray),
-                      ),
-                      GestureDetector(
-                        onTap: showExtension,
-                        child: Icon(
-                          Icons.more_horiz,
-                          color: Colors.grey,
-                          size: 26.r,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          _PostHeader(
+            object: widget.postObject,
+            goToProfile: goToProfile,
+            shouldFollow: shouldFollow,
+            showExtension: showExtension,
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 20.h),
           GestureDetector(
             onTap: () => setState(() => expandText = !expandText),
             child: RichText(
@@ -791,11 +689,11 @@ class _PostContainerState extends ConsumerState<PostContainer> {
                 children: [
                   TextSpan(
                     text:
-                        "${widget.post.text.substring(0, expandText ? null : (widget.post.text.length >= 150 ? 150 : widget.post.text.length))}"
-                        "${widget.post.text.length >= 150 && !expandText ? "..." : ""}",
+                        "${widget.postObject.text.substring(0, expandText ? null : (widget.postObject.text.length >= 150 ? 150 : widget.postObject.text.length))}"
+                        "${widget.postObject.text.length >= 150 && !expandText ? "..." : ""}",
                     style: context.textTheme.bodyMedium,
                   ),
-                  if (widget.post.text.length > 150)
+                  if (widget.postObject.text.length > 150)
                     TextSpan(
                       text: expandText ? " Read Less" : " Read More",
                       style:
@@ -806,658 +704,520 @@ class _PostContainerState extends ConsumerState<PostContainer> {
             ),
           ),
           SizedBox(height: 10.h),
-          if (widget.post.type == MediaType.imageAndText)
-            SizedBox(
-              width: 370.w,
-              height: 230.h,
-              child: PageView.builder(
-                itemCount: length,
-                itemBuilder: (context, index) => CachedNetworkImage(
-                  imageUrl: widget.post.media[index],
-                  errorWidget: (context, url, error) => Container(
-                    width: 364.w,
-                    height: 230.h,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: neutral2,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Icon(
-                      Icons.broken_image_rounded,
-                      color: Colors.white,
-                      size: 36.r,
-                    ),
-                  ),
-                  progressIndicatorBuilder: (context, url, download) =>
-                      Container(
-                    width: 364.w,
-                    height: 230.h,
-                    decoration: BoxDecoration(
-                      color: neutral2,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: const Center(
-                      child: loader,
-                    ),
-                  ),
-                  imageBuilder: (context, provider) => GestureDetector(
-                    onTap: () => context.router.pushNamed(
-                      Pages.viewMedia,
-                      extra: PreviewData(
-                        images: widget.post.media,
-                        current: index,
-                        displayType: DisplayType.network,
-                      ),
-                    ),
-                    child: Container(
-                      width: 364.w,
-                      height: 230.h,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.r),
-                        image:
-                            DecorationImage(image: provider, fit: BoxFit.cover),
-                      ),
-                      child: length > 1
-                          ? Padding(
-                              padding: EdgeInsets.only(top: 10.h, left: 10.w),
-                              child: Align(
-                                alignment: Alignment.topLeft,
-                                child: Container(
-                                  height: 20.h,
-                                  width: 55.w,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: Colors.black45,
-                                    borderRadius: BorderRadius.circular(10.h),
-                                  ),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 5.w, vertical: 2.h),
-                                  child: Text(
-                                    "${index + 1} of $length",
-                                    style: context.textTheme.bodySmall!
-                                        .copyWith(color: theme),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : null,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedSwitcherZoom.zoomIn(
-                    duration: const Duration(milliseconds: 200),
-                    child: IconButton(
-                      key: ValueKey<bool>(liked),
-                      splashRadius: 0.01,
-                      onPressed: onLike,
-                      iconSize: 20.r,
-                      icon: Icon(liked ? Boxicons.bxs_like : Boxicons.bx_like,
-                          color: liked ? appRed : null),
-                    ),
-                  ),
-                  SizedBox(width: 5.w),
-                  Text(
-                    "${widget.post.likes.length}",
-                    style: context.textTheme.bodyMedium,
-                  )
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Skeleton.ignore(
-                    ignore: true,
-                    child: IconButton(
-                      icon: SvgPicture.asset("assets/Comment Post.svg",
-                          color: darkTheme ? Colors.white : null),
-                      onPressed: widget.onCommentClicked,
-                      splashRadius: 0.01,
-                    ),
-                  ),
-                  SizedBox(width: 5.w),
-                  FutureBuilder(
-                    future: commentsFuture,
-                    builder: (context, snapshot) {
-                      String text = "";
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        text = "...";
-                      } else if (snapshot.connectionState ==
-                          ConnectionState.done) {
-                        text = "${snapshot.data as int}";
-                      }
-                      return Text(
-                        text,
-                        style: context.textTheme.bodyMedium,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Skeleton.ignore(
-                    ignore: true,
-                    child: IconButton(
-                      icon: SvgPicture.asset("assets/Reply.svg",
-                          color: darkTheme ? Colors.white : null),
-                      onPressed: () {},
-                      splashRadius: 0.01,
-                    ),
-                  ),
-                  SizedBox(width: 5.w),
-                  Text(
-                    "${widget.post.shares}",
-                    style: context.textTheme.bodyMedium,
-                  )
-                ],
-              ),
-              AnimatedSwitcherZoom.zoomIn(
-                duration: const Duration(milliseconds: 200),
-                child: IconButton(
-                  key: ValueKey<bool>(bookmarked),
-                  icon: Icon(
-                      bookmarked ? Boxicons.bxs_bookmark : Boxicons.bx_bookmark,
-                      color: bookmarked ? appRed : null),
-                  iconSize: 20.r,
-                  splashRadius: 0.01,
-                  onPressed: () => onBookmark(!bookmarked),
-                ),
-              ),
-            ],
-          )
+          if (isPost && mediaAndText)
+            _PostContainer(post: widget.postObject as Post),
+          if (!isPost) _PollContainer(poll: widget.postObject as PollData),
+          _PostFooter(
+            object: widget.postObject,
+            liked: liked,
+            bookmarked: bookmarked,
+            onBookmark: onBookmark,
+            onLike: onLike,
+            commentsFuture: commentsFuture,
+            onCommentClicked: widget.onCommentClicked,
+          ),
         ],
       ),
     );
   }
 }
 
-class PollContainer extends ConsumerStatefulWidget {
-  final PollData poll;
-  final VoidCallback onCommentClicked;
+class _PostHeader extends StatelessWidget {
+  final PostObject object;
+  final bool shouldFollow;
+  final VoidCallback goToProfile, showExtension;
 
-  const PollContainer({
+  const _PostHeader({
     super.key,
-    required this.poll,
-    required this.onCommentClicked,
+    required this.object,
+    required this.shouldFollow,
+    required this.goToProfile,
+    required this.showExtension,
   });
-
-  @override
-  ConsumerState<PollContainer> createState() => _PollContainerState();
-}
-
-class _PollContainerState extends ConsumerState<PollContainer> {
-  bool liked = false;
-  bool bookmarked = false;
-  bool expandText = false;
-  late String currentUserID;
-  late Future<int> commentsFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    User user = ref.read(userProvider);
-    currentUserID = user.id;
-
-    liked = widget.poll.likes.contains(currentUserID);
-    bookmarked = user.savedPosts.contains(widget.poll.id);
-    commentsFuture = _getCommentsCount();
-  }
-
-  Future<int> _getCommentsCount() async {
-    int value = (await getComments(widget.poll.id)).payload.length;
-    return value;
-  }
-
-  void showExtension() {
-    bool darkTheme = context.isDark;
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SizedBox(
-        height: 360.h,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 20.h),
-            SvgPicture.asset("assets/Modal Line.svg",
-                color: darkTheme ? Colors.white : null),
-            SizedBox(height: 30.h),
-            ListTile(
-              leading: SvgPicture.asset("assets/Link Red.svg"),
-              title: Text(
-                "Copy Link",
-                style: context.textTheme.bodyLarge,
-              ),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: SvgPicture.asset("assets/Unfollow Red.svg"),
-              title: Text(
-                "Unfollow",
-                style: context.textTheme.bodyLarge,
-              ),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: SvgPicture.asset("assets/Not Interested Red.svg"),
-              title: Text(
-                "Not Interested",
-                style: context.textTheme.bodyLarge,
-              ),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: SvgPicture.asset("assets/Block Red.svg"),
-              title: Text(
-                "Block User",
-                style: context.textTheme.bodyLarge,
-              ),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: SvgPicture.asset("assets/Report Red.svg"),
-              title: Text(
-                "Report Post",
-                style: context.textTheme.bodyLarge,
-              ),
-              onTap: () {},
-            ),
-            SizedBox(height: 10.h),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void onLike() {
-    setState(() => liked = !liked);
-    likePost(widget.poll.id).then((response) {
-      if (response.status == Status.success) {
-        showToast(response.message);
-        if (response.payload.contains(currentUserID) &&
-            !widget.poll.likes.contains(currentUserID)) {
-          widget.poll.likes.add(currentUserID);
-        } else if (!response.payload.contains(currentUserID) &&
-            widget.poll.likes.contains(currentUserID)) {
-          widget.poll.likes.remove(currentUserID);
-        }
-        setState(() {});
-      } else {
-        setState(() => liked = !liked);
-        showToast("Something went wrong");
-      }
-    });
-  }
-
-  void onBookmark(bool condition) {
-    if ((bookmarked && condition) || (!bookmarked && !condition)) return;
-    setState(() => bookmarked = condition);
-    savePost(widget.poll.id).then((value) {
-      if (value.status == Status.success) {
-        showToast(value.message);
-        compute(
-          (_) {
-            List<String> postsID =
-                ref.watch(userProvider.select((value) => value.savedPosts));
-            postsID.clear();
-            postsID.addAll(value.payload);
-          },
-          "",
-        );
-      } else {
-        setState(() => bookmarked = !bookmarked);
-        showToast("Something went wrong");
-      }
-    });
-  }
-
-  bool get shouldFollow {
-    User currentUser = ref.watch(userProvider);
-    if (widget.poll.poster == currentUser) return false;
-    if (widget.poll.poster.followers.contains(currentUserID) ||
-        currentUser.following.contains(widget.poll.poster.id)) return false;
-    return true;
-  }
-
-  void goToProfile() {
-    User currentUser = ref.watch(userProvider);
-    if (widget.poll.poster == currentUser) {
-      context.router.pushNamed(Pages.profile);
-    } else {
-      context.router.pushNamed(
-        Pages.otherProfile,
-        extra: widget.poll.poster,
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     bool darkTheme = context.isDark;
 
-    return Container(
-      width: 390.w,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15.r),
-        border: Border.all(color: darkTheme ? neutral : border),
-        color: Colors.transparent,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-      child: Column(
+    return SizedBox(
+      height: 40.r,
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 40.r,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CachedNetworkImage(
-                  imageUrl: widget.poll.poster.profilePicture,
-                  errorWidget: (context, url, error) => CircleAvatar(
-                    backgroundColor: neutral2,
-                    radius: 20.r,
-                    child: Icon(
-                      Icons.person_outline_rounded,
-                      color: Colors.black,
-                      size: 16.r,
-                    ),
-                  ),
-                  progressIndicatorBuilder: (context, url, download) {
-                    return Container(
-                      width: 40.r,
-                      height: 40.r,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: neutral2,
-                      ),
-                    );
-                  },
-                  imageBuilder: (context, provider) {
-                    return GestureDetector(
-                      onTap: goToProfile,
-                      child: CircleAvatar(
-                        backgroundImage: provider,
-                        radius: 20.r,
-                      ),
-                    );
-                  },
+          CachedNetworkImage(
+            imageUrl: object.poster.profilePicture,
+            errorWidget: (context, url, error) => CircleAvatar(
+              backgroundColor: neutral2,
+              radius: 20.r,
+              child: Icon(
+                Icons.person_outline_rounded,
+                color: Colors.black,
+                size: 16.r,
+              ),
+            ),
+            progressIndicatorBuilder: (context, url, download) {
+              return Container(
+                width: 40.r,
+                height: 40.r,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: neutral2,
                 ),
-                SizedBox(width: 10.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              );
+            },
+            imageBuilder: (context, provider) {
+              return GestureDetector(
+                onTap: goToProfile,
+                child: CircleAvatar(
+                  backgroundImage: provider,
+                  radius: 20.r,
+                ),
+              );
+            },
+          ),
+          SizedBox(width: 10.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 18.r,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      height: 18.r,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: !shouldFollow ? 180.w : 140.w,
-                            child: GestureDetector(
-                              onTap: goToProfile,
-                              child: Text(
-                                widget.poll.poster.username,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.bodyLarge!
-                                    .copyWith(fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                          ),
-                          if (shouldFollow)
-                            Skeleton.ignore(
-                              ignore: true,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(width: 10.w),
-                                  SizedBox(
-                                    height: 18.r,
-                                    width: 1.2.w,
-                                    child: ColoredBox(
-                                      color: darkTheme ? neutral : primary1,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      await followUser(widget.poll.poster.id);
-                                    },
-                                    child: Container(
-                                      height: 18.r,
-                                      width: 18.r,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: darkTheme ? appRed : primary,
-                                        borderRadius:
-                                            BorderRadius.circular(6.r),
-                                      ),
-                                      child: Icon(
-                                        Icons.add_rounded,
-                                        color: theme,
-                                        size: 16.r,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
+                      width: !shouldFollow ? 180.w : 140.w,
+                      child: GestureDetector(
+                        onTap: goToProfile,
+                        child: Text(
+                          object.poster.username,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textTheme.bodyLarge!
+                              .copyWith(fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
-                    Text(
-                      "@${widget.poll.poster.nickname}",
-                      style: context.textTheme.labelMedium,
-                    ),
+                    if (shouldFollow)
+                      Skeleton.ignore(
+                        ignore: true,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(width: 10.w),
+                            SizedBox(
+                              height: 18.r,
+                              width: 1.2.w,
+                              child: ColoredBox(
+                                color: darkTheme ? neutral : primary1,
+                              ),
+                            ),
+                            SizedBox(width: 10.w),
+                            GestureDetector(
+                              onTap: () async {
+                                await followUser(object.poster.id);
+                              },
+                              child: Container(
+                                height: 18.r,
+                                width: 18.r,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: darkTheme ? appRed : primary,
+                                  borderRadius: BorderRadius.circular(6.r),
+                                ),
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  color: theme,
+                                  size: 16.r,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
-                SizedBox(width: 20.w),
-                SizedBox(
-                  width: 80.w,
-                  height: 18.r,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        time.format(widget.poll.timestamp),
-                        style: context.textTheme.labelMedium!
-                            .copyWith(color: gray),
-                      ),
-                      GestureDetector(
-                        onTap: showExtension,
-                        child: Icon(
-                          Icons.more_horiz,
-                          color: Colors.grey,
-                          size: 26.r,
-                        ),
-                      )
-                    ],
-                  ),
+              ),
+              Text(
+                "@${object.poster.nickname}",
+                style: context.textTheme.labelMedium,
+              ),
+            ],
+          ),
+          SizedBox(width: 20.w),
+          SizedBox(
+            width: 80.w,
+            height: 18.r,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  time.format(object.timestamp),
+                  style: context.textTheme.labelMedium!.copyWith(color: gray),
                 ),
+                GestureDetector(
+                  onTap: showExtension,
+                  child: Icon(
+                    Icons.more_horiz,
+                    color: Colors.grey,
+                    size: 26.r,
+                  ),
+                )
               ],
             ),
           ),
-          SizedBox(height: 10.h),
-          GestureDetector(
-            onTap: () => setState(() => expandText = !expandText),
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text:
-                        "${widget.poll.text.substring(0, expandText ? null : (widget.poll.text.length >= 150 ? 150 : widget.poll.text.length))}"
-                        "${widget.poll.text.length >= 150 && !expandText ? "..." : ""}",
-                    style: context.textTheme.bodyMedium,
-                  ),
-                  if (widget.poll.text.length > 150)
-                    TextSpan(
-                      text: expandText ? " Read Less" : " Read More",
-                      style:
-                          context.textTheme.bodyMedium!.copyWith(color: appRed),
-                    ),
-                ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PostFooter extends StatelessWidget {
+  final PostObject object;
+  final bool liked, bookmarked;
+  final VoidCallback onLike, onBookmark, onCommentClicked;
+  final Future commentsFuture;
+
+  const _PostFooter({
+    super.key,
+    required this.object,
+    required this.liked,
+    required this.bookmarked,
+    required this.onLike,
+    required this.onBookmark,
+    required this.onCommentClicked,
+    required this.commentsFuture,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedSwitcherZoom.zoomIn(
+              duration: const Duration(milliseconds: 200),
+              child: IconButton(
+                key: ValueKey<bool>(liked),
+                splashRadius: 0.01,
+                onPressed: onLike,
+                iconSize: 20.r,
+                icon: Icon(liked ? Boxicons.bxs_like : Boxicons.bx_like,
+                    color: liked ? appRed : null),
               ),
             ),
+            SizedBox(width: 5.w),
+            Text(
+              "${object.likes.length}",
+              style: context.textTheme.bodyMedium,
+            )
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Skeleton.ignore(
+              ignore: true,
+              child: IconButton(
+                icon: SvgPicture.asset(
+                  "assets/Comment Post.svg",
+                  color: darkTheme ? Colors.white : null,
+                ),
+                onPressed: onCommentClicked,
+                splashRadius: 0.01,
+              ),
+            ),
+            SizedBox(width: 5.w),
+            FutureBuilder(
+              future: commentsFuture,
+              builder: (context, snapshot) {
+                String text = "";
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  text = "...";
+                } else if (snapshot.connectionState == ConnectionState.done) {
+                  text = "${snapshot.data as int}";
+                }
+                return Text(
+                  text,
+                  style: context.textTheme.bodyMedium,
+                );
+              },
+            ),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Skeleton.ignore(
+              ignore: true,
+              child: IconButton(
+                icon: SvgPicture.asset(
+                  "assets/Reply.svg",
+                  color: darkTheme ? Colors.white : null,
+                ),
+                onPressed: () {},
+                splashRadius: 0.01,
+              ),
+            ),
+            SizedBox(width: 5.w),
+            Text(
+              "${object.shares}",
+              style: context.textTheme.bodyMedium,
+            )
+          ],
+        ),
+        AnimatedSwitcherZoom.zoomIn(
+          duration: const Duration(milliseconds: 200),
+          child: IconButton(
+            key: ValueKey<bool>(bookmarked),
+            icon: Icon(
+                bookmarked ? Boxicons.bxs_bookmark : Boxicons.bx_bookmark,
+                color: bookmarked ? appRed : null),
+            iconSize: 20.r,
+            splashRadius: 0.01,
+            onPressed: onBookmark,
           ),
-          SizedBox(height: 10.h),
-          Column(
-            children: List.generate(
-              widget.poll.polls.length,
-              (index) {
-                double percentage = widget.poll.polls[index].count /
-                    widget.poll.totalVotes;
-                // percentage = 0.5;
-                return Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Row(
+        ),
+      ],
+    );
+  }
+}
+
+class _PostContainer extends StatelessWidget {
+  final Post post;
+
+  const _PostContainer({super.key, required this.post});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 370.w,
+      height: 230.h,
+      child: PageView.builder(
+        itemCount: post.media.length,
+        itemBuilder: (context, index) => CachedNetworkImage(
+          imageUrl: post.media[index],
+          errorWidget: (context, url, error) => Container(
+            width: 364.w,
+            height: 230.h,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: neutral2,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(
+              Icons.broken_image_rounded,
+              color: Colors.white,
+              size: 36.r,
+            ),
+          ),
+          progressIndicatorBuilder: (context, url, download) => Container(
+            width: 364.w,
+            height: 230.h,
+            decoration: BoxDecoration(
+              color: neutral2,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: const Center(
+              child: loader,
+            ),
+          ),
+          imageBuilder: (context, provider) => GestureDetector(
+            onTap: () => context.router.pushNamed(
+              Pages.viewMedia,
+              extra: PreviewData(
+                images: post.media,
+                current: index,
+                displayType: DisplayType.network,
+              ),
+            ),
+            child: Container(
+              width: 364.w,
+              height: 230.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.r),
+                image: DecorationImage(image: provider, fit: BoxFit.cover),
+              ),
+              child: post.media.length > 1
+                  ? Padding(
+                      padding: EdgeInsets.only(top: 10.h, left: 10.w),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: Container(
+                          height: 20.h,
+                          width: 55.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.black45,
+                            borderRadius: BorderRadius.circular(10.h),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 5.w, vertical: 2.h),
+                          child: Text(
+                            "${index + 1} of ${post.media.length}",
+                            style: context.textTheme.bodySmall!
+                                .copyWith(color: theme),
+                          ),
+                        ),
+                      ),
+                    )
+                  : null,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PollContainer extends ConsumerStatefulWidget {
+  final PollData poll;
+
+  const _PollContainer({
+    super.key,
+    required this.poll,
+  });
+
+  @override
+  ConsumerState<_PollContainer> createState() => _PollContainerState();
+}
+
+class _PollContainerState extends ConsumerState<_PollContainer> {
+  int pollIndex = -1;
+  bool hasVoted = false;
+
+  late String currentUserID;
+
+  late int totalVotes;
+
+  @override
+  void initState() {
+    super.initState();
+
+    currentUserID = ref.read(userProvider).id;
+
+    for (int i = 0; i < widget.poll.polls.length; ++i) {
+      PollChoice choice = widget.poll.polls[i];
+      List<String> voters = choice.voters;
+      if (!hasVoted && voters.contains(currentUserID)) {
+        hasVoted = true;
+        pollIndex = i;
+        break;
+      }
+    }
+
+    totalVotes = widget.poll.totalVotes;
+  }
+
+  void vote(String id, int index) {
+    setState(() {
+      hasVoted = true;
+      pollIndex = index;
+      totalVotes += 1;
+    });
+    votePoll(id).then((response) {
+      if (response.status == Status.success) {
+        showToast(response.message);
+        widget.poll.polls[index].voters.add(currentUserID);
+        setState(() {});
+      } else {
+        setState(() {
+          hasVoted = false;
+          pollIndex = -1;
+          totalVotes -= 1;
+        });
+        showToast("Something went wrong");
+      }
+    });
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: List.generate(
+            widget.poll.polls.length,
+            (index) {
+              PollChoice choice = widget.poll.polls[index];
+              double percentage = 0.0;
+              if (widget.poll.totalVotes > 0) {
+                percentage = choice.voters.length / totalVotes;
+              }
+
+              return Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          // if (!hasVoted) {
+                            vote(choice.id, index);
+                          // }
+                        },
+                        child: Row(
                           children: [
                             DecoratedBox(
                               decoration: BoxDecoration(
                                 border: Border.all(color: appRed, width: 2.0),
+                                color: (hasVoted && pollIndex == index) ? appRed : null,
                                 borderRadius: BorderRadius.circular(10.r),
                               ),
                               child: SizedBox(
-                                width: 20.r,
-                                height: 20.r,
+                                width: 16.r,
+                                height: 16.r,
+
                               ),
                             ),
                             SizedBox(width: 5.w),
                             Text(
-                              widget.poll.polls[index].name,
-                              style: context.textTheme.bodyMedium,
+                              choice.name,
+                              style: context.textTheme.bodyLarge,
                             )
                           ],
                         ),
-                        Text(
-                          (percentage * 100).toStringAsFixed(1),
-                          style: context.textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 20.r + 5.w),
-                      child: LinearProgressIndicator(
-                        color: appRed,
-                        backgroundColor: gray3,
-                        minHeight: 3.h,
-                        borderRadius: BorderRadius.circular(1.5.h),
-                        value: percentage,
                       ),
+                      Text(
+                        percentage == 0
+                            ? "0"
+                            : (percentage * 100).toStringAsFixed(1),
+                        style: context.textTheme.bodyLarge,
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20.r + 5.w),
+                    child: LinearProgressIndicator(
+                      color: appRed,
+                      backgroundColor: gray3,
+                      minHeight: 8.h,
+                      borderRadius: BorderRadius.circular(4.h),
+                      value: percentage,
                     ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                  SizedBox(height: 10.h),
+                ],
+              );
+            },
           ),
-          SizedBox(height: 5.h),
-          Padding(
-            padding: EdgeInsets.only(left: 20.r + 5.w),
-            child: Text("${formatRawAmount(widget.poll.totalVotes)} votes",
-              style: context.textTheme.bodyMedium,
-            ),
+        ),
+        SizedBox(height: 5.h),
+        Padding(
+          padding: EdgeInsets.only(left: 20.r + 5.w),
+          child: Text(
+            "${formatRawAmount(widget.poll.totalVotes)} votes",
+            style: context.textTheme.bodyLarge,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedSwitcherZoom.zoomIn(
-                    duration: const Duration(milliseconds: 200),
-                    child: IconButton(
-                      key: ValueKey<bool>(liked),
-                      splashRadius: 0.01,
-                      onPressed: onLike,
-                      iconSize: 20.r,
-                      icon: Icon(liked ? Boxicons.bxs_like : Boxicons.bx_like,
-                          color: liked ? appRed : null),
-                    ),
-                  ),
-                  SizedBox(width: 5.w),
-                  Text(
-                    "${widget.poll.likes.length}",
-                    style: context.textTheme.bodyMedium,
-                  )
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Skeleton.ignore(
-                    ignore: true,
-                    child: IconButton(
-                      icon: SvgPicture.asset("assets/Comment Post.svg",
-                          color: darkTheme ? Colors.white : null),
-                      onPressed: widget.onCommentClicked,
-                      splashRadius: 0.01,
-                    ),
-                  ),
-                  SizedBox(width: 5.w),
-                  FutureBuilder(
-                    future: commentsFuture,
-                    builder: (context, snapshot) {
-                      String text = "";
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        text = "...";
-                      } else if (snapshot.connectionState ==
-                          ConnectionState.done) {
-                        text = "${snapshot.data as int}";
-                      }
-                      return Text(
-                        text,
-                        style: context.textTheme.bodyMedium,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Skeleton.ignore(
-                    ignore: true,
-                    child: IconButton(
-                      icon: SvgPicture.asset("assets/Reply.svg",
-                          color: darkTheme ? Colors.white : null),
-                      onPressed: () {},
-                      splashRadius: 0.01,
-                    ),
-                  ),
-                  SizedBox(width: 5.w),
-                  Text(
-                    "${widget.poll.shares}",
-                    style: context.textTheme.bodyMedium,
-                  )
-                ],
-              ),
-              AnimatedSwitcherZoom.zoomIn(
-                duration: const Duration(milliseconds: 200),
-                child: IconButton(
-                  key: ValueKey<bool>(bookmarked),
-                  icon: Icon(
-                      bookmarked ? Boxicons.bxs_bookmark : Boxicons.bx_bookmark,
-                      color: bookmarked ? appRed : null),
-                  iconSize: 20.r,
-                  splashRadius: 0.01,
-                  onPressed: () => onBookmark(!bookmarked),
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

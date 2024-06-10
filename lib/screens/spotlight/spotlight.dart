@@ -44,12 +44,10 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
     for (int i = 0; i < max; ++i) {
       FijkPlayer player = FijkPlayer();
       SpotlightData data = spotlights[i];
-      player.setDataSource(data.url, autoPlay: i == 0);
+      player.setDataSource(data.url, autoPlay: false);
       spotlightPlayers.add(player);
-      spotlightStates.add(i == 0);
+      spotlightStates.add(false);
     }
-
-    spotlightStates[0] = true;
 
     setState(() => fetching = false);
   }

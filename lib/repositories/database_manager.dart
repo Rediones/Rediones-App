@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
+import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/repositories/conversation_repository.dart';
 import 'package:rediones/repositories/messages_repository.dart';
+import 'package:rediones/repositories/poll_choice_repository.dart';
 import 'package:rediones/repositories/poll_repository.dart';
 import 'package:rediones/repositories/post_object_repository.dart';
 import 'package:rediones/repositories/post_repository.dart';
@@ -95,6 +97,23 @@ class DatabaseManager {
  ''');
 
         await db.execute('''
+    CREATE TABLE ${PollChoiceRepository.pollChoicesTable} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      choiceServerID TEXT NOT NULL,
+      pollID TEXT NOT NULL
+    )
+ ''');
+
+        await db.execute('''
+    CREATE TABLE ${PollChoiceRepository.pollVotersTable} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+       ${StringListModel.referenceColumn} TEXT NOT NULL,
+      ${StringListModel.valueColumn} TEXT NOT NULL
+    )
+ ''');
+
+        await db.execute('''
     CREATE TABLE ${PostRepository.mediaTable} (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ${StringListModel.referenceColumn} TEXT NOT NULL,
@@ -134,4 +153,24 @@ class DatabaseManager {
         () => ConversationRepository());
     GetIt.I.registerLazySingleton<MessageRepository>(() => MessageRepository());
   }
+
+
+  static Future<void> clearDatabase() async {
+    Database database = GetIt.I.get();
+    await database.execute("DROP TABLE IF EXISTS ${UserRepository.userTable}");
+    await database.execute("DROP TABLE IF EXISTS ${PostRepository.postsTable}");
+    await database.execute("DROP TABLE IF EXISTS ${PollRepository.pollsTable}");
+    await database.execute("DROP TABLE IF EXISTS ${UserRepository.followerTable}");
+    await database.execute("DROP TABLE IF EXISTS ${UserRepository.followingTable}");
+    await database.execute("DROP TABLE IF EXISTS ${UserRepository.savedTable}");
+    await database.execute("DROP TABLE IF EXISTS ${PostRepository.likesTable}");
+    await database.execute("DROP TABLE IF EXISTS ${PollRepository.likesTable}");
+    await database.execute("DROP TABLE IF EXISTS ${PollChoiceRepository.pollChoicesTable}");
+    await database.execute("DROP TABLE IF EXISTS ${PollChoiceRepository.pollVotersTable}");
+    await database.execute("DROP TABLE IF EXISTS ${PostRepository.mediaTable}");
+    await database.execute("DROP TABLE IF EXISTS ${ConversationRepository.conversationTable}");
+    await database.execute("DROP TABLE IF EXISTS ${MessageRepository.messagesTable}");
+  }
 }
+
+

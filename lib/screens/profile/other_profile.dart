@@ -331,8 +331,8 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                         enabled: true,
                         child: ListView.separated(
                           itemCount: dummyPosts.length,
-                          itemBuilder: (_, index) => PostContainer(
-                            post: dummyPosts[index],
+                          itemBuilder: (_, index) => PostObjectContainer(
+                            postObject: dummyPosts[index],
                             onCommentClicked: () {},
                           ),
                           separatorBuilder: (_, __) => SizedBox(height: 20.h),
@@ -371,17 +371,10 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                 child: SlideAnimation(
                                   verticalOffset: 25.h,
                                   child: FadeInAnimation(
-                                    child: post is Post
-                                        ? PostContainer(
-                                      post: post,
+                                    child: PostObjectContainer(
+                                      postObject: post,
                                       onCommentClicked: () {},
                                     )
-                                        : post is PollData
-                                        ? PollContainer(
-                                      poll: post,
-                                      onCommentClicked: () {},
-                                    )
-                                        : const SizedBox(),
                                   ),
                                 ),
                               );

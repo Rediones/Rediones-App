@@ -168,3 +168,10 @@ bool validateForm(GlobalKey<FormState> formKey) {
   }
   return false;
 }
+List<String> toStringList(List<dynamic> data) {
+  List<String> result = [];
+  for(var element in data) {
+    result.add(element as String);
+  }
+  return result;
+}

@@ -291,15 +291,10 @@ class _GroupHomeState extends State<GroupHome> {
 
                             PostObject post = posts[index];
 
-                            return post is Post
-                                ? PostContainer(
-                                    post: post,
-                                    onCommentClicked: () {},
-                                  )
-                                : post is PollData
-                                    ? PollContainer(
-                                        poll: post, onCommentClicked: () {})
-                                    : const SizedBox();
+                            return PostObjectContainer(
+                              postObject: post,
+                              onCommentClicked: () {},
+                            );
                           },
                           separatorBuilder: (_, __) => SizedBox(height: 25.h),
                           itemCount: posts.length + 1,

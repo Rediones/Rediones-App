@@ -36,6 +36,7 @@ void main() async {
 
   await ScreenUtil.ensureScreenSize();
   await DatabaseManager.init();
+  // await DatabaseManager.clearDatabase();
 
   runApp(const ProviderScope(child: Rediones()));
 }

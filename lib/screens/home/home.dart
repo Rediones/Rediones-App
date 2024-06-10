@@ -116,27 +116,6 @@ class _HomeState extends ConsumerState<Home> {
     fetchPosts();
   }
 
-  Widget child(PostObject object) {
-    if (object is Post) {
-      return PostContainer(
-        post: object,
-        onCommentClicked: () => onCommentClicked(
-          object.id,
-          getComments(object.id),
-        ),
-      );
-    } else if (object is PollData) {
-      return PollContainer(
-        poll: object,
-        onCommentClicked: () => onCommentClicked(
-          object.id,
-          getComments(object.id),
-        ),
-      );
-    }
-    return const SizedBox();
-  }
-
   @override
   Widget build(BuildContext context) {
     List<PostObject> posts = ref.watch(postsProvider);
@@ -334,8 +313,8 @@ class _HomeState extends ConsumerState<Home> {
                   enabled: true,
                   child: ListView.separated(
                     itemCount: dummyPosts.length,
-                    itemBuilder: (_, index) => PostContainer(
-                      post: dummyPosts[index],
+                    itemBuilder: (_, index) => PostObjectContainer(
+                      postObject: dummyPosts[index],
                       onCommentClicked: () {},
                     ),
                     separatorBuilder: (_, __) => SizedBox(height: 20.h),
@@ -411,7 +390,13 @@ class _HomeState extends ConsumerState<Home> {
                               duration: const Duration(milliseconds: 750),
                               child: SlideAnimation(
                                 verticalOffset: 25.h,
-                                child: FadeInAnimation(child: child(post)),
+                                child: FadeInAnimation(child: PostObjectContainer(
+                                  postObject: post,
+                                  onCommentClicked: () => onCommentClicked(
+                                    post.id,
+                                    getComments(post.id),
+                                  ),
+                                ),),
                               ),
                             );
                           },
