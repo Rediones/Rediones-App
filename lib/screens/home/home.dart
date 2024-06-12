@@ -77,7 +77,7 @@ class _HomeState extends ConsumerState<Home> {
       fetchPosts();
     }
 
-    getLocalPosts();
+    Future.delayed(Duration.zero, getLocalPosts);
   }
 
   Future<void> getLocalPosts() async {
@@ -276,11 +276,18 @@ class _HomeState extends ConsumerState<Home> {
         ),
         automaticallyImplyLeading: false,
         title: GestureDetector(
-          onTap: () => scrollController.animateTo(
-            0,
-            duration: const Duration(milliseconds: 1000),
-            curve: Curves.easeIn,
-          ),
+          onTap: () {
+            if(posts.length < 4) {
+              setState(() => loading = true);
+              fetchPosts();
+            } else {
+              scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 1000),
+                curve: Curves.easeIn,
+              );
+            }
+          },
           child: Text(
             "REDIONES",
             style: context.textTheme.titleMedium,

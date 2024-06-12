@@ -1,7 +1,7 @@
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -27,7 +27,7 @@ import 'tools/styles.dart';
 import 'repositories/database_manager.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
@@ -38,6 +38,7 @@ void main() async {
   await DatabaseManager.init();
   // await DatabaseManager.clearDatabase();
 
+  // FlutterNativeSplash.preserve(widgetsBinding: binding);
   runApp(const ProviderScope(child: Rediones()));
 }
 
@@ -62,6 +63,23 @@ class _RedionesState extends ConsumerState<Rediones>
       routes: routes,
     );
     time.setDefaultLocale('en_short');
+
+    // initialize();
+  }
+
+  void initialize() async {
+    await Future.delayed(const Duration(seconds: 3));
+
+    FlutterNativeSplash.remove();
+
+
+    // Future.delayed(
+    //     const Duration(milliseconds: 500),
+    //     () => FileHandler.loadAuthDetails().then((details) {
+    //           String destination = details == null ? Pages.login : Pages.home;
+    //           context.router.goNamed(destination);
+    //           FlutterNativeSplash.remove();
+    //         }));
   }
 
   @override
@@ -142,7 +160,6 @@ class _RedionesState extends ConsumerState<Rediones>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
-
       final List<PostObject> posts = ref.watch(postsProvider);
       final List<Conversation> conversations = ref.watch(conversationsProvider);
 
@@ -151,9 +168,7 @@ class _RedionesState extends ConsumerState<Rediones>
       await _savePosts(posts);
       await _saveUser(user);
       await _saveConversations(conversations);
-
     } else if (state == AppLifecycleState.resumed) {
-
       List<PostObject> posts = await _loadPosts();
       ref.watch(postsProvider).clear();
       ref.watch(postsProvider).addAll(posts);

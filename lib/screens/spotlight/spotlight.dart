@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,19 +22,15 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
 
   final List<FijkPlayer> spotlightPlayers = [];
   final List<bool> spotlightStates = [];
+  static const int maximumConcurrentPlayers = 5;
 
-  static const int maximumConcurrentPlayers = 4;
+  int spotlightPointer = 0;
 
   @override
   void initState() {
     super.initState();
 
     Future.delayed(Duration.zero, fetchSpotlights);
-    // Future.delayed(const Duration(seconds: 1), () => ref.listen(spotlightsPlayStatusProvider, (oldVal, newVal) {
-    //   if(!newVal) {
-    //     pauseAll();
-    //   }
-    // }));
   }
 
   Future<void> fetchSpotlights() async {
@@ -54,7 +52,9 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
 
   void pauseAll() {
     for (FijkPlayer player in spotlightPlayers) {
-      player.pause();
+      if(player.state == FijkState.started) {
+        player.pause();
+      }
     }
   }
 
@@ -67,8 +67,21 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
     super.dispose();
   }
 
+  void listenForChanges() {
+    ref.listen(spotlightsPlayStatusProvider, (oldVal, newVal) {
+      if (!newVal) {
+        pauseAll();
+      } else {
+        spotlightPlayers[spotlightPointer].start();
+        Future.delayed(Duration.zero, () => setState(() => spotlightStates[spotlightPointer] = true));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    listenForChanges();
+
     double height = MediaQuery.of(context).size.height;
     int length = ref.watch(spotlightsProvider).length;
 
@@ -92,8 +105,12 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                         spotlightStates[index + 1] = false;
                       }
 
+                      spotlightPlayers[index].seekTo(100);
                       spotlightPlayers[index].start();
                       spotlightStates[index] = true;
+                      spotlightPointer = index;
+
+                      setState(() {});
                     },
                     itemBuilder: (_, index) => InkWell(
                       onTap: () {

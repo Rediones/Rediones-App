@@ -254,6 +254,10 @@ class BottomNavBar extends ConsumerWidget {
                                             .watch(
                                                 dashboardIndexProvider.notifier)
                                             .state = 1;
+                                        ref
+                                            .watch(spotlightsPlayStatusProvider
+                                                .notifier)
+                                            .state = true;
                                       }
                                     },
                                   ),
@@ -280,7 +284,16 @@ class BottomNavBar extends ConsumerWidget {
                                               .notifier)
                                           .state = false;
                                       context.router
-                                          .pushNamed(Pages.communityPractice);
+                                          .pushNamed(Pages.communityPractice)
+                                          .then((resp) {
+                                        if (currentTab == 1) {
+                                          ref
+                                              .watch(
+                                                  spotlightsPlayStatusProvider
+                                                      .notifier)
+                                              .state = true;
+                                        }
+                                      });
                                     },
                                   ),
                                   BottomNavItem(
@@ -1134,8 +1147,6 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -1160,7 +1171,7 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
                       GestureDetector(
                         onTap: () {
                           // if (!hasVoted) {
-                            vote(choice.id, index);
+                          vote(choice.id, index);
                           // }
                         },
                         child: Row(
@@ -1168,13 +1179,14 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
                             DecoratedBox(
                               decoration: BoxDecoration(
                                 border: Border.all(color: appRed, width: 2.0),
-                                color: (hasVoted && pollIndex == index) ? appRed : null,
+                                color: (hasVoted && pollIndex == index)
+                                    ? appRed
+                                    : null,
                                 borderRadius: BorderRadius.circular(10.r),
                               ),
                               child: SizedBox(
                                 width: 16.r,
                                 height: 16.r,
-
                               ),
                             ),
                             SizedBox(width: 5.w),
@@ -1188,7 +1200,7 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
                       Text(
                         percentage == 0
                             ? "0"
-                            : (percentage * 100).toStringAsFixed(1),
+                            : "${(percentage * 100).toStringAsFixed(0)}%",
                         style: context.textTheme.bodyLarge,
                       ),
                     ],
@@ -1198,8 +1210,8 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
                     child: LinearProgressIndicator(
                       color: appRed,
                       backgroundColor: gray3,
-                      minHeight: 8.h,
-                      borderRadius: BorderRadius.circular(4.h),
+                      minHeight: 10.h,
+                      borderRadius: BorderRadius.circular(5.h),
                       value: percentage,
                     ),
                   ),

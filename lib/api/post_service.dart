@@ -10,13 +10,13 @@ import 'package:rediones/components/providers.dart' show dummyPosts;
 
 export 'package:rediones/api/base.dart' show RedionesResponse, Status;
 
-Future<RedionesResponse<PostObject?>> createPost(Map<String, dynamic> data) async {
+Future<RedionesResponse<PostObject?>> createPost(
+    Map<String, dynamic> data) async {
   try {
     Response response = await dio.post("/post/create-post",
         data: data, options: configuration(accessToken!));
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-
       Map<String, dynamic> result =
           response.data["payload"] as Map<String, dynamic>;
       log(result["poll"].toString());
@@ -46,7 +46,7 @@ PostObject processPost(Map<String, dynamic> result) {
     result["media"] = fromArrayString(result["media"] as List<dynamic>);
     log(result.toString());
     return Post.fromJson(result);
-  } else if(result["type"] == "POLL") {
+  } else if (result["type"] == "POLL") {
     log(result.toString());
     return PollData.fromJson(result);
   }
@@ -234,7 +234,11 @@ Future<RedionesResponse> votePoll(String pollOptionID) async {
       options: configuration(accessToken!),
     );
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      log(response.data.toString());
+      return const RedionesResponse(
+        message: "",
+        payload: null,
+        status: Status.success,
+      );
     }
   } catch (e) {
     log("Vote Poll Error: $e");

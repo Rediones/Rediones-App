@@ -50,6 +50,54 @@ final StateProvider<List<SpotlightData>> spotlightsProvider =
                 "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
             poster: dummyUser,
           ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+            poster: dummyUser,
+          ),
+          SpotlightData(
+            id: "id",
+            url:
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
+            poster: dummyUser,
+          ),
         ]);
 
 final StateProvider<List<NotificationData>> notificationsProvider =
@@ -300,7 +348,8 @@ final StateProvider<bool> createdProfileProvider =
 final StateProvider<bool> initializedProvider = StateProvider((ref) => false);
 final StateProvider<bool> hideBottomProvider = StateProvider((ref) => false);
 final StateProvider<int> dashboardIndexProvider = StateProvider((ref) => 0);
-final StateProvider<bool> spotlightsPlayStatusProvider = StateProvider((ref) => false);
+final StateProvider<bool> spotlightsPlayStatusProvider =
+    StateProvider((ref) => false);
 
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);

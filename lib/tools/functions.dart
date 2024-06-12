@@ -11,7 +11,7 @@ void showNewError(String message, BuildContext context) {
   AnimatedSnackBar snackBar = AnimatedSnackBar(
     builder: (context) => ConstrainedBox(
       constraints: BoxConstraints(
-        minWidth: 100.w,
+        minWidth: 10.w,
         maxWidth: 220.w,
         minHeight: 40.h,
       ),
