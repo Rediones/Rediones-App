@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/providers.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
 import 'package:fijkplayer/fijkplayer.dart';
@@ -23,8 +24,15 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
   final List<FijkPlayer> spotlightPlayers = [];
   final List<bool> spotlightStates = [];
   static const int maximumConcurrentPlayers = 5;
+  static const int fullDragInSeconds = 30;
 
   int spotlightPointer = 0;
+  int initialVideoDurationInMilliseconds = 0;
+
+  double initialDragDx = 0.0;
+
+  bool showText = false;
+  String durationText = "";
 
   @override
   void initState() {
@@ -43,6 +51,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
       FijkPlayer player = FijkPlayer();
       SpotlightData data = spotlights[i];
       player.setDataSource(data.url, autoPlay: false);
+      player.setLoop(0);
       spotlightPlayers.add(player);
       spotlightStates.add(false);
     }
@@ -52,7 +61,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
 
   void pauseAll() {
     for (FijkPlayer player in spotlightPlayers) {
-      if(player.state == FijkState.started) {
+      if (player.state == FijkState.started) {
         player.pause();
       }
     }
@@ -73,7 +82,8 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
         pauseAll();
       } else {
         spotlightPlayers[spotlightPointer].start();
-        Future.delayed(Duration.zero, () => setState(() => spotlightStates[spotlightPointer] = true));
+        Future.delayed(Duration.zero,
+            () => setState(() => spotlightStates[spotlightPointer] = true));
       }
     });
   }
@@ -82,7 +92,9 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
   Widget build(BuildContext context) {
     listenForChanges();
 
-    double height = MediaQuery.of(context).size.height;
+    Size size = MediaQuery.of(context).size;
+    double height = size.height, width = size.width;
+
     int length = ref.watch(spotlightsProvider).length;
 
     return Scaffold(
@@ -112,7 +124,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
 
                       setState(() {});
                     },
-                    itemBuilder: (_, index) => InkWell(
+                    itemBuilder: (_, index) => GestureDetector(
                       onTap: () {
                         setState(() {
                           if (spotlightStates[index]) {
@@ -122,6 +134,42 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                             spotlightPlayers[index].start();
                             spotlightStates[index] = true;
                           }
+                        });
+                      },
+                      onHorizontalDragStart: (details) {
+                        setState(() {
+                          initialVideoDurationInMilliseconds =
+                              spotlightPlayers[index].currentPos.inMilliseconds;
+                          initialDragDx = details.globalPosition.dx;
+                          showText = true;
+                        });
+                      },
+                      onHorizontalDragUpdate: (details) {
+                        double currentDX = details.globalPosition.dx;
+                        double newPosition = currentDX / width * 1000;
+                        newPosition = newPosition.clamp(0, 1000);
+                        bool reverse = initialDragDx - currentDX > 0;
+
+                        int milliseconds = initialVideoDurationInMilliseconds +
+                            (newPosition *
+                                    fullDragInSeconds *
+                                    (reverse ? -1.0 : 1.0))
+                                .toInt();
+                        FijkPlayer player = spotlightPlayers[index];
+                        player.seekTo(milliseconds);
+
+                        Duration currentDuration =
+                            Duration(milliseconds: milliseconds);
+
+                        setState(() {
+                          durationText =
+                              "${formatDuration(currentDuration)} - ${formatDuration(player.value.duration)}";
+                        });
+                      },
+                      onHorizontalDragEnd: (details) {
+                        setState(() {
+                          showText = false;
+                          durationText = "";
                         });
                       },
                       child: Stack(
@@ -141,7 +189,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeOut,
                             child: ColoredBox(
-                              color: Colors.black54,
+                              color: Colors.black.withOpacity(0.2),
                               child: SizedBox(
                                 width: 390.w,
                                 height: 844.h,
@@ -150,6 +198,25 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                                     Icons.play_arrow_rounded,
                                     size: 64.r,
                                     color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          AnimatedOpacity(
+                            opacity: showText ? 1 : 0,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                            child: ColoredBox(
+                              color: Colors.black.withOpacity(0.2),
+                              child: SizedBox(
+                                width: 390.w,
+                                height: 844.h,
+                                child: Center(
+                                  child: Text(
+                                    durationText,
+                                    style: context.textTheme.headlineMedium!
+                                        .copyWith(color: theme),
                                   ),
                                 ),
                               ),
@@ -169,7 +236,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
               "Spotlight",
               style: context.textTheme.titleMedium!.copyWith(color: theme),
             ),
-          )
+          ),
         ],
       ),
     );

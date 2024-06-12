@@ -92,6 +92,19 @@ String formatDate(String dateTime, {bool shorten = false}) {
   return "${month(m, shorten)} ${day(d)}, $y";
 }
 
+String formatDuration(Duration duration) {
+  String twoDigits(int n) => n >= 10 ? "$n" : "0$n"; // Helper function to pad single digits with zero
+
+  String formattedDuration = "";
+  if (duration.inHours > 0) {
+    formattedDuration += "${twoDigits(duration.inHours)}:";
+  }
+  formattedDuration += "${twoDigits(duration.inMinutes.remainder(60))}:${twoDigits(duration.inSeconds.remainder(60))}";
+
+  return formattedDuration;
+}
+
+
 String month(String val, bool shorten) {
   int month = int.parse(val);
   switch (month) {
@@ -137,12 +150,6 @@ String day(String val) {
   }
 }
 
-String formatDuration(Duration duration) {
-  int total = duration.inSeconds;
-  int min = total ~/ 60;
-  int secs = total - (min * 60);
-  return "$min:$secs";
-}
 
 int fastHash(String string) {
   var hash = 0xcbf29ce484222325;

@@ -186,13 +186,13 @@ class BottomNavBar extends ConsumerWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: currentTab == 1
-                              ? goodYellow
+                              ? primary
                               : (darkTheme ? midPrimary : primary),
                         ),
                         child: Icon(
                           Icons.add_rounded,
                           size: 32.r,
-                          color: currentTab == 1 ? primary : offWhite,
+                          color: currentTab == 1 ? appRed : offWhite,
                         ),
                       ),
                     ),
@@ -206,7 +206,7 @@ class BottomNavBar extends ConsumerWidget {
                       ),
                       child: Container(
                         color: currentTab == 1
-                            ? neutral2
+                            ? primary
                             : (darkTheme ? midPrimary : primary),
                         height: 70.h,
                         child: Row(
