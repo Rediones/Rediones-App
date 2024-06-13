@@ -68,6 +68,7 @@ dependencies:
   awesome_notifications:
   uuid:
   camera_camera:
+  image:
 #  device_preview:
 
 

@@ -22,8 +22,11 @@ abstract class BaseRepository<T> {
 
     await _database.transaction((txn) async {
       for (var element in data) {
-        await txn.insert(table, element,
-            conflictAlgorithm: ConflictAlgorithm.replace);
+        await txn.insert(
+          table,
+          element,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
     });
   }
@@ -51,7 +54,16 @@ abstract class BaseRepository<T> {
     await addAll(t);
   }
 
-  Future<void> deleteAllWhere({String where = "", List<String> whereArgs = const []}) async {
+  Future<void> clearAllAndAddAllWhere(List<T> t,  {String where = "", List<String> whereArgs = const []}) async {
+    await deleteAllWhere(
+      where: where,
+      whereArgs: whereArgs,
+    );
+    await addAll(t);
+  }
+
+  Future<void> deleteAllWhere(
+      {String where = "", List<String> whereArgs = const []}) async {
     await _database.delete(
       table,
       where: where,

@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:rediones/screens/other/camera.dart';
 import 'constants.dart';
 
 import 'package:rediones/screens/auth/create_profile.dart';
@@ -217,4 +218,9 @@ final List<GoRoute> routes = [
     name: Pages.createProfile,
     builder: (_, __) => const CreateProfilePage(),
   ),
+  GoRoute(
+    path: Pages.camera.path,
+    name: Pages.camera,
+    builder: (_, __) => const CameraPage(),
+  )
 ];

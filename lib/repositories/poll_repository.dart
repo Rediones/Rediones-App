@@ -26,10 +26,8 @@ class PollRepository extends BaseRepository<PollData> {
     );
     List<String> likes = response.map((resp) => resp.value).toList();
 
-    List<PollChoice> choices = await pollChoiceRepository.getAll(
-      where: "pollID = ?",
-      whereArgs: [map["serverID"]]
-    );
+    List<PollChoice> choices = await pollChoiceRepository
+        .getAll(where: "pollID = ?", whereArgs: [map["serverID"]]);
 
     var poster = await userRepository.getById(map["posterID"]);
 
@@ -52,7 +50,12 @@ class PollRepository extends BaseRepository<PollData> {
         .toList();
 
     await likesRepository.addAll(response);
-    await pollChoiceRepository.addAll(value.polls);
+    await pollChoiceRepository.clearAllAndAddAllWhere(
+      value.polls,
+      where: "pollID = ?",
+      whereArgs: [value.id],
+    );
+
 
     userRepository.add(value.poster);
 

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/profile_service.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/screens/home/home.dart';
 import 'package:rediones/screens/notification/notification.dart';
 import 'package:rediones/screens/spotlight/spotlight.dart';

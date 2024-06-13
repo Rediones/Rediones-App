@@ -16,7 +16,7 @@ import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/tools/constants.dart';
 
-import 'community_data.dart';
+import '../components/community_data.dart';
 
 const User dummyUser = User(id: "dummy");
 final StateProvider<User> userProvider = StateProvider((ref) => dummyUser);
@@ -297,12 +297,12 @@ final StateProvider<List<String>> eventCategories = StateProvider(
     "Education",
     "Networking",
     "Arts and Culture",
+    "Fun",
     "Health and Wellness",
     "Food and Drink",
     "Carnival",
     "Music",
     "Social Causes",
-    "Fun",
   ],
 );
 

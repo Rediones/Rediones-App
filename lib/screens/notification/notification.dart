@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rediones/api/notification_service.dart';
 import 'package:rediones/components/notification_data.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:timeago/timeago.dart' as time;
@@ -92,81 +92,9 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
       body: TabBarView(
         controller: controller,
         children: [
-          Column(children: [
-            SizedBox(height: 10.h),
-            Expanded(
-              child: !loaded
-                  ? const CenteredPopup()
-                  : (notifications.isEmpty)
-                      ? GestureDetector(
-                          onTap: refresh,
-                          child: Center(
-                            child: Text(
-                              "No notifications available. Tap to refresh",
-                              style: context.textTheme.bodyLarge,
-                            ),
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: refresh,
-                          child: ListView.separated(
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: notifications.length + 1,
-                            itemBuilder: (_, index) =>
-                                (index == notifications.length)
-                                    ? SizedBox(height: 100.h)
-                                    : NotificationHeader(
-                                        notifications[index],
-                                        username: username,
-                                      ),
-                            separatorBuilder: (_, __) => SizedBox(height: 20.h),
-                          ),
-                        ),
-            ),
-          ]),
-          Column(children: [
-            SizedBox(height: 10.h),
-            Expanded(
-              child: !loaded
-                  ? const CenteredPopup()
-                  : (notifications.isEmpty)
-                      ? Center(
-                          child: RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "No posts available.",
-                                  style: context.textTheme.bodyLarge,
-                                ),
-                                TextSpan(
-                                    text: " Tap to refresh",
-                                    style: context.textTheme.bodyLarge!
-                                        .copyWith(color: appRed),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = refresh),
-                              ],
-                            ),
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: refresh,
-                          child: ListView.separated(
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: notifications.length + 1,
-                            itemBuilder: (_, index) =>
-                                (index == notifications.length)
-                                    ? SizedBox(height: 100.h)
-                                    : NotificationHeader(
-                                        notifications[index],
-                                        username: username,
-                                      ),
-                            separatorBuilder: (_, __) => SizedBox(height: 20.h),
-                          ),
-                        ),
-            ),
-          ]),
-          Column(
-            children: [
+          Padding(
+            padding: EdgeInsets.only(left: 15.w),
+            child: Column(children: [
               SizedBox(height: 10.h),
               Expanded(
                 child: !loaded
@@ -198,8 +126,10 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
                             ),
                           ),
               ),
-            ],
+            ]),
           ),
+          const SizedBox(),
+          const SizedBox(),
         ],
       ),
     );
@@ -238,49 +168,58 @@ class _NotificationHeaderState extends State<NotificationHeader> {
               ListTile(
                 leading: SvgPicture.asset("assets/Unfollow User.svg"),
                 title: RichText(
-                    text: TextSpan(children: [
-                  TextSpan(
-                    text: "Unfollow ",
-                    style: context.textTheme.bodyMedium,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Unfollow ",
+                        style: context.textTheme.bodyMedium,
+                      ),
+                      TextSpan(
+                        text: "@${widget.notification.postedBy.nickname}",
+                        style: context.textTheme.bodyMedium!
+                            .copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ],
                   ),
-                  TextSpan(
-                    text: "@${widget.notification.postedBy.nickname}",
-                    style: context.textTheme.bodyMedium!
-                        .copyWith(fontWeight: FontWeight.w700),
-                  )
-                ])),
+                ),
                 onTap: () {},
               ),
               ListTile(
                 leading: SvgPicture.asset("assets/Block User.svg"),
                 title: RichText(
-                    text: TextSpan(children: [
-                  TextSpan(
-                    text: "Block ",
-                    style: context.textTheme.bodyMedium,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Block ",
+                        style: context.textTheme.bodyMedium,
+                      ),
+                      TextSpan(
+                        text: "@${widget.notification.postedBy.nickname}",
+                        style: context.textTheme.bodyMedium!
+                            .copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ],
                   ),
-                  TextSpan(
-                    text: "@${widget.notification.postedBy.nickname}",
-                    style: context.textTheme.bodyMedium!
-                        .copyWith(fontWeight: FontWeight.w700),
-                  )
-                ])),
+                ),
                 onTap: () {},
               ),
               ListTile(
                 leading: SvgPicture.asset("assets/Mute User.svg"),
                 title: RichText(
-                    text: TextSpan(children: [
-                  TextSpan(
-                    text: "Mute ",
-                    style: context.textTheme.bodyMedium,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Mute ",
+                        style: context.textTheme.bodyMedium,
+                      ),
+                      TextSpan(
+                        text: "@${widget.notification.postedBy.nickname}",
+                        style: context.textTheme.bodyMedium!
+                            .copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ],
                   ),
-                  TextSpan(
-                    text: "@${widget.notification.postedBy.nickname}",
-                    style: context.textTheme.bodyMedium!
-                        .copyWith(fontWeight: FontWeight.w700),
-                  )
-                ])),
+                ),
                 onTap: () {},
               ),
             ],
@@ -339,22 +278,20 @@ class _NotificationHeaderState extends State<NotificationHeader> {
                           ),
                         if (!widget.notification.opened) SizedBox(width: 5.w),
                         SizedBox(
-                          width: 250.w,
+                          width: widget.notification.opened ? 270.w : 250.w,
                           child: RichText(
                             overflow: TextOverflow.ellipsis,
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: widget.notification.postedBy.username,
+                                  text: "@${widget.notification.postedBy.nickname}",
                                   style: context.textTheme.bodyLarge!.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 TextSpan(
                                   text: " ${widget.notification.header}",
-                                  style: context.textTheme.bodyLarge!.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: context.textTheme.bodyLarge,
                                 )
                               ],
                             ),
@@ -368,12 +305,12 @@ class _NotificationHeaderState extends State<NotificationHeader> {
                     child: Text(
                       widget.notification.content,
                       overflow: TextOverflow.ellipsis,
-                      style: context.textTheme.bodyMedium,
+                      style: context.textTheme.bodyLarge,
                     ),
                   ),
                   Text(
                     time.format(widget.notification.date),
-                    style: context.textTheme.bodySmall,
+                    style: context.textTheme.bodyMedium,
                   ),
                 ],
               ),

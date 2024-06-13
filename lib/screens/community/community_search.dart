@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rediones/components/community_data.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/widgets.dart';
 

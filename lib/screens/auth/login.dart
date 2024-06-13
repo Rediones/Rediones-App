@@ -2,7 +2,7 @@ import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/tools/constants.dart';
@@ -27,9 +27,9 @@ class _LoginState extends ConsumerState<Login> {
   void initState() {
     super.initState();
     _controller.addListener(() {
-      if(!validPassword && _controller.text.length >= 6) {
+      if (!validPassword && _controller.text.length >= 6) {
         setState(() => validPassword = true);
-      } else if(validPassword && _controller.text.length < 6) {
+      } else if (validPassword && _controller.text.length < 6) {
         setState(() => validPassword = false);
       }
     });
@@ -99,7 +99,7 @@ class _LoginState extends ConsumerState<Login> {
               SizedBox(
                 height: 63.h,
               ),
-              Text("Log In", style: context.textTheme.titleMedium),
+              Text("Log In", style: context.textTheme.titleLarge),
               Text(
                 "Hi, Welcome back.",
                 style: context.textTheme.bodyLarge,
@@ -180,10 +180,8 @@ class _LoginState extends ConsumerState<Login> {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Password must be at least 6 characters",
-                          style: context.textTheme.bodySmall!.copyWith(
-                            color: !validPassword
-                                ? appRed
-                                : possibleGreen,
+                          style: context.textTheme.bodyMedium!.copyWith(
+                            color: !validPassword ? appRed : possibleGreen,
                           ),
                         ),
                       ),
@@ -199,8 +197,10 @@ class _LoginState extends ConsumerState<Login> {
                         onPressed: submit,
                         child: Text(
                           "Login",
-                          style: context.textTheme.bodyLarge!.copyWith(
-                              color: theme, fontWeight: FontWeight.w600),
+                          style: context.textTheme.titleSmall!.copyWith(
+                            color: theme,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       SizedBox(height: 10.h),
@@ -216,8 +216,10 @@ class _LoginState extends ConsumerState<Login> {
                           ),
                           Text(
                             "Click Here",
-                            style: context.textTheme.bodyLarge!
-                                .copyWith(color: appRed),
+                            style: context.textTheme.bodyLarge!.copyWith(
+                              color: appRed,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -252,7 +254,7 @@ class _LoginState extends ConsumerState<Login> {
                             SizedBox(width: 10.w),
                             Text(
                               "log in with Google",
-                              style: context.textTheme.bodyMedium,
+                              style: context.textTheme.bodyLarge,
                             )
                           ],
                         ),
@@ -275,8 +277,10 @@ class _LoginState extends ConsumerState<Login> {
                                 .pushReplacementNamed(Pages.register),
                             child: Text(
                               "Sign Up",
-                              style: context.textTheme.bodyLarge!
-                                  .copyWith(color: appRed),
+                              style: context.textTheme.bodyLarge!.copyWith(
+                                color: appRed,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],

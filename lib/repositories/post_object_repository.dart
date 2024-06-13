@@ -1,3 +1,5 @@
+import 'dart:developer' show log;
+
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
@@ -26,7 +28,7 @@ class PostObjectRepository {
     response.addAll(posts);
     response.addAll(polls);
 
-    response.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    response.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     return response;
   }

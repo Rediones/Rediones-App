@@ -30,10 +30,8 @@ class ImageSlide extends StatelessWidget {
           if (index == 0) {
             return GestureDetector(
               onTap: () {
-                Navigator.of(context)
-                    .push(
-                      MaterialPageRoute(builder: (_) => const CameraPage()),
-                    )
+                context.router
+                    .pushNamed(Pages.camera)
                     .then((res) => onPictureTaken(res));
               },
               child: Container(
@@ -64,8 +62,12 @@ class PostPreview extends StatelessWidget {
   final Duration? duration;
   final VoidCallback onDelete;
 
-  const PostPreview(
-      {super.key, required this.bytes, this.duration, required this.onDelete});
+  const PostPreview({
+    super.key,
+    required this.bytes,
+    this.duration,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {

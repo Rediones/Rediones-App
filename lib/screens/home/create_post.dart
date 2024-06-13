@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/post_service.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
@@ -95,16 +95,20 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                           () => mediaBytes.removeAt(index),
                         ),
                         onPictureTaken: (res) {
-                          if(res == null) return;
+                          if (res == null) return;
                           mediaBytes.add(res as Uint8List);
                         },
                       ),
                       SizedBox(height: 20.h),
                       ListTile(
-                        leading: SvgPicture.asset("assets/Add Gallery.svg",
-                            color: appRed),
-                        title: Text("Gallery",
-                            style: context.textTheme.bodyLarge),
+                        leading: SvgPicture.asset(
+                          "assets/Add Gallery.svg",
+                          color: appRed,
+                        ),
+                        title: Text(
+                          "Gallery",
+                          style: context.textTheme.bodyLarge,
+                        ),
                         onTap: () async {
                           unFocus();
                           List<Uint8List> images =
@@ -156,9 +160,9 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                         },
                         child: Text(
                           "Post",
-                          style: context.textTheme.bodyLarge!.copyWith(
+                          style: context.textTheme.titleSmall!.copyWith(
                             color: theme,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

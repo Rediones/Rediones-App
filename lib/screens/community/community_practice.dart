@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/components/community_data.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
 
 class CommunityPracticePage extends ConsumerStatefulWidget {
@@ -80,8 +80,8 @@ class _CommunityPracticePageState extends ConsumerState<CommunityPracticePage> {
               SizedBox(height: 20.h),
               Text(
                 "Popular Categories",
-                style: context.textTheme.bodyLarge!
-                    .copyWith(fontWeight: FontWeight.w700),
+                style: context.textTheme.titleSmall!
+                    .copyWith(fontWeight: FontWeight.w600),
               ),
               SizedBox(
                 height: 50.h,
@@ -199,8 +199,10 @@ class _CommunityContainer extends StatelessWidget {
             ),
             child: Text(
               "Join",
-              style: context.textTheme.bodyLarge!
-                  .copyWith(color: theme, fontWeight: FontWeight.w600),
+              style: context.textTheme.titleSmall!.copyWith(
+                color: theme,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

@@ -17,7 +17,7 @@ class PollChoice {
 
   @override
   String toString() {
-    return "Choice {name: $name, id: $id, voters: ${voters.length}";
+    return "Choice { name: $name, id: $id, voters: ${voters.length} }";
   }
 }
 
@@ -38,6 +38,11 @@ class PollData extends PostObject {
     this.totalVotes = 0,
     this.durationInHours = 0,
   });
+
+  @override
+  String toString() {
+   return "Poll { totalVotes: $totalVotes, text: $text: polls: $polls }";
+  }
 
   @override
   List<Object> get props => [id];

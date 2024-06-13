@@ -7,14 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rediones/api/event_service.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/components/event_data.dart';
-import 'package:rediones/components/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class CreateEventsPage extends ConsumerStatefulWidget {
@@ -31,8 +32,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
 
   final GlobalKey<FormState> formKey = GlobalKey();
 
-  String formattedDate = "",
-      formattedTime = "";
+  String formattedDate = "", formattedTime = "";
 
   final List<String> chosenCategories = [];
 
@@ -56,7 +56,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
 
   void create() {
     createEvent(details).then(
-          (result) {
+      (result) {
         if (!mounted) return;
         Navigator.of(context).pop();
         showToast(result.message);
@@ -106,13 +106,13 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        "Add Event Cover",
-                        style: context.textTheme.bodyLarge!
+                        "Event Cover",
+                        style: context.textTheme.titleSmall!
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "*",
-                        style: context.textTheme.bodyLarge!
+                        style: context.textTheme.titleSmall!
                             .copyWith(color: appRed),
                       ),
                     ],
@@ -121,26 +121,11 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                   GestureDetector(
                     onTap: () {
                       Future<SingleFileResponse?> response =
-                      FileHandler.single(type: FileType.image);
+                          FileHandler.single(type: FileType.image);
                       response.then(
-                            (value) {
+                        (value) {
                           if (value == null) return;
-
-                          context.router.pushNamed(
-                            Pages.aspectRatio,
-                            extra: [
-                              value.filename,
-                              value.path,
-                            ],
-                          ).then(
-                                (value) async {
-                              if (value == null) return;
-                              Uint8List data =
-                              await FileHandler.convertSingleToData(
-                                  value as String);
-                              setState(() => eventCover = data);
-                            },
-                          );
+                          setState(() => eventCover = value.data);
                         },
                       );
                     },
@@ -152,19 +137,19 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                         color: eventCover == null ? Colors.transparent : null,
                         border: eventCover == null
                             ? Border.all(
-                            color: darkTheme ? neutral3 : fadedPrimary)
+                                color: darkTheme ? neutral3 : fadedPrimary)
                             : null,
                         borderRadius: BorderRadius.circular(15.r),
                         image: eventCover == null
                             ? null
                             : DecorationImage(
-                          image: MemoryImage(eventCover!),
-                          fit: BoxFit.cover,
-                        ),
+                                image: MemoryImage(eventCover!),
+                                fit: BoxFit.cover,
+                              ),
                       ),
                       child: eventCover == null
                           ? Icon(Icons.image_rounded,
-                          size: 32.r, color: Colors.grey)
+                              size: 32.r, color: Colors.grey)
                           : null,
                     ),
                   ),
@@ -174,13 +159,13 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        "Name Of Event",
-                        style: context.textTheme.bodyLarge!
+                        "Event Name",
+                        style: context.textTheme.titleSmall!
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "*",
-                        style: context.textTheme.bodyLarge!
+                        style: context.textTheme.titleSmall!
                             .copyWith(color: appRed),
                       ),
                     ],
@@ -206,13 +191,13 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        "Select Event Category",
-                        style: context.textTheme.bodyLarge!
+                        "Event Category",
+                        style: context.textTheme.titleSmall!
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "*",
-                        style: context.textTheme.bodyLarge!
+                        style: context.textTheme.titleSmall!
                             .copyWith(color: appRed),
                       ),
                     ],
@@ -221,11 +206,12 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                   if (chosenCategories.isNotEmpty)
                     Container(
                       padding:
-                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(25.r),
                         border: Border.all(
-                            color: darkTheme ? neutral3 : fadedPrimary),
+                          color: darkTheme ? neutral3 : fadedPrimary,
+                        ),
                       ),
                       child: Wrap(
                         spacing: 5.w,
@@ -233,30 +219,27 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                         runSpacing: 0,
                         children: List.generate(
                           chosenCategories.length,
-                              (index) =>
-                              Chip(
-                                label: Text(
-                                  chosenCategories[index],
-                                  style: context.textTheme.bodySmall,
-                                ),
-                                elevation: 1.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(25.r),
-                                ),
-                                backgroundColor: neutral3,
-                                side: const BorderSide(
-                                  color: Colors.transparent,
-                                ),
-                                deleteIcon: Icon(
-                                  Boxicons.bx_x,
-                                  color: theme,
-                                  size: 18.r,
-                                ),
-                                onDeleted: () =>
-                                    setState(
-                                            () =>
-                                            chosenCategories.removeAt(index)),
-                              ),
+                          (index) => Chip(
+                            label: Text(
+                              chosenCategories[index],
+                              style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                            ),
+                            elevation: 1.0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25.r),
+                            ),
+                            backgroundColor: neutral3,
+                            side: const BorderSide(
+                              color: Colors.transparent,
+                            ),
+                            deleteIcon: Icon(
+                              Boxicons.bx_x,
+                              color: theme,
+                              size: 18.r,
+                            ),
+                            onDeleted: () => setState(
+                                () => chosenCategories.removeAt(index)),
+                          ),
                         ),
                       ),
                     ),
@@ -269,34 +252,31 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     runSpacing: 8.h,
                     children: List.generate(
                       categories.length,
-                          (index) =>
-                          GestureDetector(
-                            onTap: () =>
-                                setState(
-                                        () =>
-                                        chosenCategories.add(
-                                            categories[index])),
-                            child: Chip(
-                              label: Text(
-                                categories[index],
-                                style: context.textTheme.bodySmall,
-                              ),
-                              elevation: 0.0,
-                              backgroundColor:
-                              chosenCategories.contains(categories[index])
-                                  ? neutral3
-                                  : null,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25.r),
-                              ),
-                              side: BorderSide(
-                                color: chosenCategories.contains(
-                                    categories[index])
-                                    ? Colors.transparent
-                                    : neutral3,
-                              ),
+                      (index) {
+                        String category = categories[index];
+                        bool contained = chosenCategories.contains(category);
+
+                        return GestureDetector(
+                          onTap: () {
+                            if (contained) return;
+                            setState(() => chosenCategories.add(category));
+                          },
+                          child: Chip(
+                            label: Text(
+                              categories[index],
+                              style: context.textTheme.bodyLarge!.copyWith(color: contained ? theme : null),
+                            ),
+                            elevation: 0.0,
+                            backgroundColor: contained ? neutral3 : null,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25.r),
+                            ),
+                            side: BorderSide(
+                              color: contained ? Colors.transparent : neutral3,
                             ),
                           ),
+                        );
+                      },
                     ),
                   ),
                   SizedBox(height: 22.h),
@@ -305,13 +285,13 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        "Add Location",
-                        style: context.textTheme.bodyLarge!
+                        "Event Location",
+                        style: context.textTheme.titleSmall!
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "*",
-                        style: context.textTheme.bodyLarge!
+                        style: context.textTheme.titleSmall!
                             .copyWith(color: appRed),
                       ),
                     ],
@@ -322,10 +302,15 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     hint: "e.g Somewhere in the world",
                     width: 390.w,
                     height: 40.h,
-                    prefix: Icon(
-                      Icons.location_on_rounded,
-                      color: appRed,
-                      size: 16.r,
+                    prefix: SizedBox(
+                      height: 40.h,
+                      width: 40.h,
+                      child: SvgPicture.asset(
+                        "assets/Profile Location.svg",
+                        width: 20.h,
+                        height: 20.h,
+                        fit: BoxFit.scaleDown,
+                      ),
                     ),
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
@@ -343,12 +328,12 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     children: [
                       Text(
                         "Date and Time",
-                        style: context.textTheme.bodyLarge!
+                        style: context.textTheme.titleSmall!
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "*",
-                        style: context.textTheme.bodyLarge!
+                        style: context.textTheme.titleSmall!
                             .copyWith(color: appRed),
                       ),
                     ],
@@ -382,8 +367,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                             );
                             if (pickedDate != null) {
                               setState(
-                                    () =>
-                                formattedDate = formatDate(
+                                () => formattedDate = formatDate(
                                     DateFormat("dd/MM/yyyy")
                                         .format(pickedDate!),
                                     shorten: true),
@@ -396,9 +380,10 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                               pickedDate == null
                                   ? "Jan 1, 2023"
                                   : formattedDate,
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                  fontWeight: pickedDate == null ? FontWeight
-                                      .w200 : FontWeight.normal),
+                              style: context.textTheme.bodyLarge!.copyWith(
+                                  fontWeight: pickedDate == null
+                                      ? FontWeight.w200
+                                      : FontWeight.normal),
                             ),
                           ),
                         ),
@@ -414,7 +399,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                               context: context,
                               initialTime: TimeOfDay.now(),
                             ).then(
-                                  (val) {
+                              (val) {
                                 pickedTime = val;
                                 if (pickedTime != null) {
                                   String format = pickedTime!.format(context);
@@ -427,9 +412,10 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                             width: 60.w,
                             child: Text(
                               pickedDate == null ? "12:00 AM" : formattedTime,
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                  fontWeight: pickedDate == null ? FontWeight
-                                      .w200 : FontWeight.normal),
+                              style: context.textTheme.bodyLarge!.copyWith(
+                                  fontWeight: pickedDate == null
+                                      ? FontWeight.w200
+                                      : FontWeight.normal),
                             ),
                           ),
                         ),
@@ -443,12 +429,12 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     children: [
                       Text(
                         "Description",
-                        style: context.textTheme.bodyLarge!
+                        style: context.textTheme.titleSmall!
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "*",
-                        style: context.textTheme.bodyLarge!
+                        style: context.textTheme.titleSmall!
                             .copyWith(color: appRed),
                       ),
                     ],
@@ -470,40 +456,39 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     onSave: (value) => details["description"] = value!,
                   ),
                   SizedBox(height: 64.h),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20.h),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(390.w, 40.h),
-                        backgroundColor: appRed,
-                      ),
-                      onPressed: () {
-                        unFocus();
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(390.w, 40.h),
+                      backgroundColor: appRed,
+                    ),
+                    onPressed: () {
+                      unFocus();
 
-                        if (eventCover == null) {
-                          showToast("Please choose event cover image");
-                          return;
-                        }
+                      if (eventCover == null) {
+                        showToast("Please choose event cover image");
+                        return;
+                      }
 
-                        FormState? currentState = formKey.currentState;
-                        if (currentState != null) {
-                          if (!currentState.validate()) return;
-                          currentState.save();
+                      FormState? currentState = formKey.currentState;
+                      if (currentState != null) {
+                        if (!currentState.validate()) return;
+                        currentState.save();
 
-                          details["categories"] = chosenCategories;
-                          details["cover"] = {
-                            "file": {"name": ""},
-                            "base64":
-                            "$imgPrefix${FileHandler.convertTo64(eventCover!)}"
-                          };
+                        details["categories"] = chosenCategories;
+                        details["cover"] = {
+                          "file": {"name": ""},
+                          "base64":
+                              "$imgPrefix${FileHandler.convertTo64(eventCover!)}"
+                        };
 
-                          create();
-                        }
-                      },
-                      child: Text(
-                        "Create",
-                        style: context.textTheme.bodyLarge!.copyWith(
-                            color: theme, fontWeight: FontWeight.w500),
+                        create();
+                      }
+                    },
+                    child: Text(
+                      "Create",
+                      style: context.textTheme.titleSmall!.copyWith(
+                        color: theme,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -647,20 +632,18 @@ class _AspectRatioPageState extends State<AspectRatioPage>
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: List.generate(
                     aspectRatios.length,
-                        (index) =>
-                        GestureDetector(
-                          onTap: () {
-                            cropController.aspectRatio =
-                                aspectRatios[index].value;
-                            cropController.crop =
+                    (index) => GestureDetector(
+                      onTap: () {
+                        cropController.aspectRatio = aspectRatios[index].value;
+                        cropController.crop =
                             const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9);
-                          },
-                          child: Text(
-                            aspectRatios[index].name,
-                            style: context.textTheme.bodyLarge!
-                                .copyWith(fontWeight: FontWeight.w500),
-                          ),
-                        ),
+                      },
+                      child: Text(
+                        aspectRatios[index].name,
+                        style: context.textTheme.bodyLarge!
+                            .copyWith(fontWeight: FontWeight.w500),
+                      ),
+                    ),
                   ),
                 ),
               ),

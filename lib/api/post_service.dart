@@ -6,7 +6,7 @@ import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/comment_data.dart';
 import 'package:rediones/api/profile_service.dart';
-import 'package:rediones/components/providers.dart' show dummyPosts;
+import 'package:rediones/tools/providers.dart' show dummyPosts;
 
 export 'package:rediones/api/base.dart' show RedionesResponse, Status;
 
@@ -44,10 +44,8 @@ PostObject processPost(Map<String, dynamic> result) {
 
   if (result["type"] == "POST") {
     result["media"] = fromArrayString(result["media"] as List<dynamic>);
-    log(result.toString());
     return Post.fromJson(result);
   } else if (result["type"] == "POLL") {
-    log(result.toString());
     return PollData.fromJson(result);
   }
 

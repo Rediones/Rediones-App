@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rediones/components/community_data.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/widgets.dart';
@@ -93,7 +93,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             elevation: 0.0,
             floating: true,
             pinned: true,
-            title: Text("Search", style: context.textTheme.titleLarge),
+            title: Text(
+              "Search",
+              style: context.textTheme.titleLarge,
+            ),
           ),
           SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -128,7 +131,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   Text(
                     "Recent Searches",
                     style: context.textTheme.titleSmall!
-                        .copyWith(fontWeight: FontWeight.w700),
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 10.h),
                 ],
@@ -142,8 +145,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(recentSearches[index],
-                      style: context.textTheme.bodyLarge,),
+                  Text(
+                    recentSearches[index],
+                    style: context.textTheme.bodyLarge,
+                  ),
                   GestureDetector(
                     onTap: () => setState(
                       () => recentSearches.removeAt(index),
@@ -171,7 +176,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   Text(
                     "Suggested",
                     style: context.textTheme.titleSmall!
-                        .copyWith(fontWeight: FontWeight.w700),
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 10.h),
                   SizedBox(
@@ -195,7 +200,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   Text(
                     "Communities",
                     style: context.textTheme.titleSmall!
-                        .copyWith(fontWeight: FontWeight.w700),
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 10.h),
                 ],
@@ -280,9 +285,10 @@ class SuggestedContainer extends StatelessWidget {
                   child: Center(
                     child: Text(
                       user.username,
-                      overflow: TextOverflow.ellipsis,
+                      overflow: TextOverflow.visible,
                       style: context.textTheme.bodyLarge!
-                          .copyWith(fontWeight: FontWeight.w700),
+                          .copyWith(fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
@@ -291,7 +297,7 @@ class SuggestedContainer extends StatelessWidget {
                   width: 100.w,
                   child: Center(
                     child: Text("@${user.nickname}",
-                        style: context.textTheme.labelSmall),
+                        style: context.textTheme.labelMedium,),
                   ),
                 ),
                 SizedBox(height: 10.h),
@@ -358,7 +364,7 @@ class CommunityContainer extends StatelessWidget {
               child: Text(
                 data.name,
                 overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodyLarge!
+                style: context.textTheme.titleSmall!
                     .copyWith(fontWeight: FontWeight.w600),
               ),
             ),
@@ -371,9 +377,13 @@ class CommunityContainer extends StatelessWidget {
               maximumSize: Size(100.w, 30.h),
             ),
             onPressed: onFollow,
-            child: Text("Follow",
-                style: context.textTheme.bodyMedium!
-                    .copyWith(fontWeight: FontWeight.w600, color: primary)),
+            child: Text(
+              "Follow",
+              style: context.textTheme.bodyLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+                color: primary,
+              ),
+            ),
           ),
         ],
       ),

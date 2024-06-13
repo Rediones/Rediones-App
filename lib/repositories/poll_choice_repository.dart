@@ -1,5 +1,3 @@
-
-
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/repositories/base_repository.dart';
 import 'package:rediones/repositories/string_list_repository.dart';
@@ -9,7 +7,8 @@ class PollChoiceRepository extends BaseRepository<PollChoice> {
   static const String pollChoicesTable = "PollsChoices";
   static const String pollVotersTable = "PollsVoters";
 
-  final StringListModelRepository votersRepository = StringListModelRepository(tableName: pollVotersTable);
+  final StringListModelRepository votersRepository = StringListModelRepository(
+      tableName: pollVotersTable);
 
 
   @override
@@ -18,7 +17,6 @@ class PollChoiceRepository extends BaseRepository<PollChoice> {
 
   @override
   Future<PollChoice> fromJson(Map<String, dynamic> map) async {
-
     var response = await votersRepository.getAll(
       where: "${StringListModel.referenceColumn} = ?",
       whereArgs: [map["choiceServerID"]],
@@ -34,22 +32,23 @@ class PollChoiceRepository extends BaseRepository<PollChoice> {
   }
 
 
-
   @override
   Future<Map<String, dynamic>> toJson(PollChoice value) async {
     var response = value.voters
         .map((val) => StringListModel(referenceID: value.id, value: val))
         .toList();
 
-    await votersRepository.addAll(response);
+    await votersRepository.clearAllAndAddAllWhere(response,
+      whereArgs: [value.id],
+      where: "${StringListModel.referenceColumn} = ?",
+    );
 
     return {
-      'title' : value.name,
-      'choiceServerID' : value.id,
-      'pollID' : value.rootID,
+      'title': value.name,
+      'choiceServerID': value.id,
+      'pollID': value.rootID,
     };
   }
-
 
 
 }

@@ -1,11 +1,13 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:rediones/components/event_data.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:rediones/api/event_service.dart';
+import 'package:rediones/components/event_data.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class EventsPage extends ConsumerStatefulWidget {
@@ -53,7 +55,10 @@ class _EventsPageState extends ConsumerState<EventsPage> {
           onPressed: () => context.router.pop(),
         ),
         elevation: 0.0,
-        title: Text("Events", style: context.textTheme.titleLarge),
+        title: Text(
+          "Events",
+          style: context.textTheme.titleLarge,
+        ),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 15.w),
@@ -108,7 +113,17 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                 borderColor: Colors.transparent,
                 action: TextInputAction.go,
                 onActionPressed: (value) {},
-                prefix: Icon(Icons.search_rounded, size: 20.r, color: appRed),
+                prefix: SizedBox(
+                  height: 40.h,
+                  width: 40.h,
+                  child: SvgPicture.asset(
+                    "assets/Search Icon.svg",
+                    width: 20.h,
+                    height: 20.h,
+                    color: darkTheme ? Colors.white54 : Colors.black45,
+                    fit: BoxFit.scaleDown,
+                  ),
+                ),
               ),
               SizedBox(height: 10.h),
               Expanded(
@@ -116,8 +131,25 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                     ? const CenteredPopup()
                     : events.isEmpty
                         ? Center(
-                            child: Text("No Events Available",
-                                style: context.textTheme.bodyLarge),
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "No events available.",
+                                    style: context.textTheme.bodyLarge,
+                                  ),
+                                  TextSpan(
+                                      text: " Tap to refresh",
+                                      style: context.textTheme.bodyLarge!
+                                          .copyWith(color: appRed),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          setState(() => loadedForYou = false);
+                                          fetchEvents();
+                                        }),
+                                ],
+                              ),
+                            ),
                           )
                         : RefreshIndicator(
                             onRefresh: () async {

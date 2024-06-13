@@ -7,7 +7,7 @@ import 'package:timeago/timeago.dart' as time;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:rediones/components/group_data.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/widgets.dart';
 

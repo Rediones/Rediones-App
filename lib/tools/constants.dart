@@ -53,6 +53,7 @@ class Pages
   static const String notification = "notification";
   static const String events = "events";
   static const String groups = "groups";
+  static const String camera = "camera";
   static const String communityPractice = "community-practice";
   static const String createProfile = "create-profile";
   static const String profile = "profile";

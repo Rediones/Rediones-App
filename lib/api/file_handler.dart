@@ -141,7 +141,7 @@ class FileHandler {
       List<SingleFileResponse> response = [];
       List<PlatformFile> files = result.files;
       for (PlatformFile file in files) {
-        response.add(_convert(file));
+        response.add(await _convert(file));
       }
       return response;
     }
@@ -149,12 +149,18 @@ class FileHandler {
     return null;
   }
 
-  static SingleFileResponse _convert(PlatformFile file) => SingleFileResponse(
-        path: file.path!,
-        extension: file.extension!,
-        filename: file.name,
-        size: file.size,
-      );
+  static Future<SingleFileResponse> _convert(PlatformFile file) async {
+
+    Uint8List data = await convertSingleToData(file.path!);
+
+    return SingleFileResponse(
+      path: file.path!,
+      extension: file.extension!,
+      filename: file.name,
+      size: file.size,
+      data: data,
+    );
+  }
 }
 
 class SingleFileResponse {
@@ -162,12 +168,14 @@ class SingleFileResponse {
   String filename;
   String extension;
   int size;
+  Uint8List data;
 
   SingleFileResponse({
     this.path = "",
     this.filename = "",
     this.extension = "",
     this.size = 0,
+    required this.data,
   });
 
   @override

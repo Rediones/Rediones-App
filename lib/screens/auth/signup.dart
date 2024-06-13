@@ -2,7 +2,7 @@ import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/tools/constants.dart';
@@ -67,9 +67,9 @@ class _SignupState extends ConsumerState<Signup> {
     authenticate(_authDetails, Pages.register).then(
       (result) {
         f.showError(
-            result.status == Status.failed
-                ? result.message
-                : "Account Created Successfully",
+          result.status == Status.failed
+              ? result.message
+              : "Account Created Successfully",
         );
 
         if (result.status == Status.success) {
@@ -112,7 +112,7 @@ class _SignupState extends ConsumerState<Signup> {
               SizedBox(
                 height: 63.h,
               ),
-              Text("Sign Up", style: context.textTheme.titleMedium),
+              Text("Sign Up", style: context.textTheme.titleLarge),
               Text(
                 "Welcome to Rediones",
                 style: context.textTheme.bodyLarge,
@@ -172,7 +172,6 @@ class _SignupState extends ConsumerState<Signup> {
                         hint: "Last Name",
                       ),
                       SizedBox(height: 10.h),
-
                       SpecialForm(
                         width: 390.w,
                         height: 40.h,
@@ -240,7 +239,7 @@ class _SignupState extends ConsumerState<Signup> {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Password must be at least 6 characters",
-                          style: context.textTheme.bodySmall!.copyWith(
+                          style: context.textTheme.bodyMedium!.copyWith(
                             color: !validPassword ? appRed : possibleGreen,
                           ),
                         ),
@@ -288,7 +287,7 @@ class _SignupState extends ConsumerState<Signup> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             "Passwords do not match",
-                            style: context.textTheme.bodySmall!.copyWith(
+                            style: context.textTheme.bodyMedium!.copyWith(
                               color: appRed,
                             ),
                           ),
@@ -305,8 +304,10 @@ class _SignupState extends ConsumerState<Signup> {
                         onPressed: submit,
                         child: Text(
                           "Sign up",
-                          style: context.textTheme.bodyLarge!.copyWith(
-                              color: theme, fontWeight: FontWeight.w600),
+                          style: context.textTheme.titleSmall!.copyWith(
+                            color: theme,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       SizedBox(height: 10.h),
@@ -325,8 +326,10 @@ class _SignupState extends ConsumerState<Signup> {
                                 .pushReplacementNamed(Pages.login),
                             child: Text(
                               "Log In",
-                              style: context.textTheme.bodyLarge!
-                                  .copyWith(color: appRed),
+                              style: context.textTheme.bodyLarge!.copyWith(
+                                color: appRed,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -362,7 +365,7 @@ class _SignupState extends ConsumerState<Signup> {
                             SizedBox(width: 10.w),
                             Text(
                               "sign up with Google",
-                              style: context.textTheme.bodyMedium,
+                              style: context.textTheme.bodyLarge,
                             )
                           ],
                         ),

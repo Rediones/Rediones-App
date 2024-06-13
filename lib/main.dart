@@ -13,7 +13,7 @@ import 'package:rediones/repositories/post_object_repository.dart';
 
 import 'api/file_handler.dart';
 
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/repositories/user_repository.dart';
 
 import 'package:rediones/tools/constants.dart' as c;
@@ -72,7 +72,6 @@ class _RedionesState extends ConsumerState<Rediones>
 
     FlutterNativeSplash.remove();
 
-
     // Future.delayed(
     //     const Duration(milliseconds: 500),
     //     () => FileHandler.loadAuthDetails().then((details) {
@@ -95,13 +94,14 @@ class _RedionesState extends ConsumerState<Rediones>
         title: 'Rediones',
         debugShowCheckedModeBanner: false,
         theme: FlexThemeData.light(
-            fontFamily: "Nunito",
-            useMaterial3: true,
-            scheme: FlexScheme.mandyRed,
-            textTheme: lightTheme,
-            appBarStyle: FlexAppBarStyle.scaffoldBackground,
-            surfaceTint: Colors.transparent,
-            appBarElevation: 1.0),
+          fontFamily: "Nunito",
+          useMaterial3: true,
+          scheme: FlexScheme.mandyRed,
+          textTheme: lightTheme,
+          appBarStyle: FlexAppBarStyle.scaffoldBackground,
+          surfaceTint: Colors.transparent,
+          appBarElevation: 1.0,
+        ),
         darkTheme: FlexThemeData.dark(
           fontFamily: "Nunito",
           useMaterial3: true,

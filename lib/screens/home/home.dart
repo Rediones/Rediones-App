@@ -12,7 +12,7 @@ import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
-import 'package:rediones/components/providers.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/repositories/post_object_repository.dart';
 import 'package:rediones/screens/home/comments.dart';
 import 'package:rediones/tools/constants.dart';
@@ -126,10 +126,12 @@ class _HomeState extends ConsumerState<Home> {
 
     bool darkTheme = context.isDark;
 
+    bool isLoggedIn = ref.watch(userProvider) != dummyUser;
+
     return Scaffold(
       key: _scaffoldKey,
       drawer: SizedBox(
-        width: 250.w,
+        width: 290.w,
         child: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
@@ -196,8 +198,10 @@ class _HomeState extends ConsumerState<Home> {
               SizedBox(height: 30.h),
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
-                leading: SvgPicture.asset("assets/Groups.svg",
-                    color: !darkTheme ? Colors.black : null),
+                leading: SvgPicture.asset(
+                  "assets/Groups.svg",
+                  color: appRed,
+                ),
                 title: Text("Groups", style: context.textTheme.bodyLarge),
                 onTap: () {
                   Navigator.pop(context);
@@ -208,10 +212,9 @@ class _HomeState extends ConsumerState<Home> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
                 leading: SvgPicture.asset(
                   "assets/Community.svg",
-                  color: !darkTheme ? Colors.black : null,
+                  color: appRed,
                 ),
-                title: Text("Community Practice",
-                    style: context.textTheme.bodyLarge),
+                title: Text("Projects", style: context.textTheme.bodyLarge),
                 onTap: () {
                   Navigator.pop(context);
                   context.router.pushNamed(Pages.communityPractice);
@@ -219,8 +222,10 @@ class _HomeState extends ConsumerState<Home> {
               ),
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
-                leading: SvgPicture.asset("assets/Events.svg",
-                    color: !darkTheme ? Colors.black : null),
+                leading: SvgPicture.asset(
+                  "assets/Events.svg",
+                  color: appRed,
+                ),
                 title: Text("Events", style: context.textTheme.bodyLarge),
                 onTap: () {
                   Navigator.pop(context);
@@ -234,8 +239,10 @@ class _HomeState extends ConsumerState<Home> {
                   logout(ref);
                   context.router.goNamed(Pages.splash);
                 },
-                leading: SvgPicture.asset("assets/Logout.svg",
-                    color: !darkTheme ? Colors.black : null),
+                leading: SvgPicture.asset(
+                  "assets/Logout.svg",
+                  color: appRed,
+                ),
                 title: Text("Log Out", style: context.textTheme.bodyLarge),
               ),
             ],
@@ -250,7 +257,11 @@ class _HomeState extends ConsumerState<Home> {
           child: Padding(
             padding: EdgeInsets.only(left: 10.w),
             child: GestureDetector(
-              onTap: () => _scaffoldKey.currentState!.openDrawer(),
+              onTap: () {
+                if(isLoggedIn) {
+                  _scaffoldKey.currentState!.openDrawer();
+                }
+              },
               child: CachedNetworkImage(
                 imageUrl: profilePicture,
                 errorWidget: (context, url, error) => CircleAvatar(
@@ -277,7 +288,7 @@ class _HomeState extends ConsumerState<Home> {
         automaticallyImplyLeading: false,
         title: GestureDetector(
           onTap: () {
-            if(posts.length < 4) {
+            if (posts.length < 4) {
               setState(() => loading = true);
               fetchPosts();
             } else {
@@ -397,13 +408,15 @@ class _HomeState extends ConsumerState<Home> {
                               duration: const Duration(milliseconds: 750),
                               child: SlideAnimation(
                                 verticalOffset: 25.h,
-                                child: FadeInAnimation(child: PostObjectContainer(
-                                  postObject: post,
-                                  onCommentClicked: () => onCommentClicked(
-                                    post.id,
-                                    getComments(post.id),
+                                child: FadeInAnimation(
+                                  child: PostObjectContainer(
+                                    postObject: post,
+                                    onCommentClicked: () => onCommentClicked(
+                                      post.id,
+                                      getComments(post.id),
+                                    ),
                                   ),
-                                ),),
+                                ),
                               ),
                             );
                           },
