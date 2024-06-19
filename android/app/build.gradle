@@ -66,6 +66,13 @@ android {
                     auth0Scheme: "demo"
             ]
         }
+
+        profile {
+            manifestPlaceholders = [
+                    auth0Domain: "your_auth0_domain",
+                    auth0Scheme: "demo"
+            ]
+        }
     }
 
     // buildTypes {

@@ -4,3 +4,4 @@ export 'widgets/events.dart';
 export 'widgets/groups.dart';
 export 'widgets/home.dart';
 export 'widgets/projects.dart';
+export 'widgets/spotlight.dart';

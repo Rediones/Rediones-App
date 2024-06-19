@@ -1,19 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rediones/api/file_handler.dart';
+import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/components/event_data.dart';
 import 'package:rediones/components/group_data.dart';
+import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/notification_data.dart';
 import 'package:rediones/components/pocket_data.dart';
-import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/project_data.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/user_data.dart';
-import 'package:rediones/api/file_handler.dart';
-import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/tools/constants.dart';
 
 import '../components/community_data.dart';
@@ -24,81 +24,89 @@ final StateProvider<User> userProvider = StateProvider((ref) => dummyUser);
 final StateProvider<List<PostObject>> postsProvider =
     StateProvider((ref) => []);
 
-final StateProvider<List<SpotlightData>> spotlightsProvider =
-    StateProvider((ref) => const [
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
-            poster: dummyUser,
-          ),
-          SpotlightData(
-            id: "id",
-            url:
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
-            poster: dummyUser,
-          ),
-        ]);
+final StateProvider<List<SpotlightData>> spotlightsProvider = StateProvider(
+  (ref) {
+    if(ref.watch(userProvider) == dummyUser) {
+      return [];
+    }
+
+    return [
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+        poster: ref.watch(userProvider),
+      ),
+      SpotlightData(
+        id: "id",
+        url:
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
+        poster: ref.watch(userProvider),
+      ),
+    ];
+
+  },
+);
 
 final StateProvider<List<NotificationData>> notificationsProvider =
     StateProvider((ref) => []);

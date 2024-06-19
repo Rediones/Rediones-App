@@ -1,15 +1,12 @@
-import 'dart:developer';
-
+import 'package:fijkplayer/fijkplayer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/components/spotlight_data.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
-
-import 'package:fijkplayer/fijkplayer.dart';
 
 class SpotlightPage extends ConsumerStatefulWidget {
   const SpotlightPage({super.key});
@@ -38,7 +35,6 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
   void initState() {
     super.initState();
 
-    Future.delayed(Duration.zero, fetchSpotlights);
   }
 
   Future<void> fetchSpotlights() async {
@@ -86,6 +82,12 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
             () => setState(() => spotlightStates[spotlightPointer] = true));
       }
     });
+
+    ref.listen(userProvider, (oldUser, newUser) {
+      if(oldUser == dummyUser && newUser != dummyUser) {
+        fetchSpotlights();
+      }
+    });
   }
 
   @override
@@ -96,6 +98,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
     double height = size.height, width = size.width;
 
     int length = ref.watch(spotlightsProvider).length;
+    List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
 
     return Scaffold(
       backgroundColor: primary,
@@ -170,6 +173,8 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                         setState(() {
                           showText = false;
                           durationText = "";
+                          spotlightPlayers[index].start();
+                          spotlightStates[index] = true;
                         });
                       },
                       child: Stack(
@@ -221,6 +226,30 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                                 ),
                               ),
                             ),
+                          ),
+                          Positioned(
+                            right: 10.w,
+                            bottom: 80.h,
+                            child: SpotlightToolbar(
+                              data: spotlights[index],
+                              liked: true,
+                              onLike: () {},
+                              bookmarked: false,
+                              onCommentClicked: () {},
+                              commentsFuture: () async {
+                                await Future.delayed(Duration.zero);
+                                return 1;
+                              }(),
+                              onBookmark: () {},
+                            ),
+                          ),
+                          Positioned(
+                            left: 10.w,
+                            bottom: 100.h,
+                            child: SpotlightUserData(
+                              text: loremIpsum,
+                              postedBy: spotlights[index].poster,
+                            ),
                           )
                         ],
                       ),
@@ -231,7 +260,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
           ),
           Positioned(
             top: 10.h,
-            left: 15.w,
+            left: 10.w,
             child: Text(
               "Spotlight",
               style: context.textTheme.titleMedium!.copyWith(color: theme),

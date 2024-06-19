@@ -1,23 +1,23 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:rediones/api/base.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/api/profile_service.dart';
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/screens/other/media_view.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:timeago/timeago.dart' as time;
 
@@ -186,13 +186,13 @@ class BottomNavBar extends ConsumerWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: currentTab == 1
-                              ? primary
+                              ? goodYellow
                               : (darkTheme ? midPrimary : primary),
                         ),
                         child: Icon(
                           Icons.add_rounded,
                           size: 32.r,
-                          color: currentTab == 1 ? appRed : offWhite,
+                          color: currentTab == 1 ? primary : offWhite,
                         ),
                       ),
                     ),
@@ -695,25 +695,23 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
             showExtension: showExtension,
           ),
           SizedBox(height: 20.h),
-          GestureDetector(
-            onTap: () => setState(() => expandText = !expandText),
-            child: RichText(
-              text: TextSpan(
-                children: [
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text:
+                      "${widget.postObject.text.substring(0, expandText ? null : (widget.postObject.text.length >= 150 ? 150 : widget.postObject.text.length))}"
+                      "${widget.postObject.text.length >= 150 && !expandText ? "..." : ""}",
+                  style: context.textTheme.bodyMedium,
+                ),
+                if (widget.postObject.text.length > 150)
                   TextSpan(
-                    text:
-                        "${widget.postObject.text.substring(0, expandText ? null : (widget.postObject.text.length >= 150 ? 150 : widget.postObject.text.length))}"
-                        "${widget.postObject.text.length >= 150 && !expandText ? "..." : ""}",
-                    style: context.textTheme.bodyMedium,
+                    text: expandText ? " Read Less" : " Read More",
+                    style:
+                        context.textTheme.bodyMedium!.copyWith(color: appRed),
+                    recognizer: TapGestureRecognizer()..onTap = () => setState(() => expandText = !expandText),
                   ),
-                  if (widget.postObject.text.length > 150)
-                    TextSpan(
-                      text: expandText ? " Read Less" : " Read More",
-                      style:
-                          context.textTheme.bodyMedium!.copyWith(color: appRed),
-                    ),
-                ],
-              ),
+              ],
             ),
           ),
           SizedBox(height: 10.h),
@@ -911,21 +909,26 @@ class _PostFooter extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedSwitcherZoom.zoomIn(
-              duration: const Duration(milliseconds: 200),
-              child: IconButton(
-                key: ValueKey<bool>(liked),
-                splashRadius: 0.01,
-                onPressed: onLike,
-                iconSize: 20.r,
-                icon: Icon(liked ? Boxicons.bxs_like : Boxicons.bx_like,
-                    color: liked ? appRed : null),
+            Skeleton.ignore(
+              ignore: true,
+              child: AnimatedSwitcherZoom.zoomIn(
+                duration: const Duration(milliseconds: 200),
+                child: IconButton(
+                  key: ValueKey<bool>(liked),
+                  splashRadius: 0.01,
+                  onPressed: onLike,
+                  icon: SvgPicture.asset(
+                    "assets/Like ${liked ? "F" : "Unf"}illed.svg",
+                    color: darkTheme && !liked ? Colors.white : null,
+                    width: 22.r,
+                  ),
+                ),
               ),
             ),
             SizedBox(width: 5.w),
             Text(
               "${object.likes.length}",
-              style: context.textTheme.bodyMedium,
+              style: context.textTheme.bodyLarge,
             )
           ],
         ),
@@ -938,9 +941,9 @@ class _PostFooter extends StatelessWidget {
                 icon: SvgPicture.asset(
                   "assets/Comment Post.svg",
                   color: darkTheme ? Colors.white : null,
+                  width: 22.r,
                 ),
                 onPressed: onCommentClicked,
-                splashRadius: 0.01,
               ),
             ),
             SizedBox(width: 5.w),
@@ -955,7 +958,7 @@ class _PostFooter extends StatelessWidget {
                 }
                 return Text(
                   text,
-                  style: context.textTheme.bodyMedium,
+                  style: context.textTheme.bodyLarge,
                 );
               },
             ),
@@ -970,6 +973,7 @@ class _PostFooter extends StatelessWidget {
                 icon: SvgPicture.asset(
                   "assets/Reply.svg",
                   color: darkTheme ? Colors.white : null,
+                  width: 22.r,
                 ),
                 onPressed: () {},
                 splashRadius: 0.01,
@@ -978,20 +982,24 @@ class _PostFooter extends StatelessWidget {
             SizedBox(width: 5.w),
             Text(
               "${object.shares}",
-              style: context.textTheme.bodyMedium,
+              style: context.textTheme.bodyLarge,
             )
           ],
         ),
-        AnimatedSwitcherZoom.zoomIn(
-          duration: const Duration(milliseconds: 200),
-          child: IconButton(
-            key: ValueKey<bool>(bookmarked),
-            icon: Icon(
-                bookmarked ? Boxicons.bxs_bookmark : Boxicons.bx_bookmark,
-                color: bookmarked ? appRed : null),
-            iconSize: 20.r,
-            splashRadius: 0.01,
-            onPressed: onBookmark,
+        Skeleton.ignore(
+          ignore: true,
+          child: AnimatedSwitcherZoom.zoomIn(
+            duration: const Duration(milliseconds: 200),
+            child: IconButton(
+              key: ValueKey<bool>(bookmarked),
+              icon: SvgPicture.asset(
+                "assets/Bookmark${bookmarked ? " Filled" : ""}.svg",
+                color: darkTheme && !bookmarked ? Colors.white : null,
+                width: bookmarked ? 24.r : 18.r,
+
+              ),
+              onPressed: onBookmark,
+            ),
           ),
         ),
       ],
@@ -1170,9 +1178,9 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          // if (!hasVoted) {
-                          vote(choice.id, index);
-                          // }
+                          if (!hasVoted) {
+                            vote(choice.id, index);
+                          }
                         },
                         child: Row(
                           children: [
@@ -1209,7 +1217,7 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
                     padding: EdgeInsets.only(left: 20.r + 5.w),
                     child: LinearProgressIndicator(
                       color: appRed,
-                      backgroundColor: gray3,
+                      backgroundColor: context.isDark ? neutral2 : gray3,
                       minHeight: 10.h,
                       borderRadius: BorderRadius.circular(5.h),
                       value: percentage,
@@ -1225,7 +1233,7 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
         Padding(
           padding: EdgeInsets.only(left: 20.r + 5.w),
           child: Text(
-            "${formatRawAmount(widget.poll.totalVotes)} votes",
+            "${formatRawAmount(widget.poll.totalVotes)} vote${widget.poll.totalVotes == 1 ? "" : "s"}",
             style: context.textTheme.bodyLarge,
           ),
         ),
