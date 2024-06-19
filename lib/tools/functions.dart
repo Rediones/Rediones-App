@@ -7,26 +7,28 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rediones/tools/constants.dart';
 
 void showNewError(String message, BuildContext context) {
+  if(message.isEmpty) return;
+
   HapticFeedback.vibrate();
   AnimatedSnackBar snackBar = AnimatedSnackBar(
     builder: (context) => ConstrainedBox(
       constraints: BoxConstraints(
-        minWidth: 10.w,
+        minWidth: 50.w,
         maxWidth: 220.w,
         minHeight: 40.h,
       ),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: appRed,
           borderRadius: BorderRadius.circular(5.r),
         ),
-        alignment: Alignment.center,
-        child: Text(
-          message,
-          style: context.textTheme.bodySmall!.copyWith(
-            color: theme,
-            fontWeight: FontWeight.w700,
+        child: Center(
+          child: Text(
+            message,
+            style: context.textTheme.bodySmall!.copyWith(
+              color: theme,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),

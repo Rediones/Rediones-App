@@ -38,12 +38,15 @@ void main() async {
   await DatabaseManager.init();
   // await DatabaseManager.clearDatabase();
 
-  // FlutterNativeSplash.preserve(widgetsBinding: binding);
-  runApp(const ProviderScope(child: Rediones()));
+  bool goHome = await FileHandler.hasAuthDetails;
+
+  FlutterNativeSplash.preserve(widgetsBinding: binding);
+  runApp(ProviderScope(child: Rediones(goHome: goHome)));
 }
 
 class Rediones extends ConsumerStatefulWidget {
-  const Rediones({super.key});
+  final bool goHome;
+  const Rediones({super.key, required this.goHome});
 
   @override
   ConsumerState<Rediones> createState() => _RedionesState();
@@ -59,26 +62,10 @@ class _RedionesState extends ConsumerState<Rediones>
     WidgetsBinding.instance.addObserver(this);
 
     _router = GoRouter(
-      initialLocation: Pages.splash.path,
+      initialLocation: widget.goHome ? Pages.home.path : Pages.login.path,
       routes: routes,
     );
     time.setDefaultLocale('en_short');
-
-    // initialize();
-  }
-
-  void initialize() async {
-    await Future.delayed(const Duration(seconds: 3));
-
-    FlutterNativeSplash.remove();
-
-    // Future.delayed(
-    //     const Duration(milliseconds: 500),
-    //     () => FileHandler.loadAuthDetails().then((details) {
-    //           String destination = details == null ? Pages.login : Pages.home;
-    //           context.router.goNamed(destination);
-    //           FlutterNativeSplash.remove();
-    //         }));
   }
 
   @override

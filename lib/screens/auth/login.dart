@@ -1,5 +1,6 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rediones/tools/providers.dart';
@@ -33,7 +34,10 @@ class _LoginState extends ConsumerState<Login> {
         setState(() => validPassword = false);
       }
     });
+
+    Future.delayed(const Duration(milliseconds: 500), () => FlutterNativeSplash.remove());
   }
+
 
   void navigate(RedionesResponse<User?> result) {
     String location = Pages.home;

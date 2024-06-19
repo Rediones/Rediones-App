@@ -8,6 +8,11 @@ export 'base.dart' show imgPrefix, vidPrefix;
 export 'package:file_picker/file_picker.dart' show FileType;
 
 class FileHandler {
+  static Future<bool> get hasAuthDetails async {
+    var result = await loadAuthDetails();
+    return result != null;
+  }
+
   static Future<void> saveAuthDetails(Map<String, String>? auth) async {
     SharedPreferences instance = await SharedPreferences.getInstance();
     await instance.setString(

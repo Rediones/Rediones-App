@@ -1,4 +1,5 @@
 import 'package:fijkplayer/fijkplayer.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,43 +17,52 @@ class SpotlightPage extends ConsumerStatefulWidget {
 }
 
 class _SpotlightPageState extends ConsumerState<SpotlightPage> {
-  bool fetching = true;
-
   final List<FijkPlayer> spotlightPlayers = [];
   final List<bool> spotlightStates = [];
-  static const int maximumConcurrentPlayers = 5;
-  static const int fullDragInSeconds = 30;
 
-  int spotlightPointer = 0;
-  int initialVideoDurationInMilliseconds = 0;
+  static const int maximumConcurrentPlayers = 5, fullDragInSeconds = 30;
+
+  int spotlightPointer = 0, initialVideoDurationInMilliseconds = 0;
 
   double initialDragDx = 0.0;
 
-  bool showText = false;
+  bool showText = false, _shouldRefresh = false;
   String durationText = "";
+
+  late Future spotlightFuture;
 
   @override
   void initState() {
     super.initState();
-
+    spotlightFuture = Future.delayed(Duration.zero);
   }
 
   Future<void> fetchSpotlights() async {
-    List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
-    int max = spotlights.length > maximumConcurrentPlayers
-        ? maximumConcurrentPlayers
-        : spotlights.length;
+    if (_shouldRefresh) {
+      List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
+      if (spotlights.isEmpty) return;
 
-    for (int i = 0; i < max; ++i) {
-      FijkPlayer player = FijkPlayer();
-      SpotlightData data = spotlights[i];
-      player.setDataSource(data.url, autoPlay: false);
-      player.setLoop(0);
-      spotlightPlayers.add(player);
-      spotlightStates.add(false);
+      for(FijkPlayer p in spotlightPlayers) {
+        p.release();
+      }
+      spotlightStates.clear();
+      spotlightPlayers.clear();
+
+      int max = spotlights.length > maximumConcurrentPlayers
+          ? maximumConcurrentPlayers
+          : spotlights.length;
+
+      for (int i = 0; i < max; ++i) {
+        FijkPlayer player = FijkPlayer();
+        SpotlightData data = spotlights[i];
+        player.setDataSource(data.url, autoPlay: false);
+        player.setLoop(0);
+        spotlightPlayers.add(player);
+        spotlightStates.add(false);
+      }
+
+      setState(() => _shouldRefresh = false);
     }
-
-    setState(() => fetching = false);
   }
 
   void pauseAll() {
@@ -77,17 +87,24 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
       if (!newVal) {
         pauseAll();
       } else {
-        spotlightPlayers[spotlightPointer].start();
-        Future.delayed(Duration.zero,
-            () => setState(() => spotlightStates[spotlightPointer] = true));
+        if (spotlightPlayers.isNotEmpty) {
+          pauseAll();
+          spotlightPlayers[spotlightPointer].start();
+          Future.delayed(Duration.zero,
+              () => setState(() => spotlightStates[spotlightPointer] = true));
+        }
       }
     });
 
     ref.listen(userProvider, (oldUser, newUser) {
-      if(oldUser == dummyUser && newUser != dummyUser) {
-        fetchSpotlights();
+      if (oldUser == dummyUser && newUser != dummyUser) {
+        setState(() => _shouldRefresh = true);
       }
     });
+  }
+
+  bool get available {
+    return spotlightPlayers.isNotEmpty && spotlightStates.isNotEmpty;
   }
 
   @override
@@ -96,9 +113,8 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
 
     Size size = MediaQuery.of(context).size;
     double height = size.height, width = size.width;
-
-    int length = ref.watch(spotlightsProvider).length;
     List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
+    int length = spotlights.length;
 
     return Scaffold(
       backgroundColor: primary,
@@ -106,9 +122,37 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
         children: [
           SizedBox(
             height: height,
-            child: fetching
-                ? const Center(child: loader)
-                : PageView.builder(
+            child: FutureBuilder(
+              future: _shouldRefresh ? fetchSpotlights() : spotlightFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting &&
+                    !_shouldRefresh) {
+                  return const Center(child: loader);
+                } else if (snapshot.connectionState == ConnectionState.done) {
+                  if (!available || length == 0) {
+                    return Center(
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "No spotlights available finally.",
+                              style: context.textTheme.bodyLarge,
+                            ),
+                            TextSpan(
+                              text: " Tap to refresh",
+                              style: context.textTheme.bodyLarge!
+                                  .copyWith(color: appRed),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap =
+                                    () => setState(() => _shouldRefresh = true),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return PageView.builder(
                     onPageChanged: (index) {
                       if (index != 0) {
                         spotlightPlayers[index - 1].pause();
@@ -256,7 +300,31 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                     ),
                     itemCount: length,
                     scrollDirection: Axis.vertical,
-                  ),
+                  );
+                } else {
+                  return Center(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "No spotlights available.",
+                            style: context.textTheme.bodyLarge,
+                          ),
+                          TextSpan(
+                            text: " Tap to refresh",
+                            style: context.textTheme.bodyLarge!
+                                .copyWith(color: appRed),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap =
+                                  () => setState(() => _shouldRefresh = true),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
           ),
           Positioned(
             top: 10.h,

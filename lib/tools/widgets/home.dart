@@ -141,12 +141,12 @@ class BottomNavBar extends ConsumerWidget {
                                   triangleWidth: 20.h,
                                 ),
                                 child: Container(
-                                  color: neutral2,
+                                  color: Colors.white,
                                   height: 65.h,
                                   width: 80.w,
                                   child: Column(
                                     children: [
-                                      SizedBox(height: 20.h),
+                                      SizedBox(height: 15.h),
                                       GestureDetector(
                                         onTap: () async {
                                           Navigator.pop(context);
@@ -165,7 +165,7 @@ class BottomNavBar extends ConsumerWidget {
                                           style: context.textTheme.titleSmall!
                                               .copyWith(
                                             fontWeight: FontWeight.w500,
-                                            color: theme,
+                                            color: primary,
                                           ),
                                         ),
                                       ),

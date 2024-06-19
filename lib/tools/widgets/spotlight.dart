@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/functions.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class SpotlightToolbar extends StatelessWidget {
@@ -191,7 +192,9 @@ class _SpotlightUserDataState extends State<SpotlightUserData> {
                   },
                   imageBuilder: (context, provider) {
                     return GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        showNewError("Welcome back", context);
+                      },
                       child: CircleAvatar(
                         backgroundImage: provider,
                         radius: 20.r,
@@ -211,7 +214,7 @@ class _SpotlightUserDataState extends State<SpotlightUserData> {
                     ),
                     Text(
                       "@${widget.postedBy.nickname}",
-                      style: context.textTheme.labelMedium!.copyWith(color: neutral),
+                      style: context.textTheme.labelMedium!.copyWith(color: Colors.white70),
                     ),
                   ],
                 ),
