@@ -100,7 +100,7 @@ class _CreateSpotlightPageState extends State<CreateSpotlightPage>
                   ),
                   onPressed: () async {
                     if (selectedVideo == -1) {
-                      showError("Please choose a video");
+                      showToast("Please choose a video", context);
                       return;
                     }
 

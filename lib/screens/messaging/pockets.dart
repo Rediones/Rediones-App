@@ -50,7 +50,7 @@ class _PocketPageState extends ConsumerState<PocketPage> {
       if (!mounted) return;
 
       if (resp.status == Status.failed) {
-        showError(resp.message);
+        showToast(resp.message, context);
         return;
       }
 
@@ -74,7 +74,7 @@ class _PocketPageState extends ConsumerState<PocketPage> {
       if (!mounted) return;
 
       if (resp.status == Status.failed) {
-        showError(resp.message);
+        showToast(resp.message, context);
         return;
       }
 

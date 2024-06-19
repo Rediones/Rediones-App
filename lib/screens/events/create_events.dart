@@ -59,7 +59,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
       (result) {
         if (!mounted) return;
         Navigator.of(context).pop();
-        showToast(result.message);
+        showToast(result.message, context);
         if (result.status == Status.success) {
           navigate(result);
         }
@@ -178,7 +178,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     hint: "e.g My Event",
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter the name of the event");
+                        showToast("Please enter the name of the event", context);
                         return '';
                       }
                       return null;
@@ -314,7 +314,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     ),
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter the location of the event");
+                        showToast("Please enter the location of the event", context);
                         return '';
                       }
                       return null;
@@ -448,7 +448,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     width: 390.w,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter the description of the event");
+                        showToast("Please enter the description of the event", context);
                         return '';
                       }
                       return null;
@@ -465,7 +465,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                       unFocus();
 
                       if (eventCover == null) {
-                        showToast("Please choose event cover image");
+                        showToast("Please choose event cover image", context);
                         return;
                       }
 

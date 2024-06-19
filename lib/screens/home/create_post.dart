@@ -34,7 +34,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
 
       Navigator.of(context).pop();
       if (response.payload == null) {
-        showError(response.message);
+        showToast(response.message, context);
       } else {
         ref.watch(postsProvider).add(response.payload!);
         navigate();
@@ -134,7 +134,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                           unFocus();
 
                           if (controller.text.trim().isEmpty) {
-                            showError("Please enter a description");
+                            showToast("Please enter a description", context);
                             return;
                           }
 

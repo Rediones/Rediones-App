@@ -66,10 +66,10 @@ class _SignupState extends ConsumerState<Signup> {
   void register() {
     authenticate(_authDetails, Pages.register).then(
       (result) {
-        f.showError(
+        f.showToast(
           result.status == Status.failed
               ? result.message
-              : "Account Created Successfully",
+              : "Account Created Successfully", context
         );
 
         if (result.status == Status.success) {
@@ -140,7 +140,7 @@ class _SignupState extends ConsumerState<Signup> {
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
                           if (value!.isEmpty) {
-                            f.showNewError("Invalid Name Provided", context);
+                            f.showToast("Invalid Name Provided", context);
                             return '';
                           }
                           return null;
@@ -163,7 +163,7 @@ class _SignupState extends ConsumerState<Signup> {
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
                           if (value!.isEmpty) {
-                            f.showNewError("Invalid Name Provided", context);
+                            f.showToast("Invalid Name Provided", context);
                             return '';
                           }
                           return null;
@@ -186,7 +186,7 @@ class _SignupState extends ConsumerState<Signup> {
                         type: TextInputType.emailAddress,
                         onValidate: (value) {
                           if (value!.isEmpty || !value.contains("@")) {
-                            f.showNewError("Invalid Email Address", context);
+                            f.showToast("Invalid Email Address", context);
                             return '';
                           }
                           return null;
@@ -225,7 +225,7 @@ class _SignupState extends ConsumerState<Signup> {
                         ),
                         onValidate: (value) {
                           if (value!.length < 6) {
-                            f.showNewError(
+                            f.showToast(
                                 "Password is too short. Use at least 6 characters",
                                 context);
                             return '';
@@ -275,7 +275,7 @@ class _SignupState extends ConsumerState<Signup> {
                         ),
                         onValidate: (value) {
                           if (value != _controller.text) {
-                            f.showNewError("Password do not match", context);
+                            f.showToast("Password do not match", context);
                             return '';
                           }
                           return null;

@@ -48,7 +48,7 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
         if (result.status == Status.success) {
           navigate(result);
         } else {
-          showNewError(result.message, context);
+          showToast(result.message, context);
           Navigator.of(context).pop();
         }
       },
@@ -105,7 +105,7 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
                         ),
                         onValidate: (value) {
                           if (value!.isEmpty) {
-                            showNewError("Invalid Username", context);
+                            showToast("Invalid Username", context);
                             return '';
                           }
                           return null;
@@ -128,7 +128,7 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
                         ),
                         onValidate: (value) {
                           if (value!.isEmpty) {
-                            showNewError("No school provided", context);
+                            showToast("No school provided", context);
                             return '';
                           }
                           return null;

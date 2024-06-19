@@ -226,14 +226,14 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                         ConnectionState.waiting) {
                                       return const Popup();
                                     } else if (snapshot.hasError) {
-                                      showError(
-                                          "An error occurred. Please try again");
+                                      showToast(
+                                          "An error occurred. Please try again", context);
                                       return const SizedBox.shrink();
                                     } else {
                                       Conversation? resp = snapshot.data;
                                       if (resp == null) {
-                                        showError(
-                                            "An error occurred. Please try again.");
+                                        showToast(
+                                            "An error occurred. Please try again.", context);
                                       } else {
                                         Future.delayed(Duration.zero,
                                             () => navigate(resp));

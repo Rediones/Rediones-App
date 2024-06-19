@@ -91,7 +91,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
         if (result.status == Status.success) {
           navigate(result);
         } else {
-          showNewError(result.message, context);
+          showToast(result.message, context);
           Navigator.of(context).pop();
         }
       },
@@ -182,7 +182,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     height: 40.h,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter your first name");
+                        showToast("Please enter your first name", context);
                         return '';
                       }
                       return null;
@@ -199,7 +199,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     height: 40.h,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter your last name");
+                        showToast("Please enter your last name", context);
                         return '';
                       }
                       return null;
@@ -216,7 +216,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     height: 40.h,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter your other name");
+                        showToast("Please enter your other name", context);
                         return '';
                       }
                       return null;
@@ -233,7 +233,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     height: 40.h,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter your username");
+                        showToast("Please enter your username", context);
                         return '';
                       }
                       return null;
@@ -260,7 +260,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     height: 40.h,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter your school");
+                        showToast("Please enter your school", context);
                         return '';
                       }
                       return null;
@@ -277,7 +277,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     height: 40.h,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter your address");
+                        showToast("Please enter your address", context);
                         return '';
                       }
                       return null;
@@ -295,7 +295,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     maxLines: 10,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter your bio");
+                        showToast("Please enter your bio", context);
                         return '';
                       }
                       return null;

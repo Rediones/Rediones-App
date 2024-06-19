@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -614,7 +613,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     setState(() => liked = !liked);
     likePost(widget.postObject.id).then((response) {
       if (response.status == Status.success) {
-        showToast(response.message);
+        showToast(response.message, context);
         if (response.payload.contains(currentUserID) &&
             !widget.postObject.likes.contains(currentUserID)) {
           widget.postObject.likes.add(currentUserID);
@@ -625,7 +624,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
         setState(() {});
       } else {
         setState(() => liked = !liked);
-        showToast("Something went wrong");
+        showToast("Something went wrong", context);
       }
     });
   }
@@ -634,19 +633,14 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     setState(() => bookmarked = !bookmarked);
     savePost(widget.postObject.id).then((value) {
       if (value.status == Status.success) {
-        showToast(value.message);
-        compute(
-          (_) {
-            List<String> postsID =
-                ref.watch(userProvider.select((value) => value.savedPosts));
-            postsID.clear();
-            postsID.addAll(value.payload);
-          },
-          "",
-        );
+        showToast(value.message, context);
+        List<String> postsID =
+        ref.watch(userProvider.select((value) => value.savedPosts));
+        postsID.clear();
+        postsID.addAll(value.payload);
       } else {
         setState(() => bookmarked = !bookmarked);
-        showToast("Something went wrong");
+        showToast("Something went wrong", context);
       }
     });
   }
@@ -1141,7 +1135,7 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
     });
     votePoll(id).then((response) {
       if (response.status == Status.success) {
-        showToast(response.message);
+        showToast(response.message, context);
         widget.poll.polls[index].voters.add(currentUserID);
         setState(() {});
       } else {
@@ -1150,7 +1144,7 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
           pollIndex = -1;
           totalVotes -= 1;
         });
-        showToast("Something went wrong");
+        showToast("Something went wrong", context);
       }
     });
   }

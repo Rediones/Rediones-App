@@ -44,7 +44,7 @@ class _GroupHomeState extends State<GroupHome> {
       if (!mounted) return;
 
       if (resp.status == Status.failed) {
-        showError(resp.message);
+        showToast(resp.message, context);
         return;
       }
 

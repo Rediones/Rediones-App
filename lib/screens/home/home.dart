@@ -9,8 +9,6 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rediones/api/post_service.dart';
-import 'package:rediones/components/poll_data.dart';
-import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/repositories/post_object_repository.dart';
@@ -48,7 +46,7 @@ class _HomeState extends ConsumerState<Home> {
 
     List<PostObject> p = response.payload;
     if (response.status == Status.failed) {
-      showToast(response.message);
+      showToast(response.message, context);
       setState(() => loading = false);
       return;
     }

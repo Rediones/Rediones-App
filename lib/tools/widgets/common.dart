@@ -30,7 +30,7 @@ class TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) =>
       Container(
-        color: context.isDark ? primary1 : Colors.white,
+        color: Colors.transparent,
         child: tabBar,
       );
 

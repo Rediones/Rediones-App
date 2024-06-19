@@ -2,13 +2,15 @@ import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
-import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:timeago/timeago.dart' as time;
 
 class SpotlightToolbar extends StatelessWidget {
   final SpotlightData data;
@@ -120,26 +122,56 @@ class SpotlightToolbar extends StatelessWidget {
   }
 }
 
-class SpotlightUserData extends StatefulWidget {
+class SpotlightUserData extends ConsumerStatefulWidget {
   final User postedBy;
   final String text;
+  final DateTime timestamp;
 
   const SpotlightUserData({
     super.key,
     required this.postedBy,
+    required this.timestamp,
     required this.text,
   });
 
   @override
-  State<SpotlightUserData> createState() => _SpotlightUserDataState();
+  ConsumerState<SpotlightUserData> createState() => _SpotlightUserDataState();
 }
 
-class _SpotlightUserDataState extends State<SpotlightUserData> {
-
+class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
   bool expandText = false;
+  late bool follow;
+  late String _time;
+
+  void goToProfile() {
+    User current = ref.watch(userProvider);
+    ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+    context.router.pushNamed(
+      current == widget.postedBy ? Pages.profile : Pages.otherProfile,
+      extra: current != widget.postedBy ? widget.postedBy : null,
+    ).then((res) => ref.watch(spotlightsPlayStatusProvider.notifier).state = true);
+  }
+
+  bool get shouldFollow {
+    User currentUser = ref.read(userProvider);
+    if (widget.postedBy == currentUser) return false;
+    if (widget.postedBy.followers.contains(currentUserID) ||
+        currentUser.following.contains(widget.postedBy.id)) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    follow = shouldFollow;
+    _time = time.format(widget.timestamp);
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return SizedBox(
       width: 280.w,
       child: Column(
@@ -149,92 +181,115 @@ class _SpotlightUserDataState extends State<SpotlightUserData> {
               children: [
                 TextSpan(
                   text:
-                  "${widget.text.substring(0, expandText ? null : (widget.text.length >= 150 ? 150 : widget.text.length))}"
+                      "${widget.text.substring(0, expandText ? null : (widget.text.length >= 150 ? 150 : widget.text.length))}"
                       "${widget.text.length >= 150 && !expandText ? "..." : ""}",
-                  style: context.textTheme.bodyLarge!.copyWith(color: Colors.white),
+                  style: context.textTheme.bodyLarge!
+                      .copyWith(color: Colors.white),
                 ),
                 if (widget.text.length > 150)
                   TextSpan(
                     text: expandText ? " Read Less" : " Read More",
-                    style:
-                    context.textTheme.bodyLarge!.copyWith(color: appRed),
-                    recognizer: TapGestureRecognizer()..onTap = () => setState(() => expandText = !expandText),
+                    style: context.textTheme.bodyLarge!.copyWith(color: appRed),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => setState(() => expandText = !expandText),
                   ),
               ],
             ),
           ),
           SizedBox(height: 20.h),
-          SizedBox(
-            height: 40.r,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CachedNetworkImage(
-                  imageUrl: widget.postedBy.profilePicture,
-                  errorWidget: (context, url, error) => CircleAvatar(
-                    backgroundColor: neutral2,
-                    radius: 20.r,
-                    child: Icon(
-                      Icons.person_outline_rounded,
-                      color: Colors.black,
-                      size: 16.r,
-                    ),
-                  ),
-                  progressIndicatorBuilder: (context, url, download) {
-                    return Container(
-                      width: 40.r,
-                      height: 40.r,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: neutral2,
+          GestureDetector(
+            onTap: goToProfile,
+            child: SizedBox(
+              height: 40.r,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: widget.postedBy.profilePicture,
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      backgroundColor: neutral2,
+                      radius: 20.r,
+                      child: Icon(
+                        Icons.person_outline_rounded,
+                        color: Colors.black,
+                        size: 16.r,
                       ),
-                    );
-                  },
-                  imageBuilder: (context, provider) {
-                    return GestureDetector(
-                      onTap: () {
-                        showNewError("Welcome back", context);
-                      },
-                      child: CircleAvatar(
+                    ),
+                    progressIndicatorBuilder: (context, url, download) {
+                      return Container(
+                        width: 40.r,
+                        height: 40.r,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: neutral2,
+                        ),
+                      );
+                    },
+                    imageBuilder: (context, provider) {
+                      return CircleAvatar(
                         backgroundImage: provider,
                         radius: 20.r,
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(width: 10.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.postedBy.username,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textTheme.bodyLarge!
-                          .copyWith(fontWeight: FontWeight.w700, color: Colors.white),
-                    ),
-                    Text(
-                      "@${widget.postedBy.nickname}",
-                      style: context.textTheme.labelMedium!.copyWith(color: Colors.white70),
-                    ),
-                  ],
-                ),
-                SizedBox(width: 20.w),
-                SizedBox(
-                  width: 80.w,
-                  height: 18.r,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      );
+                    },
+                  ),
+                  SizedBox(width: 10.w),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "2m",
-                        style: context.textTheme.labelMedium!.copyWith(color: gray),
+                      Row(
+                        children: [
+                          Text(
+                            widget.postedBy.username,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.textTheme.bodyLarge!.copyWith(
+                                fontWeight: FontWeight.w700, color: Colors.white),
+                          ),
+                          if(follow)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(width: 10.w),
+                                SizedBox(
+                                  height: 18.r,
+                                  width: 1.2.w,
+                                  child: const ColoredBox(
+                                    color: appRed,
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                                GestureDetector(
+                                  onTap: () async {
+                                    //await followUser(object.poster.id);
+                                  },
+                                  child: Container(
+                                    height: 18.r,
+                                    width: 18.r,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: appRed,
+                                      borderRadius: BorderRadius.circular(6.r),
+                                    ),
+                                    child: Icon(
+                                      Icons.add_rounded,
+                                      color: theme,
+                                      size: 16.r,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
                       ),
-
+                      Text(
+                        "@${widget.postedBy.nickname}  -  ${_time == "now" ? "now" : "$_time ago"}",
+                        style: context.textTheme.labelSmall!
+                            .copyWith(color: Colors.white70),
+                      )
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

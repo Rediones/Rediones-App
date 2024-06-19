@@ -184,42 +184,42 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                         });
                       },
                       onHorizontalDragStart: (details) {
-                        setState(() {
-                          initialVideoDurationInMilliseconds =
-                              spotlightPlayers[index].currentPos.inMilliseconds;
-                          initialDragDx = details.globalPosition.dx;
-                          showText = true;
-                        });
+                        // setState(() {
+                        //   initialVideoDurationInMilliseconds =
+                        //       spotlightPlayers[index].currentPos.inMilliseconds;
+                        //   initialDragDx = details.globalPosition.dx;
+                        //   showText = true;
+                        // });
                       },
                       onHorizontalDragUpdate: (details) {
-                        double currentDX = details.globalPosition.dx;
-                        double newPosition = currentDX / width * 1000;
-                        newPosition = newPosition.clamp(0, 1000);
-                        bool reverse = initialDragDx - currentDX > 0;
-
-                        int milliseconds = initialVideoDurationInMilliseconds +
-                            (newPosition *
-                                    fullDragInSeconds *
-                                    (reverse ? -1.0 : 1.0))
-                                .toInt();
-                        FijkPlayer player = spotlightPlayers[index];
-                        player.seekTo(milliseconds);
-
-                        Duration currentDuration =
-                            Duration(milliseconds: milliseconds);
-
-                        setState(() {
-                          durationText =
-                              "${formatDuration(currentDuration)} - ${formatDuration(player.value.duration)}";
-                        });
+                        // double currentDX = details.globalPosition.dx;
+                        // double newPosition = currentDX / width * 1000;
+                        // newPosition = newPosition.clamp(0, 1000);
+                        // bool reverse = initialDragDx - currentDX > 0;
+                        //
+                        // int milliseconds = initialVideoDurationInMilliseconds +
+                        //     (newPosition *
+                        //             fullDragInSeconds *
+                        //             (reverse ? -1.0 : 1.0))
+                        //         .toInt();
+                        // FijkPlayer player = spotlightPlayers[index];
+                        // player.seekTo(milliseconds);
+                        //
+                        // Duration currentDuration =
+                        //     Duration(milliseconds: milliseconds);
+                        //
+                        // setState(() {
+                        //   durationText =
+                        //       "${formatDuration(currentDuration)} - ${formatDuration(player.value.duration)}";
+                        // });
                       },
                       onHorizontalDragEnd: (details) {
-                        setState(() {
-                          showText = false;
-                          durationText = "";
-                          spotlightPlayers[index].start();
-                          spotlightStates[index] = true;
-                        });
+                        // setState(() {
+                        //   showText = false;
+                        //   durationText = "";
+                        //   spotlightPlayers[index].start();
+                        //   spotlightStates[index] = true;
+                        // });
                       },
                       child: Stack(
                         children: [
@@ -293,6 +293,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                             child: SpotlightUserData(
                               text: loremIpsum,
                               postedBy: spotlights[index].poster,
+                              timestamp: spotlights[index].createdAt,
                             ),
                           )
                         ],

@@ -59,7 +59,7 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
 
       Navigator.of(context).pop();
       if (response.payload == null) {
-        showError(response.message);
+        showToast(response.message, context);
       } else {
         ref.watch(postsProvider).add(response.payload!);
         navigate();
@@ -114,7 +114,7 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                         hint: "What would you like to ask?",
                         onValidate: (value) {
                           if (value!.isEmpty) {
-                            showNewError(
+                            showToast(
                                 "Provide a title for your poll", context);
                             return '';
                           }
@@ -231,7 +231,7 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                     if (!validateForm(formKey)) return;
 
                     if (choices.length < 2) {
-                      showNewError("Provide at least 2 poll options", context);
+                      showToast("Provide at least 2 poll options", context);
                       return;
                     }
 
@@ -313,7 +313,7 @@ class _ChoiceContainerState extends State<_ChoiceContainer> {
       onChange: (val) => widget.choice.value = val,
       onValidate: (value) {
         if (value!.isEmpty) {
-          showNewError("Input a choice", context);
+          showToast("Input a choice", context);
           return '';
         }
         return null;

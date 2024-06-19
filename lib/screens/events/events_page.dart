@@ -32,7 +32,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
   void fetchEvents() {
     getEvents().then((result) {
       if (result.status == Status.failed) {
-        showError(result.message);
+        showToast(result.message, context);
       }
       if (!mounted) return;
       setState(() => loadedForYou = true);

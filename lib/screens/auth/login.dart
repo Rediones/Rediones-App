@@ -66,15 +66,13 @@ class _LoginState extends ConsumerState<Login> {
     authenticate(_authDetails, Pages.login).then((result) {
       if (!mounted) return;
 
-      f.showNewError(
+      f.showToast(
           result.status == Status.failed
               ? result.message
               : "Welcome, ${result.payload!.username}",
           context);
 
       if (result.status == Status.success) {
-        _controller.clear();
-        _emailControl.clear();
         navigate(result);
       } else {
         Navigator.of(context).pop();
@@ -131,7 +129,7 @@ class _LoginState extends ConsumerState<Login> {
                         ),
                         onValidate: (value) {
                           if (value!.isEmpty || !value.contains("@")) {
-                            f.showNewError("Invalid Email Address", context);
+                            f.showToast("Invalid Email Address", context);
                             return '';
                           }
                           return null;
@@ -170,7 +168,7 @@ class _LoginState extends ConsumerState<Login> {
                         ),
                         onValidate: (value) {
                           if (value!.length < 6) {
-                            f.showNewError(
+                            f.showToast(
                                 "Password is too short. Use at least 6 characters",
                                 context);
                             return '';

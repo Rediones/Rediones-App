@@ -112,7 +112,7 @@ class _InboxState extends ConsumerState<Inbox> {
     if (!mounted) return;
 
     if (response.status == Status.failed) {
-      showError(response.message);
+      showToast(response.message, context);
       setState(() {
         loading = false;
         hasError = true;

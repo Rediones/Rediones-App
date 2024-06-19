@@ -147,14 +147,17 @@ class _RedionesState extends ConsumerState<Rediones>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
+      ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+
       final List<PostObject> posts = ref.watch(postsProvider);
       final List<Conversation> conversations = ref.watch(conversationsProvider);
-
       final User user = ref.watch(userProvider);
 
       await _savePosts(posts);
       await _saveUser(user);
       await _saveConversations(conversations);
+
+
     } else if (state == AppLifecycleState.resumed) {
       List<PostObject> posts = await _loadPosts();
       ref.watch(postsProvider).clear();

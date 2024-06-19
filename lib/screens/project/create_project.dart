@@ -148,7 +148,7 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
           height: 40.h,
           onValidate: (val) {
             if (val?.trim().isEmpty) {
-              showError("Please enter project title");
+              showToast("Please enter project title", context);
               return '';
             }
             return null;
@@ -285,7 +285,7 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
             onChanged: (val) => setState(() => durationType = val),
             onValidate: (val) {
               if (val?.trim().isEmpty || int.tryParse(val) == null) {
-                showError("Please enter valid project duration");
+                showToast("Please enter valid project duration", context);
                 return '';
               }
               return null;
@@ -315,7 +315,7 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
           width: 390.w,
           onValidate: (val) {
             if (val?.trim().isEmpty) {
-              showError("Please enter project description");
+              showToast("Please enter project description", context);
               return '';
             }
             return null;

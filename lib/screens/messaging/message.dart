@@ -60,7 +60,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
 
     List<Conversation> p = response.payload;
     if (response.status == Status.failed) {
-      showToast(response.message);
+      showToast(response.message, context);
       setState(() => loadingConversations = false);
       return;
     }

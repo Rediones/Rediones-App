@@ -36,7 +36,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     _authenticate();
   }
 
-  void _showError(String text) => showNewError(text, context);
+  void _showError(String text) => showToast(text, context);
 
 
   void _authenticate() async {

@@ -39,7 +39,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage>
   void fetchGroups() {
     getGroups().then((result) {
       if (result.status == Status.failed) {
-        showError(result.message);
+        showToast(result.message, context);
         return;
       }
       if (!mounted) return;

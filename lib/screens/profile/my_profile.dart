@@ -44,7 +44,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
     getUsersPosts(id: id).then((resp) {
       if (!mounted) return;
       if (resp.status == Status.failed) {
-        showError(resp.message);
+        showToast(resp.message, context);
         return;
       }
 
@@ -60,7 +60,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
     getUsersSavedPosts().then((resp) {
       if (!mounted) return;
       if (resp.status == Status.failed) {
-        showError(resp.message);
+        showToast(resp.message, context);
         return;
       }
 

@@ -40,7 +40,7 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
     createGroup(details).then(
       (result) {
         if (!mounted) return;
-        showToast(result.message);
+        showToast(result.message, context);
         Navigator.of(context).pop();
 
         if (result.status == Status.success) {
@@ -162,7 +162,7 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                     height: 40.h,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter the name of the group");
+                        showToast("Please enter the name of the group", context);
                         return '';
                       }
                       return null;
@@ -197,7 +197,7 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                     width: 358.w,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showError("Please enter a description for your group");
+                        showToast("Please enter a description for your group", context);
                         return '';
                       }
                       return null;
@@ -214,8 +214,8 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                       ),
                       onPressed: () {
                         if (cover == null) {
-                          showError(
-                              "Please choose a cover image for your group.");
+                          showToast(
+                              "Please choose a cover image for your group.", context);
                           return;
                         }
                         

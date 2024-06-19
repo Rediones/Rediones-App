@@ -2,11 +2,9 @@ import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rediones/tools/constants.dart';
 
-void showNewError(String message, BuildContext context) {
+void showToast(String message, BuildContext context) {
   if(message.isEmpty) return;
 
   HapticFeedback.vibrate();
@@ -42,23 +40,6 @@ void showNewError(String message, BuildContext context) {
   snackBar.show(context);
 }
 
-void showError(String message,
-    {Color background = appRed, Color text = offWhite}) {
-  HapticFeedback.vibrate();
-  showToast(message, background: background, text: text);
-}
-
-void showToast(String message,
-        {Color background = appRed, Color text = offWhite}) =>
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.SNACKBAR,
-      timeInSecForIosWeb: 2,
-      backgroundColor: background,
-      textColor: text,
-      fontSize: 14.sp,
-    );
 
 void unFocus() => FocusManager.instance.primaryFocus?.unfocus();
 
