@@ -4,6 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rediones/tools/constants.dart';
 
+const SpinKitWave smallLoader = SpinKitWave(
+  color: appRed,
+  size: 12,
+);
 
 const SpinKitWave loader = SpinKitWave(
   color: appRed,

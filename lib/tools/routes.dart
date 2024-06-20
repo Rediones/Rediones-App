@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:photo_gallery/photo_gallery.dart';
 import 'package:rediones/screens/other/camera.dart';
 import 'constants.dart';
 
@@ -128,7 +129,7 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.editSpotlight.path,
     name: Pages.editSpotlight,
-    builder: (_, state) => EditSpotlightPage(spotlight: state.extra as dynamic),
+    builder: (_, state) => EditSpotlightPage(spotlight: state.extra as Medium),
   ),
   GoRoute(
     path: Pages.yourSpotlight.path,
@@ -222,5 +223,5 @@ final List<GoRoute> routes = [
     path: Pages.camera.path,
     name: Pages.camera,
     builder: (_, __) => const CameraPage(),
-  )
+  ),
 ];

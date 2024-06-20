@@ -1,6 +1,5 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -149,13 +148,24 @@ class BottomNavBar extends ConsumerWidget {
                                       GestureDetector(
                                         onTap: () async {
                                           Navigator.pop(context);
-                                          Permission.storage
+                                          Permission.videos
                                               .request()
                                               .then((resp) {
                                             if (resp.isGranted) {
-                                              context.router.pushNamed(
-                                                Pages.createSpotlight,
-                                              );
+                                              ref
+                                                  .watch(
+                                                      spotlightsPlayStatusProvider
+                                                          .notifier)
+                                                  .state = false;
+                                              context.router
+                                                  .pushNamed(
+                                                    Pages.createSpotlight,
+                                                  )
+                                                  .then((res) => ref
+                                                      .watch(
+                                                          spotlightsPlayStatusProvider
+                                                              .notifier)
+                                                      .state = true);
                                             }
                                           });
                                         },
@@ -174,8 +184,6 @@ class BottomNavBar extends ConsumerWidget {
                               ),
                             ),
                           );
-                        } else if (currentTab == 2) {
-                          context.router.pushNamed(Pages.createProject);
                         }
                       },
                       child: Container(
@@ -341,6 +349,7 @@ class BottomNavItem extends StatelessWidget {
   final String inactiveSVG;
   final String text;
   final Color? color;
+  final bool expandText;
   final bool invertColor;
   final bool selected;
   final double height;
@@ -349,6 +358,7 @@ class BottomNavItem extends StatelessWidget {
   const BottomNavItem({
     super.key,
     this.color,
+    this.expandText = false,
     this.invertColor = false,
     this.activeSVG = "",
     this.inactiveSVG = "",
@@ -388,17 +398,22 @@ class BottomNavItem extends StatelessWidget {
               child: SvgPicture.asset(
                 selected ? activeSVG : inactiveSVG,
                 key: ValueKey<bool>(selected),
-                width: 20.r,
-                height: 20.r,
+                width: expandText ? 28.r : 20.r,
+                height: expandText ? 28.r : 20.r,
               ),
             ),
             SizedBox(height: 5.h),
             Text(
               text,
-              style: context.textTheme.bodyMedium!.copyWith(
-                color: selected ? appRed : theme.withOpacity(0.5),
-                fontWeight: FontWeight.w500,
-              ),
+              style: expandText
+                  ? context.textTheme.bodyLarge!.copyWith(
+                      color: theme,
+                      fontWeight: FontWeight.w600,
+                    )
+                  : context.textTheme.bodyMedium!.copyWith(
+                      color: selected ? appRed : theme.withOpacity(0.5),
+                      fontWeight: FontWeight.w500,
+                    ),
             ),
           ],
         ),
@@ -635,7 +650,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
       if (value.status == Status.success) {
         showToast(value.message, context);
         List<String> postsID =
-        ref.watch(userProvider.select((value) => value.savedPosts));
+            ref.watch(userProvider.select((value) => value.savedPosts));
         postsID.clear();
         postsID.addAll(value.payload);
       } else {
@@ -703,7 +718,8 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
                     text: expandText ? " Read Less" : " Read More",
                     style:
                         context.textTheme.bodyMedium!.copyWith(color: appRed),
-                    recognizer: TapGestureRecognizer()..onTap = () => setState(() => expandText = !expandText),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => setState(() => expandText = !expandText),
                   ),
               ],
             ),
@@ -990,7 +1006,6 @@ class _PostFooter extends StatelessWidget {
                 "assets/Bookmark${bookmarked ? " Filled" : ""}.svg",
                 color: darkTheme && !bookmarked ? Colors.white : null,
                 width: bookmarked ? 24.r : 18.r,
-
               ),
               onPressed: onBookmark,
             ),

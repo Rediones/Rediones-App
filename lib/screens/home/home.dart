@@ -79,14 +79,15 @@ class _HomeState extends ConsumerState<Home> {
   }
 
   Future<void> getLocalPosts() async {
-    final PostObjectRepository repository = GetIt.I.get();
-    List<PostObject> posts = await repository.getAll();
-    if (posts.isEmpty) {
-      fetchPosts();
-    } else {
-      ref.watch(postsProvider.notifier).state.addAll(posts);
-      setState(() => loading = false);
-    }
+    // final PostObjectRepository repository = GetIt.I.get();
+    // List<PostObject> posts = await repository.getAll();
+    // if (posts.isEmpty) {
+    //   fetchPosts();
+    // } else {
+    //   ref.watch(postsProvider.notifier).state.addAll(posts);
+    //   setState(() => loading = false);
+    // }
+    await fetchPosts();
   }
 
   @override

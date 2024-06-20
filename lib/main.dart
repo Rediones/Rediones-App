@@ -35,7 +35,7 @@ void main() async {
   c.currentCamera = 0;
 
   await ScreenUtil.ensureScreenSize();
-  await DatabaseManager.init();
+  // await DatabaseManager.init();
   // await DatabaseManager.clearDatabase();
 
   bool goHome = await FileHandler.hasAuthDetails;
@@ -146,31 +146,31 @@ class _RedionesState extends ConsumerState<Rediones>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused) {
-      ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
-
-      final List<PostObject> posts = ref.watch(postsProvider);
-      final List<Conversation> conversations = ref.watch(conversationsProvider);
-      final User user = ref.watch(userProvider);
-
-      await _savePosts(posts);
-      await _saveUser(user);
-      await _saveConversations(conversations);
-
-
-    } else if (state == AppLifecycleState.resumed) {
-      List<PostObject> posts = await _loadPosts();
-      ref.watch(postsProvider).clear();
-      ref.watch(postsProvider).addAll(posts);
-
-      User? user = await _loadUser();
-      if (user != null) {
-        ref.watch(userProvider.notifier).state = user;
-      }
-
-      List<Conversation> conversations = await _loadConversations();
-      ref.watch(conversationsProvider).clear();
-      ref.watch(conversationsProvider).addAll(conversations);
-    }
+    // if (state == AppLifecycleState.paused) {
+    //   ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+    //
+    //   final List<PostObject> posts = ref.watch(postsProvider);
+    //   final List<Conversation> conversations = ref.watch(conversationsProvider);
+    //   final User user = ref.watch(userProvider);
+    //
+    //   await _savePosts(posts);
+    //   await _saveUser(user);
+    //   await _saveConversations(conversations);
+    //
+    //
+    // } else if (state == AppLifecycleState.resumed) {
+    //   List<PostObject> posts = await _loadPosts();
+    //   ref.watch(postsProvider).clear();
+    //   ref.watch(postsProvider).addAll(posts);
+    //
+    //   User? user = await _loadUser();
+    //   if (user != null) {
+    //     ref.watch(userProvider.notifier).state = user;
+    //   }
+    //
+    //   List<Conversation> conversations = await _loadConversations();
+    //   ref.watch(conversationsProvider).clear();
+    //   ref.watch(conversationsProvider).addAll(conversations);
+    // }
   }
 }

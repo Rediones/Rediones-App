@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:photo_gallery/photo_gallery.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
@@ -60,7 +63,9 @@ class SpotlightToolbar extends StatelessWidget {
               SizedBox(width: 5.w),
               Text(
                 "${data.likes.length}",
-                style: context.textTheme.titleSmall,
+                style: context.textTheme.titleSmall!.copyWith(
+                  color: Colors.white,
+                ),
               )
             ],
           ),
@@ -89,7 +94,9 @@ class SpotlightToolbar extends StatelessWidget {
                   }
                   return Text(
                     text,
-                    style: context.textTheme.titleSmall,
+                    style: context.textTheme.titleSmall!.copyWith(
+                        color: Colors.white,
+                    ),
                   );
                 },
               ),
@@ -146,10 +153,13 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
   void goToProfile() {
     User current = ref.watch(userProvider);
     ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
-    context.router.pushNamed(
-      current == widget.postedBy ? Pages.profile : Pages.otherProfile,
-      extra: current != widget.postedBy ? widget.postedBy : null,
-    ).then((res) => ref.watch(spotlightsPlayStatusProvider.notifier).state = true);
+    context.router
+        .pushNamed(
+          current == widget.postedBy ? Pages.profile : Pages.otherProfile,
+          extra: current != widget.postedBy ? widget.postedBy : null,
+        )
+        .then((res) =>
+            ref.watch(spotlightsPlayStatusProvider.notifier).state = true);
   }
 
   bool get shouldFollow {
@@ -171,7 +181,6 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
 
   @override
   Widget build(BuildContext context) {
-
     return SizedBox(
       width: 280.w,
       child: Column(
@@ -243,9 +252,10 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
                             widget.postedBy.username,
                             overflow: TextOverflow.ellipsis,
                             style: context.textTheme.bodyLarge!.copyWith(
-                                fontWeight: FontWeight.w700, color: Colors.white),
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white),
                           ),
-                          if(follow)
+                          if (follow)
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -293,6 +303,140 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class SpotlightMediaList extends StatelessWidget {
+  final List<Album> allAlbums;
+  final Animation<double> animation;
+  final Function(int) onSelect;
+
+  const SpotlightMediaList({
+    super.key,
+    required this.allAlbums,
+    required this.animation,
+    required this.onSelect,
+  });
+
+  Future<List<dynamic>?> getAlbumData(int index) async {
+    Album album = allAlbums[index];
+    if (album.name == null) return null;
+
+    List<int> bytes = await album.getThumbnail();
+    MediaPage page = await album.listMedia();
+    return [album.name!, Uint8List.fromList(bytes), page.items.length];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
+
+    return SizeTransition(
+      sizeFactor: animation,
+      child: Container(
+        width: 390.w,
+        height: 800.h,
+        color: darkTheme ? Colors.black : Colors.white,
+        padding: EdgeInsets.only(
+          left: 20.w,
+          right: 20.w,
+          bottom: 20.h,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 10.h),
+            Expanded(
+              child: ListView.separated(
+                itemBuilder: (_, index) {
+                  return FutureBuilder(
+                      future: getAlbumData(index),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Skeletonizer(
+                            child: Row(
+                              children: [
+                                ColoredBox(
+                                  color: neutral2,
+                                  child: SizedBox(
+                                    height: 100.h,
+                                    width: 85.w,
+                                  ),
+                                ),
+                                SizedBox(width: 20.w),
+                                Column(
+                                  children: [
+                                    Text(
+                                      "Album Name",
+                                      style: context.textTheme.bodyLarge,
+                                    ),
+                                    Text(
+                                      "Album Items",
+                                      style: context.textTheme.bodyMedium,
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          List<dynamic>? resp = snapshot.data;
+                          if (resp == null) return const SizedBox();
+
+                          return GestureDetector(
+                            onTap: () => onSelect(index),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 100.h,
+                                  width: 85.w,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10.r),
+                                    image: DecorationImage(
+                                      image: MemoryImage(
+                                        Uint8List.fromList(resp[1]),
+                                      ),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 20.w),
+                                SizedBox(
+                                  width: 240.w,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        resp[0],
+                                        style: context.textTheme.bodyLarge!.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      SizedBox(height: 5.h),
+                                      Text(
+                                        "${resp[2]} video${resp[2] == 1 ? "" : "s"}",
+                                        style: context.textTheme.bodyMedium,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      });
+                },
+                separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                itemCount: allAlbums.length,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

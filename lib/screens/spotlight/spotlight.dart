@@ -112,7 +112,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
     listenForChanges();
 
     Size size = MediaQuery.of(context).size;
-    double height = size.height, width = size.width;
+    double height = size.height;
     List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
     int length = spotlights.length;
 

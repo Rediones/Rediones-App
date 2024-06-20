@@ -3,13 +3,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-//import 'package:media_gallery2/media_gallery2.dart';
-import 'package:rediones/api/file_handler.dart';
+import 'package:flutter_video_info/flutter_video_info.dart';
+import 'package:photo_gallery/photo_gallery.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
-
-import 'package:rediones/api/spotlight_service.dart';
+import 'package:rediones/tools/widgets.dart';
 
 class CreateSpotlightPage extends StatefulWidget {
   const CreateSpotlightPage({super.key});
@@ -19,36 +17,81 @@ class CreateSpotlightPage extends StatefulWidget {
 }
 
 class _CreateSpotlightPageState extends State<CreateSpotlightPage>
-    with SingleTickerProviderStateMixin {
-  // List<MediaCollection> allVideos = [];
-  // late MediaPage videoPage;
+    with TickerProviderStateMixin {
+  final List<Album> allAlbums = [];
+  final List<Medium> albumMedia = [];
+  bool loadedDeviceVideos = false,
+      expanded = false,
+      _shouldRefreshAlbums = false,
+      _shouldRefreshMedia = false;
 
-  bool loadedDeviceVideos = false;
-  late TabController controller;
-
-  int selectedVideo = -1;
+  late AnimationController controller;
+  late Animation<double> animation;
 
   String? videoPath;
+
+  int selectedAlbum = 0;
+
+  late Future deviceVideoFuture;
+  Medium? selectedVideo;
 
   @override
   void initState() {
     super.initState();
-    controller = TabController(length: 2, vsync: this);
-    getDeviceVideos();
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+      reverseDuration: const Duration(milliseconds: 300),
+    );
+    animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeIn,
+        reverseCurve: Curves.easeOut,
+      ),
+    );
+    deviceVideoFuture = getDeviceVideos();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   Future<void> getDeviceVideos() async {
-    // allVideos =
-    //     await MediaGallery.listMediaCollections(mediaTypes: [MediaType.video])
-    //         as List<MediaCollection>;
-    // videoPage = await allVideos[0].getMedias(mediaType: MediaType.video);
-    setState(() => loadedDeviceVideos = true);
+    List<Album> albums = await PhotoGallery.listAlbums(
+      mediumType: MediumType.video,
+      newest: true,
+    );
+    allAlbums.addAll(albums);
+    setState(() => _shouldRefreshAlbums = false);
+    await getMediaForAlbum();
+  }
+
+  Future<void> getMediaForAlbum() async {
+    setState(() => loadedDeviceVideos = false);
+    Album album = allAlbums[selectedAlbum];
+    MediaPage page = await album.listMedia();
+    albumMedia.clear();
+    albumMedia.addAll(page.items);
+    setState(() {
+      _shouldRefreshMedia = false;
+      loadedDeviceVideos = true;
+    });
+  }
+
+  Future get getFuture {
+    return _shouldRefreshAlbums
+        ? getDeviceVideos()
+        : _shouldRefreshMedia
+            ? getMediaForAlbum()
+            : deviceVideoFuture;
   }
 
   @override
   Widget build(BuildContext context) {
-    bool darkTheme =
-        MediaQuery.of(context).platformBrightness == Brightness.dark;
+    bool darkTheme = context.isDark;
 
     return Scaffold(
       appBar: AppBar(
@@ -60,32 +103,92 @@ class _CreateSpotlightPageState extends State<CreateSpotlightPage>
         ),
         elevation: 0.0,
         centerTitle: true,
-        title: Text("Recent", style: context.textTheme.headlineSmall),
+        title: GestureDetector(
+          onTap: () => setState(() {
+            expanded = !expanded;
+            if (expanded) {
+              controller.forward();
+            } else {
+              controller.reverse();
+            }
+          }),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: 20.w,
+                  maxWidth: 200.w,
+                ),
+                child: Text(
+                  allAlbums.isEmpty ? "..." : allAlbums[selectedAlbum].name!,
+                  style: context.textTheme.titleLarge,
+                ),
+              ),
+              SizedBox(width: 5.w),
+              Icon(Icons.keyboard_arrow_down_rounded, size: 26.r)
+            ],
+          ),
+        ),
       ),
       body: SafeArea(
-        child: //!loadedDeviceVideos ?
-            Center(child: SpinKitWave(color: appRed, size: 40.r))
-
-        // : Padding(
-        //         padding: EdgeInsets.symmetric(horizontal: 10.w),
-        //         child: GridView.builder(
-        //           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        //               mainAxisSpacing: 5.h,
-        //               crossAxisCount: 4,
-        //               crossAxisSpacing: 5.w),
-        //           itemCount: videoPage.items.length,
-        //           itemBuilder: (context, index) => _SpotlightContainer(
-        //               data: Holder(videoPage.items[index],
-        //                   selected: index == selectedVideo),
-        //               onPress: () => setState(() => selectedVideo = index),
-        //           ),
-        //         ),
-        //       ),
+        child: Stack(
+          children: [
+            FutureBuilder(
+              future: getFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: loader);
+                } else if (snapshot.connectionState == ConnectionState.done) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w),
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        mainAxisSpacing: 5.r,
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 5.r,
+                        mainAxisExtent: 100.h,
+                      ),
+                      itemCount: albumMedia.length,
+                      itemBuilder: (context, index) => _SpotlightContainer(
+                        data: Holder(
+                          albumMedia[index],
+                          selected: albumMedia[index] == selectedVideo,
+                        ),
+                        onPress: () =>
+                            setState(() => selectedVideo = albumMedia[index]),
+                      ),
+                    ),
+                  );
+                } else {
+                  return Center(
+                    child: Text(
+                      "An error occurred while fetching your video albums",
+                      style: context.textTheme.bodyLarge,
+                    ),
+                  );
+                }
+              },
+            ),
+            SpotlightMediaList(
+              animation: animation,
+              allAlbums: allAlbums,
+              onSelect: (index) {
+                setState(() {
+                  selectedAlbum = index;
+                  _shouldRefreshMedia = true;
+                });
+                controller.reverse();
+              },
+            ),
+          ],
+        ),
       ),
-      bottomNavigationBar: Container(
-        height: 50.h,
+      bottomNavigationBar: expanded ? null : Container(
+        height: 60.h,
         width: 390.w,
-        color: darkTheme ? primary : theme,
+        color: darkTheme ? primary : Colors.white,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -95,34 +198,43 @@ class _CreateSpotlightPageState extends State<CreateSpotlightPage>
                 padding: EdgeInsets.only(right: 10.w),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:  selectedVideo != -1 ? appRed : neutral,
-                    minimumSize: Size(90.w, 35.h)
+                    backgroundColor: selectedVideo != null ? appRed : neutral2,
+                    minimumSize: Size(90.w, 35.h),
+                    fixedSize: Size(90.w, 35.h),
+                    elevation: 1.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.r),
+                    ),
                   ),
                   onPressed: () async {
-                    if (selectedVideo == -1) {
+                    if (selectedVideo == null) {
                       showToast("Please choose a video", context);
                       return;
                     }
 
-                    // context.router.pushNamed(
-                    //   Pages.editSpotlight,
-                    //   extra: videoPage.items[selectedVideo],
-                    // );
+                    context.router.pushNamed(
+                      Pages.editSpotlight,
+                      extra: selectedVideo,
+                    );
 
-
-                    SingleFileResponse? response = await FileHandler.single(type: FileType.video);
-                    if(response != null) {
-                      File file = File(response.path);
-                      Uint8List data = await file.readAsBytes();
-                      String videoData = FileHandler.convertTo64(data);
-                      await createSpotlight(data: videoData, name: response.filename, extension: response.extension);
-                    }
-
+                    // SingleFileResponse? response =
+                    //     await FileHandler.single(type: FileType.video);
+                    // if (response != null) {
+                    //   File file = File(response.path);
+                    //   Uint8List data = await file.readAsBytes();
+                    //   String videoData = FileHandler.convertTo64(data);
+                    //   await createSpotlight(
+                    //       data: videoData,
+                    //       name: response.filename,
+                    //       extension: response.extension);
+                    // }
                   },
                   child: Text(
                     "Next",
-                    style:
-                        context.textTheme.bodyLarge!.copyWith(color: theme),
+                    style: context.textTheme.titleSmall!.copyWith(
+                      color: theme,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               )
@@ -133,83 +245,109 @@ class _CreateSpotlightPageState extends State<CreateSpotlightPage>
   }
 }
 
-// class _SpotlightContainer extends StatefulWidget {
-//   final Holder<Media> data;
-//   final VoidCallback onPress;
-//
-//   const _SpotlightContainer({
-//     Key? key,
-//     required this.data,
-//     required this.onPress,
-//   }) : super(key: key);
-//
-//   @override
-//   State<_SpotlightContainer> createState() => _SpotlightContainerState();
-// }
-//
-// class _SpotlightContainerState extends State<_SpotlightContainer> {
-//   late Duration duration;
-//   bool loaded = false;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     //assign();
-//     duration = const Duration(minutes: 2, seconds: 45);
-//   }
-//
-//   void assign() async {
-//     double d = (await FlutterVideoInfo()
-//             .getVideoInfo((await widget.data.value.getFile())!.path))!
-//         .duration!;
-//     duration = Duration(milliseconds: d.toInt());
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: widget.onPress,
-//       child: SizedBox(
-//         height: 100.h,
-//         width: 85.w,
-//         child: Stack(children: [
-//           ClipRRect(
-//             borderRadius: BorderRadius.circular(5.r),
-//             child: FadeInImage(
-//               height: 100.h,
-//               width: 85.w,
-//               fit: BoxFit.cover,
-//               placeholder: MemoryImage(kTransparentImage),
-//               image: MediaThumbnailProvider(
-//                 media: widget.data.value,
-//               ),
-//             ),
-//           ),
-//           Container(
-//             height: 100.h,
-//             width: 85.w,
-//             alignment: Alignment.center,
-//             color: widget.data.selected ? Colors.black45 : Colors.transparent,
-//             child: widget.data.selected
-//                 ? Container(
-//                     height: 20.r,
-//                     width: 20.r,
-//                     alignment: Alignment.center,
-//                     decoration: const BoxDecoration(
-//                         shape: BoxShape.circle, color: appRed),
-//                     child: Icon(Icons.done_rounded, size: 14.r, color: theme))
-//                 : null,
-//           ),
-//           Align(
-//             alignment: Alignment.bottomCenter,
-//             child: Padding(
-//               padding: EdgeInsets.only(bottom: 5.h, right: 5.w),
-//               child: Text(formatDuration(duration),
-//                   style: context.textTheme.bodyMedium!.copyWith(color: theme)),
-//             ),
-//           )
-//         ]),
-//       ),
-//     );
-//   }
-// }
+class _SpotlightContainer extends StatefulWidget {
+  final Holder<Medium> data;
+  final VoidCallback onPress;
+
+  const _SpotlightContainer({
+    super.key,
+    required this.data,
+    required this.onPress,
+  });
+
+  @override
+  State<_SpotlightContainer> createState() => _SpotlightContainerState();
+}
+
+class _SpotlightContainerState extends State<_SpotlightContainer> {
+  late Future videoFuture;
+  bool shouldRefresh = false;
+
+  @override
+  void initState() {
+    super.initState();
+    videoFuture = assign();
+  }
+
+  Future<List<dynamic>> assign() async {
+    File videoFile = await widget.data.value.getFile();
+    Uint8List bytes =
+        Uint8List.fromList(await widget.data.value.getThumbnail());
+    var data = await FlutterVideoInfo().getVideoInfo(videoFile.path);
+    Duration duration = Duration(milliseconds: data!.duration!.toInt());
+    return [bytes, duration];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: videoFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return SizedBox(
+            height: 100.h,
+            width: 85.w,
+            child: const Center(
+              child: smallLoader,
+            ),
+          );
+        } else {
+          List<dynamic>? data = snapshot.data;
+
+          if (data == null) return const SizedBox();
+
+          return GestureDetector(
+            onTap: widget.onPress,
+            child: Container(
+              height: 100.h,
+              width: 85.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5.r),
+                image: DecorationImage(
+                  image: MemoryImage(data[0]),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(widget.data.selected ? 0.5 : 0.1),
+                    BlendMode.darken,
+                  ),
+                ),
+              ),
+              padding: EdgeInsets.symmetric(
+                vertical: 5.r,
+                horizontal: 5.r,
+              ),
+              child: Column(
+                mainAxisAlignment: widget.data.selected
+                    ? MainAxisAlignment.spaceBetween
+                    : MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (widget.data.selected)
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        height: 20.r,
+                        width: 20.r,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                            shape: BoxShape.circle, color: appRed),
+                        child: Icon(
+                          Icons.done_rounded,
+                          size: 14.r,
+                          color: theme,
+                        ),
+                      ),
+                    ),
+                  Text(
+                    formatDuration(data[1]),
+                    style: context.textTheme.bodyMedium!.copyWith(color: theme),
+                  )
+                ],
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
