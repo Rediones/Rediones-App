@@ -11,7 +11,6 @@ import 'package:get_it/get_it.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/tools/providers.dart';
-import 'package:rediones/repositories/post_object_repository.dart';
 import 'package:rediones/screens/home/comments.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' show showToast, unFocus;

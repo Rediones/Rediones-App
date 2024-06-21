@@ -53,6 +53,14 @@ PostObject processPost(Map<String, dynamic> result) {
 }
 
 Future<RedionesResponse<List<PostObject>>> getPosts() async {
+  if (accessToken == null) {
+    return const RedionesResponse(
+      message: "",
+      payload: [],
+      status: Status.success,
+    );
+  }
+
   try {
     Response response =
         await dio.get("/posts/all", options: configuration(accessToken!));
@@ -148,6 +156,14 @@ CommentData _processComment(Map<String, dynamic> result) {
 }
 
 Future<RedionesResponse<List<CommentData>>> getComments(String postID) async {
+  if (accessToken == null || postID.contains("Dummy")) {
+    return const RedionesResponse(
+      message: "",
+      payload: [],
+      status: Status.success,
+    );
+  }
+
   try {
     Response response = await dio.get("/comments/$postID",
         options: configuration(accessToken!));
