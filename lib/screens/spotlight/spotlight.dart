@@ -252,25 +252,6 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                               ),
                             ),
                           ),
-                          AnimatedOpacity(
-                            opacity: showText ? 1 : 0,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOut,
-                            child: ColoredBox(
-                              color: Colors.black.withOpacity(0.2),
-                              child: SizedBox(
-                                width: 390.w,
-                                height: 844.h,
-                                child: Center(
-                                  child: Text(
-                                    durationText,
-                                    style: context.textTheme.headlineMedium!
-                                        .copyWith(color: theme),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
                           Positioned(
                             right: 10.w,
                             bottom: 80.h,

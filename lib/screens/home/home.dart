@@ -55,8 +55,8 @@ class _HomeState extends ConsumerState<Home> {
     posts.clear();
     posts.addAll(p);
 
-    final PostObjectRepository repository = GetIt.I.get();
-    repository.clearAllAndAddAll(p);
+    // final PostObjectRepository repository = GetIt.I.get();
+    // repository.clearAllAndAddAll(p);
 
     setState(() => loading = false);
   }
@@ -115,8 +115,17 @@ class _HomeState extends ConsumerState<Home> {
     fetchPosts();
   }
 
+  void checkForChanges() {
+      ref.listen(userProvider, (oldUser, newUser) {
+          if(oldUser == dummyUser && newUser != dummyUser && ref.watch(postsProvider).isEmpty) {
+            refresh();
+          }
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
+    checkForChanges();
     List<PostObject> posts = ref.watch(postsProvider);
     String profilePicture =
         ref.watch(userProvider.select((value) => value.profilePicture));
@@ -234,9 +243,8 @@ class _HomeState extends ConsumerState<Home> {
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
                 onTap: () {
-                  Navigator.pop(context);
                   logout(ref);
-                  context.router.goNamed(Pages.splash);
+                  context.router.goNamed(Pages.login);
                 },
                 leading: SvgPicture.asset(
                   "assets/Logout.svg",

@@ -9,14 +9,30 @@ import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 
-class CreateSpotlightPage extends StatefulWidget {
-  const CreateSpotlightPage({super.key});
+export 'package:photo_gallery/photo_gallery.dart' show MediumType;
 
-  @override
-  State<CreateSpotlightPage> createState() => _CreateSpotlightPageState();
+class MultiGalleryOptions {
+  final String destination;
+  final bool multiSelect;
+  final bool pushResultAsExtra;
+  final List<MediumType> types;
+
+  const MultiGalleryOptions({
+    required this.destination,
+    required this.multiSelect,
+    required this.types,
+    this.pushResultAsExtra = true,
+  });
 }
 
-class _CreateSpotlightPageState extends State<CreateSpotlightPage>
+class MultimediaGallery extends StatefulWidget {
+  const MultimediaGallery({super.key});
+
+  @override
+  State<MultimediaGallery> createState() => _MultimediaGalleryState();
+}
+
+class _MultimediaGalleryState extends State<MultimediaGallery>
     with TickerProviderStateMixin {
   final List<Album> allAlbums = [];
   final List<Medium> albumMedia = [];
@@ -185,62 +201,65 @@ class _CreateSpotlightPageState extends State<CreateSpotlightPage>
           ],
         ),
       ),
-      bottomNavigationBar: expanded ? null : Container(
-        height: 60.h,
-        width: 390.w,
-        color: darkTheme ? primary : Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (loadedDeviceVideos)
-              Padding(
-                padding: EdgeInsets.only(right: 10.w),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: selectedVideo != null ? appRed : neutral2,
-                    minimumSize: Size(90.w, 35.h),
-                    fixedSize: Size(90.w, 35.h),
-                    elevation: 1.0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.r),
-                    ),
-                  ),
-                  onPressed: () async {
-                    if (selectedVideo == null) {
-                      showToast("Please choose a video", context);
-                      return;
-                    }
+      bottomNavigationBar: expanded
+          ? null
+          : Container(
+              height: 60.h,
+              width: 390.w,
+              color: darkTheme ? primary : Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (loadedDeviceVideos)
+                    Padding(
+                      padding: EdgeInsets.only(right: 10.w),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              selectedVideo != null ? appRed : neutral2,
+                          minimumSize: Size(90.w, 35.h),
+                          fixedSize: Size(90.w, 35.h),
+                          elevation: 1.0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.r),
+                          ),
+                        ),
+                        onPressed: () async {
+                          if (selectedVideo == null) {
+                            showToast("Please choose a video", context);
+                            return;
+                          }
 
-                    context.router.pushNamed(
-                      Pages.editSpotlight,
-                      extra: selectedVideo,
-                    );
+                          context.router.pushNamed(
+                            Pages.editSpotlight,
+                            extra: selectedVideo,
+                          );
 
-                    // SingleFileResponse? response =
-                    //     await FileHandler.single(type: FileType.video);
-                    // if (response != null) {
-                    //   File file = File(response.path);
-                    //   Uint8List data = await file.readAsBytes();
-                    //   String videoData = FileHandler.convertTo64(data);
-                    //   await createSpotlight(
-                    //       data: videoData,
-                    //       name: response.filename,
-                    //       extension: response.extension);
-                    // }
-                  },
-                  child: Text(
-                    "Next",
-                    style: context.textTheme.titleSmall!.copyWith(
-                      color: theme,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              )
-          ],
-        ),
-      ),
+                          // SingleFileResponse? response =
+                          //     await FileHandler.single(type: FileType.video);
+                          // if (response != null) {
+                          //   File file = File(response.path);
+                          //   Uint8List data = await file.readAsBytes();
+                          //   String videoData = FileHandler.convertTo64(data);
+                          //   await createSpotlight(
+                          //       data: videoData,
+                          //       name: response.filename,
+                          //       extension: response.extension);
+                          // }
+                        },
+                        child: Text(
+                          "Next",
+                          style: context.textTheme.titleSmall!.copyWith(
+                            color: theme,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    )
+                ],
+              ),
+            ),
     );
   }
 }

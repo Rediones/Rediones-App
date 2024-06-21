@@ -6,18 +6,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
+import 'package:rediones/api/message_service.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/user_data.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/repositories/conversation_repository.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:timeago/timeago.dart' as time;
-
-import 'package:rediones/api/message_service.dart';
 
 class MessagePage extends ConsumerStatefulWidget {
   const MessagePage({super.key});
@@ -51,7 +50,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
 
     userID = ref.read(userProvider).id;
 
-    getLocalConversations();
+    // getLocalConversations();
   }
 
   Future<void> fetchConversations() async {
@@ -69,8 +68,8 @@ class _MessagePageState extends ConsumerState<MessagePage>
     con.clear();
     con.addAll(p);
 
-    final ConversationRepository repository = GetIt.I.get();
-    repository.clearAllAndAddAll(p);
+    // final ConversationRepository repository = GetIt.I.get();
+    // repository.clearAllAndAddAll(p);
 
     setState(() => loadingConversations = false);
   }
@@ -324,100 +323,60 @@ class StoryContainer extends StatelessWidget {
       child: Container(
         width: 90.r,
         height: 120.r,
+        padding: EdgeInsets.symmetric(horizontal: 5.r),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.r),
           image: DecorationImage(
             image: AssetImage(data.stories.last.mediaUrl),
             fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.3),
+              BlendMode.darken,
+            ),
           ),
         ),
-        child: Container(
-          width: 90.r,
-          height: 120.r,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.r),
-            color: Colors.black45,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              SizedBox(
-                height: 55.r,
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: SizedBox(
-                        width: 90.r,
-                        height: 35.r,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(height: 15.r),
-                            SizedBox(
-                              height: 20.r,
-                              child: Text(
-                                data.postedBy.username,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.bodyMedium!.copyWith(
-                                    color: theme, fontWeight: FontWeight.w500),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 5.h,
-                      left: 29.r,
-                      child: CircleAvatar(
-                        radius: 15.r,
-                        backgroundColor: appRed,
-                        child: CircleAvatar(
-                          radius: 13.r,
-                          backgroundImage:
-                              NetworkImage(data.postedBy.profilePicture),
-                        ),
-                      ),
-                    ),
-                  ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            CircleAvatar(
+              radius: 15.r,
+              backgroundColor: appRed,
+              child: CachedNetworkImage(
+                imageUrl: data.postedBy.profilePicture,
+                errorWidget: (_, __, val) => CircleAvatar(
+                  radius: 13.5.r,
+                  backgroundColor: appRed,
                 ),
-              )
-            ],
-          ),
+                progressIndicatorBuilder: (_, __, val) => CircleAvatar(
+                  radius: 13.5.r,
+                  backgroundColor: appRed.withOpacity(0.6),
+                ),
+                imageBuilder: (_, provider) => CircleAvatar(
+                  radius: 13.5.r,
+                  backgroundImage: provider,
+                ),
+              ),
+            ),
+            SizedBox(height: 5.r),
+            SizedBox(
+              height: 20.r,
+              child: Text(
+                data.postedBy.username,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodyMedium!.copyWith(
+                  color: theme,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-// CachedNetworkImage(
-// imageUrl: widget.post.poster.profilePicture,
-// errorWidget: (context, url, error) =>
-// CircleAvatar(
-// backgroundColor: neutral2,
-// radius: 18.r,
-// child: Icon(Icons.person_outline_rounded,
-// color: Colors.black, size: 12.r),
-// ),
-// progressIndicatorBuilder: (context, url, download) {
-// return Container(
-// width: 35.r,
-// height: 35.r,
-// decoration: const BoxDecoration(
-// shape: BoxShape.circle,
-// color: neutral2,
-// ),
-// );
-// },
-// imageBuilder: (context, provider) {
-// return CircleAvatar(
-// backgroundImage: provider,
-// radius: 20.r,
-// );
-// },
-// ),
 
 class _AddStory extends ConsumerWidget {
   const _AddStory();
@@ -435,66 +394,85 @@ class _AddStory extends ConsumerWidget {
           border: Border.all(color: context.isDark ? neutral3 : fadedPrimary),
           borderRadius: BorderRadius.circular(10.r),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.end,
+        child: Stack(
           children: [
-            Container(
-              height: 20.r,
-              width: 20.r,
-              decoration: BoxDecoration(
-                color: primary,
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-              child: Center(
-                child: Icon(Icons.add_rounded, color: theme, size: 16.r),
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  height: 20.r,
+                  width: 20.r,
+                  decoration: BoxDecoration(
+                    color: primary,
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.add_rounded,
+                    color: theme,
+                    size: 16.r,
+                  ),
+                ),
+                SizedBox(height: 25.r),
+                ClipPath(
+                  clipper: StoryClipper(
+                    borderRadius: 3.r,
+                    cutoutRadius: 17.r,
+                    containerRadius: 10.r,
+                  ),
+                  child: SizedBox(
+                    width: 90.r,
+                    height: 40.r,
+                    child: const ColoredBox(
+                      color: appRed,
+                    ),
+                  ),
+                ),
+              ],
             ),
+
             SizedBox(
-              height: 55.r,
-              child: Stack(
+              width: 90.r,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: ClipPath(
-                      clipper: BottomNavBarClipper(
-                          borderRadius: 10.r, cutoutRadius: 16.r),
-                      child: SizedBox(
-                        width: 90.r,
-                        height: 35.r,
-                        child: ColoredBox(
-                          color: appRed,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(height: 15.r),
-                              Text(
-                                "Add Story",
-                                style: context.textTheme.bodyMedium!.copyWith(
-                                    color: theme, fontWeight: FontWeight.w500),
-                              )
-                            ],
-                          ),
-                        ),
+                  CircleAvatar(
+                    radius: 15.r,
+                    backgroundColor: appRed,
+                    child: CachedNetworkImage(
+                      imageUrl: image,
+                      errorWidget: (_, __, val) => CircleAvatar(
+                        radius: 13.5.r,
+                        backgroundColor: appRed,
+                      ),
+                      progressIndicatorBuilder: (_, __, val) => CircleAvatar(
+                        radius: 13.5.r,
+                        backgroundColor: appRed.withOpacity(0.6),
+                      ),
+                      imageBuilder: (_, provider) => CircleAvatar(
+                        radius: 13.5.r,
+                        backgroundImage: provider,
                       ),
                     ),
                   ),
-                  Positioned(
-                    top: 5.h,
-                    left: 29.r,
-                    child: CircleAvatar(
-                      radius: 15.r,
-                      backgroundColor: appRed,
-                      child: CircleAvatar(
-                        radius: 13.r,
-                        backgroundImage: NetworkImage(image),
+                  SizedBox(height: 5.r),
+                  SizedBox(
+                    height: 20.r,
+                    child: Text(
+                      "Add Story",
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.bodyMedium!.copyWith(
+                        color: theme,
+                        fontWeight: FontWeight.w500,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

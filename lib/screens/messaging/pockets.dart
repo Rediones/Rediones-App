@@ -100,7 +100,7 @@ class _PocketPageState extends ConsumerState<PocketPage> {
         elevation: 0.0,
         title: Text(
           "Pocket",
-          style: context.textTheme.titleMedium,
+          style: context.textTheme.titleLarge,
         ),
         actions: [
           Padding(
@@ -205,27 +205,30 @@ class _PocketPageState extends ConsumerState<PocketPage> {
       bottomNavigationBar: AnimatedPadding(
         padding: MediaQuery.of(context).viewInsets,
         duration: const Duration(milliseconds: 500),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SpecialForm(
-              controller: controller,
-              width: 300.w,
-              height: 40.h,
-              hint: "Type your message here",
-            ),
-            IconButton(
-              onPressed: () {
-                String text = controller.text.trim();
-                if (text.isEmpty) return;
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 10.h),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SpecialForm(
+                controller: controller,
+                width: 300.w,
+                height: 40.h,
+                hint: "Type your message here",
+              ),
+              IconButton(
+                onPressed: () {
+                  String text = controller.text.trim();
+                  if (text.isEmpty) return;
 
-                createMessage(text);
-              },
-              icon: const Icon(Icons.send_rounded, color: appRed),
-              iconSize: 26.r,
-            )
-          ],
+                  createMessage(text);
+                },
+                icon: const Icon(Icons.send_rounded, color: appRed),
+                iconSize: 26.r,
+              )
+            ],
+          ),
         ),
       ),
     );

@@ -124,7 +124,7 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.createSpotlight.path,
     name: Pages.createSpotlight,
-    builder: (_, __) => const CreateSpotlightPage(),
+    builder: (_, __) => const MultimediaGallery(),
   ),
   GoRoute(
     path: Pages.editSpotlight.path,
