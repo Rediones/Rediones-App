@@ -69,6 +69,7 @@ dependencies:
   uuid:
   camera_camera:
   image:
+  flutter_quick_video_encoder:
 #  device_preview:
 
 

@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'dart:ui';
+import 'dart:typed_data';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photo_gallery/photo_gallery.dart';
+import 'package:rediones/api/video_service.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:video_player/video_player.dart';
@@ -62,6 +65,9 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
     );
     await videoController!.initialize();
     setState(() => loaded = true);
+
+    List<Uint8List> bytes = await VideoService.extractFrames(spotlightFile.path);
+    log("Video Services: ${bytes.length}");
   }
 
   Widget get getBottomContent {
