@@ -14,6 +14,8 @@ Future<RedionesResponse<List<NotificationData>>> getNotifications() async {
     );
   }
 
+  String errorHeader = "Get Notification:";
+
   try {
     Response response = await dio.get("/notifications/",
         options: configuration(ps.accessToken!));
@@ -27,16 +29,23 @@ Future<RedionesResponse<List<NotificationData>>> getNotifications() async {
       }
 
       return RedionesResponse(
-          message: "Successful",
-          payload: notifications,
-          status: Status.success);
+        message: "Successful",
+        payload: notifications,
+        status: Status.success,
+      );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
     log("Get Notification Error: $e");
   }
 
-  return const RedionesResponse<List<NotificationData>>(
-    message: "An error occurred. Please try again!",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again!",
     payload: [],
     status: Status.failed,
   );

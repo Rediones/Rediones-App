@@ -1,7 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:isolate';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_video_info/flutter_video_info.dart';
 import 'package:photo_gallery/photo_gallery.dart';
@@ -48,6 +50,8 @@ class _MultimediaGalleryState extends State<MultimediaGallery>
 
   int selectedAlbum = 0;
 
+  final ReceivePort receivePort = ReceivePort();
+
   late Future deviceVideoFuture;
   Medium? selectedVideo;
 
@@ -66,6 +70,7 @@ class _MultimediaGalleryState extends State<MultimediaGallery>
         reverseCurve: Curves.easeOut,
       ),
     );
+
     deviceVideoFuture = getDeviceVideos();
   }
 
@@ -85,13 +90,52 @@ class _MultimediaGalleryState extends State<MultimediaGallery>
     await getMediaForAlbum();
   }
 
+  static Future<List<Medium>> computeMediaForAlbum(Album album) async {
+    try {
+      MediaPage page = await album.listMedia();
+      List<Medium> mediaList = [];
+
+      for (Medium medium in page.items) {
+        Duration videoDuration = Duration(milliseconds: medium.duration);
+        if (videoDuration.inSeconds > 30) continue;
+        mediaList.add(medium);
+      }
+
+      return mediaList;
+    } catch (e) {
+      log("$e");
+      rethrow;
+    }
+  }
+
   Future<void> getMediaForAlbum() async {
     setState(() => loadedDeviceVideos = false);
     Album album = allAlbums[selectedAlbum];
-    MediaPage page = await album.listMedia();
-    albumMedia.clear();
-    albumMedia.addAll(page.items);
+
+    // Isolate.spawn((SendPort sendPort) async {
+    //   try {
+    //     MediaPage page = await album.listMedia();
+    //     List<Medium> mediaList = [];
+    //
+    //     for (Medium medium in page.items) {
+    //       Duration videoDuration = Duration(milliseconds: medium.duration);
+    //       if (videoDuration.inSeconds > 30) continue;
+    //       mediaList.add(medium);
+    //     }
+    //     sendPort.send(mediaList);
+    //   } catch (e) {
+    //     log("$e");
+    //     rethrow;
+    //   }
+    // }, receivePort.sendPort);
+    //
+    // List<Medium> mediaList = await receivePort.first;
+
+    List<Medium> mediaList = await computeMediaForAlbum(album);
+
     setState(() {
+      albumMedia.clear();
+      albumMedia.addAll(mediaList);
       _shouldRefreshMedia = false;
       loadedDeviceVideos = true;
     });
@@ -235,18 +279,6 @@ class _MultimediaGalleryState extends State<MultimediaGallery>
                             Pages.editSpotlight,
                             extra: selectedVideo,
                           );
-
-                          // SingleFileResponse? response =
-                          //     await FileHandler.single(type: FileType.video);
-                          // if (response != null) {
-                          //   File file = File(response.path);
-                          //   Uint8List data = await file.readAsBytes();
-                          //   String videoData = FileHandler.convertTo64(data);
-                          //   await createSpotlight(
-                          //       data: videoData,
-                          //       name: response.filename,
-                          //       extension: response.extension);
-                          // }
                         },
                         child: Text(
                           "Next",

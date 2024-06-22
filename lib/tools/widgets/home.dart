@@ -639,7 +639,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
         setState(() {});
       } else {
         setState(() => liked = !liked);
-        showToast("Something went wrong", context);
+        showToast("Something went wrong liking your post", context);
       }
     });
   }

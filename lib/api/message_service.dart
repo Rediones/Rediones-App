@@ -1,9 +1,9 @@
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/pocket_data.dart';
 import 'package:rediones/components/user_data.dart';
-import 'profile_service.dart';
 
 import 'base.dart';
+import 'profile_service.dart';
 
 export 'base.dart' show RedionesResponse, Status;
 
@@ -17,6 +17,7 @@ bool _has(List<Conversation> conversations, String conversationID) {
 }
 
 Future<RedionesResponse<List<Conversation>>> getConversations() async {
+  String errorHeader = "Get Conversations:";
   try {
     Response response = await dio.get(
       "/conversations/user-conversations",
@@ -46,18 +47,25 @@ Future<RedionesResponse<List<Conversation>>> getConversations() async {
         );
       }
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
-    log("Init Conversation Error: $e");
+    log("Create Conversation Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again.",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
     payload: [],
     status: Status.failed,
   );
 }
 
-Future<Conversation?> createConversation(String id) async {
+Future<RedionesResponse<Conversation?>> createConversation(String id) async {
+  String errorHeader = "Create Conversation:";
   try {
     Response response = await dio.post(
       "/conversations/new-conversation/$id",
@@ -68,17 +76,33 @@ Future<Conversation?> createConversation(String id) async {
       List<dynamic> memberList = body["members"] as List<dynamic>;
       List<User> profiles = _getUsers(memberList);
       body["members"] = profiles;
-      return Conversation.fromJson(body);
+
+      return RedionesResponse(
+        payload: Conversation.fromJson(body),
+        message: "Success",
+        status: Status.success,
+      );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Create Conversation Error: $e");
   }
-  return null;
+  return RedionesResponse(
+    payload: null,
+    message: "$errorHeader An error occurred. Please try again",
+    status: Status.failed,
+  );
 }
 
 Future<RedionesResponse<MessageData?>> sendMessage(MessageData message) async {
   emit(messageSignal, message.toJson());
 
+  String errorHeader = "Send Message:";
   try {
     Response response = await dio.post(
       "/messages/send-message",
@@ -104,12 +128,18 @@ Future<RedionesResponse<MessageData?>> sendMessage(MessageData message) async {
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Send Message Error: $e");
   }
-  return const RedionesResponse(
+  return RedionesResponse(
     payload: null,
-    message: "An error occurred. Please try again",
+    message: "$errorHeader An error occurred. Please try again",
     status: Status.failed,
   );
 }
@@ -126,6 +156,7 @@ List<User> _getUsers(List<dynamic> list) {
 
 Future<RedionesResponse<List<MessageData>>> getMessagesFor(
     String conversationID, String otherID) async {
+  String errorHeader = "Get Messages:";
   try {
     Response response = await dio.get(
       "/messages/$conversationID",
@@ -160,18 +191,25 @@ Future<RedionesResponse<List<MessageData>>> getMessagesFor(
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
     log("Get Message Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again",
+  return RedionesResponse(
+    message: "$errorHeader An error occurred. Please try again",
     payload: [],
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse<PocketResponse?>> getPocket() async {
+  String errorHeader = "Get Pocket";
   try {
     Response response = await dio.get(
       "/pocket",
@@ -204,12 +242,18 @@ Future<RedionesResponse<PocketResponse?>> getPocket() async {
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Get Pocket Message Data Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again",
+  return RedionesResponse(
+    message: "$errorHeader An error occurred. Please try again",
     payload: null,
     status: Status.failed,
   );
@@ -217,6 +261,7 @@ Future<RedionesResponse<PocketResponse?>> getPocket() async {
 
 Future<RedionesResponse<PocketMessageData?>> createPocketMessageData(
     String text) async {
+  String errorHeader = "Create Pocket:";
   try {
     Response response = await dio.post(
       "/pocket",
@@ -231,18 +276,25 @@ Future<RedionesResponse<PocketMessageData?>> createPocketMessageData(
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Create Pocket Message Data Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again",
+  return RedionesResponse(
+    message: "$errorHeader An error occurred. Please try again",
     payload: null,
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse<StickyData?>> makeSticky(String id) async {
+  String errorHeader = "Make Sticky:";
   try {
     Response response = await dio.patch(
       "/pocket/make-note/$id",
@@ -255,12 +307,18 @@ Future<RedionesResponse<StickyData?>> makeSticky(String id) async {
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Create Sticky Note Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again",
+  return RedionesResponse(
+    message: "$errorHeader An error occurred. Please try again",
     payload: null,
     status: Status.failed,
   );

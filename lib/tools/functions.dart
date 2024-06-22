@@ -13,21 +13,22 @@ void showToast(String message, BuildContext context) {
       constraints: BoxConstraints(
         minWidth: 50.w,
         maxWidth: 220.w,
-        minHeight: 40.h,
+        minHeight: 50.h,
       ),
-      child: DecoratedBox(
+      child: Container(
         decoration: BoxDecoration(
           color: appRed,
           borderRadius: BorderRadius.circular(5.r),
         ),
-        child: Center(
-          child: Text(
-            message,
-            style: context.textTheme.bodySmall!.copyWith(
-              color: theme,
-              fontWeight: FontWeight.w700,
-            ),
+        padding: EdgeInsets.symmetric(horizontal: 5.w),
+        alignment: Alignment.center,
+        child: Text(
+          message,
+          style: context.textTheme.bodyMedium!.copyWith(
+            color: theme,
+            fontWeight: FontWeight.w700,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
     ),

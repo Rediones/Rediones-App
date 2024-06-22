@@ -52,8 +52,17 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
     fetch();
   }
 
+  void checkForChanges() {
+    ref.listen(userProvider, (oldUser, newUser) {
+      if(oldUser == dummyUser && newUser != dummyUser && ref.watch(postsProvider).isEmpty) {
+        refresh();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    checkForChanges();
     List<NotificationData> notifications = ref.watch(notificationsProvider);
     String username = ref.watch(userProvider).username;
 

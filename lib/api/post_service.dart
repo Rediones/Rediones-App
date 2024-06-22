@@ -1,35 +1,47 @@
 import 'dart:async';
 
 import 'package:rediones/api/base.dart';
-import 'package:rediones/components/postable.dart';
+import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/components/comment_data.dart';
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
-import 'package:rediones/components/comment_data.dart';
-import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/tools/providers.dart' show dummyPosts;
 
 export 'package:rediones/api/base.dart' show RedionesResponse, Status;
 
 Future<RedionesResponse<PostObject?>> createPost(
     Map<String, dynamic> data) async {
+  String errorHeader = "Create Post:";
   try {
-    Response response = await dio.post("/post/create-post",
-        data: data, options: configuration(accessToken!));
+    Response response = await dio.post(
+      "/post/create-post",
+      data: data,
+      options: configuration(accessToken!),
+    );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       Map<String, dynamic> result =
           response.data["payload"] as Map<String, dynamic>;
-      log(result["poll"].toString());
       PostObject post = processPost(result);
       return RedionesResponse(
-          message: "Post Created", payload: post, status: Status.success);
+        message: "Post Created",
+        payload: post,
+        status: Status.success,
+      );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Create Post Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again.",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
     payload: null,
     status: Status.failed,
   );
@@ -61,9 +73,13 @@ Future<RedionesResponse<List<PostObject>>> getPosts() async {
     );
   }
 
+  String errorHeader = "Get Posts:";
+
   try {
-    Response response =
-        await dio.get("/posts/all", options: configuration(accessToken!));
+    Response response = await dio.get(
+      "/posts/all",
+      options: configuration(accessToken!),
+    );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
@@ -78,12 +94,18 @@ Future<RedionesResponse<List<PostObject>>> getPosts() async {
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
     log("Get Posts Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again.",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
     payload: [],
     status: Status.failed,
   );
@@ -91,9 +113,13 @@ Future<RedionesResponse<List<PostObject>>> getPosts() async {
 
 Future<RedionesResponse<List<PostObject>>> getUsersPosts(
     {required String id}) async {
+  String errorHeader = "Get Users Posts:";
   try {
-    Response response = await dio.post("/post/get-post-by-user",
-        data: {"userId": id}, options: configuration(accessToken!));
+    Response response = await dio.post(
+      "/post/get-post-by-user",
+      data: {"userId": id},
+      options: configuration(accessToken!),
+    );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
@@ -108,21 +134,30 @@ Future<RedionesResponse<List<PostObject>>> getUsersPosts(
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
     log("Get User Posts Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again.",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
     payload: [],
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse<List<PostObject>>> getUsersSavedPosts() async {
+  String errorHeader = "Get User Saved Posts:";
   try {
-    Response response =
-        await dio.get("/auth/saved", options: configuration(accessToken!));
+    Response response = await dio.get(
+      "/auth/saved",
+      options: configuration(accessToken!),
+    );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
@@ -137,12 +172,18 @@ Future<RedionesResponse<List<PostObject>>> getUsersSavedPosts() async {
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
     log("Get User Saved Posts Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again.",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
     payload: [],
     status: Status.failed,
   );
@@ -163,10 +204,12 @@ Future<RedionesResponse<List<CommentData>>> getComments(String postID) async {
       status: Status.success,
     );
   }
-
+  String errorHeader = "Get Comments";
   try {
-    Response response = await dio.get("/comments/$postID",
-        options: configuration(accessToken!));
+    Response response = await dio.get(
+      "/comments/$postID",
+      options: configuration(accessToken!),
+    );
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       List<dynamic> list = response.data["payload"] as List<dynamic>;
       List<CommentData> comments = [];
@@ -177,22 +220,32 @@ Future<RedionesResponse<List<CommentData>>> getComments(String postID) async {
       }
 
       return RedionesResponse(
-          message: "Comments Fetched",
-          payload: comments,
-          status: Status.success);
+        message: "Comments Fetched",
+        payload: comments,
+        status: Status.success,
+      );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
     log("Get Comments Error: $e");
   }
   return const RedionesResponse<List<CommentData>>(
-    message: "An error occurred. Please try again!",
+    message: "An unknown error occurred. Please try again!",
     payload: [],
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse<CommentData?>> createComment(
-    String postID, String content) async {
+  String postID,
+  String content,
+) async {
+  String errorHeader = "Create Comment:";
   try {
     Response response = await dio.post("/comments/",
         data: {"relatedContent": postID, "content": content},
@@ -201,20 +254,30 @@ Future<RedionesResponse<CommentData?>> createComment(
       Map<String, dynamic> map = response.data["payload"];
       CommentData data = _processComment(map);
       return RedionesResponse<CommentData>(
-          message: "Comment Created", payload: data, status: Status.success);
+        message: "Comment Created",
+        payload: data,
+        status: Status.success,
+      );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Create Comment Error: $e");
   }
 
-  return const RedionesResponse<CommentData?>(
-    message: "An error occurred. Please try again!",
+  return RedionesResponse<CommentData?>(
+    message: "$errorHeader An unknown error occurred. Please try again!",
     payload: null,
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse<List<String>>> likePost(String postID) async {
+  String errorHeader = "Like Post";
   try {
     Response response = await dio.patch(
       "/post/like/$postID",
@@ -226,22 +289,30 @@ Future<RedionesResponse<List<String>>> likePost(String postID) async {
           : response.data["payload"] as List<dynamic>;
       List<String> likes = fromArrayString(map);
       return RedionesResponse<List<String>>(
-          message: response.data["message"],
-          payload: likes,
-          status: Status.success);
+        message: response.data["message"],
+        payload: likes,
+        status: Status.success,
+      );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
     log("Like Post Error: $e");
   }
 
-  return const RedionesResponse<List<String>>(
-    message: "An error occurred. Please try again!",
+  return RedionesResponse<List<String>>(
+    message: "$errorHeader An unknown error occurred. Please try again!",
     payload: [],
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse> votePoll(String pollOptionID) async {
+  String errorHeader = "Vote Poll:";
   try {
     Response response = await dio.patch(
       "/post/vote/$pollOptionID",
@@ -254,18 +325,26 @@ Future<RedionesResponse> votePoll(String pollOptionID) async {
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
     log("Vote Poll Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again!",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again!",
     payload: null,
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse<List<String>>> savePost(String postID) async {
+  String errorHeader = "Save Posts:";
+
   try {
     Response response = await dio.patch(
       "/post/save/$postID",
@@ -282,18 +361,26 @@ Future<RedionesResponse<List<String>>> savePost(String postID) async {
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
   } catch (e) {
     log("Save Post Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again!",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again!",
     payload: [],
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse> delete(String postID) async {
+  String errorHeader = "Delete Post:";
+
   try {
     Response response = await dio.delete(
       "/post/delete/$postID",
@@ -302,16 +389,23 @@ Future<RedionesResponse> delete(String postID) async {
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       log(response.data.toString());
       return const RedionesResponse(
-          message: "Deleted Successfully",
-          payload: null,
-          status: Status.success);
+        message: "Deleted Successfully",
+        payload: null,
+        status: Status.success,
+      );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Delete Post Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again!",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again!",
     payload: null,
     status: Status.failed,
   );

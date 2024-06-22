@@ -27,6 +27,10 @@ import 'tools/styles.dart';
 import 'repositories/database_manager.dart';
 
 void main() async {
+  // var rootIsolateToken = RootIsolateToken.instance!;
+  // BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
+
+
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -55,11 +59,15 @@ class Rediones extends ConsumerStatefulWidget {
 class _RedionesState extends ConsumerState<Rediones>
     with WidgetsBindingObserver {
   late GoRouter _router;
+  late RootIsolateToken _rootIsolateToken;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    _rootIsolateToken = RootIsolateToken.instance!;
+    BackgroundIsolateBinaryMessenger.ensureInitialized(_rootIsolateToken);
 
     _router = GoRouter(
       initialLocation: widget.goHome ? Pages.home.path : Pages.login.path,

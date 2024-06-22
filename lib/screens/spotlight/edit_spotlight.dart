@@ -1,14 +1,15 @@
 import 'dart:io';
-import 'dart:ui';
 import 'dart:typed_data';
-import 'dart:developer';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photo_gallery/photo_gallery.dart';
-import 'package:rediones/api/video_service.dart';
+import 'package:rediones/api/file_handler.dart';
+import 'package:rediones/api/spotlight_service.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:video_player/video_player.dart';
 
@@ -57,6 +58,27 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
     super.dispose();
   }
 
+  Future<void> onCreate() async {
+    File file = await widget.spotlight.getFile();
+    Uint8List data = await file.readAsBytes();
+    String videoData = FileHandler.convertTo64(data);
+    _create("$vidPrefix$videoData");
+  }
+
+  void _create(String videoData) {
+    createSpotlight(data: videoData).then((resp) {
+      showToast(resp.message, context);
+      Navigator.of(context).pop();
+    });
+
+    showDialog(
+      useSafeArea: true,
+      barrierDismissible: false,
+      context: context,
+      builder: (_) => const Popup(),
+    );
+  }
+
   Future<void> setup() async {
     spotlightFile = await widget.spotlight.getFile();
     videoController = VideoPlayerController.file(
@@ -66,8 +88,8 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
     await videoController!.initialize();
     setState(() => loaded = true);
 
-    List<Uint8List> bytes = await VideoService.extractFrames(spotlightFile.path);
-    log("Video Services: ${bytes.length}");
+    // List<Uint8List> bytes = await VideoService.extractFrames(spotlightFile.path);
+    // log("Video Services: ${bytes.length}");
   }
 
   Widget get getBottomContent {
@@ -230,7 +252,7 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
                           borderRadius: BorderRadius.circular(5.r),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: onCreate,
                       child: Text(
                         "Next",
                         style: context.textTheme.titleSmall!.copyWith(

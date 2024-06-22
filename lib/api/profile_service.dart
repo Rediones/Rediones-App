@@ -1,5 +1,5 @@
-import 'package:rediones/components/user_data.dart';
 import 'package:rediones/api/base.dart';
+import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 
 export 'package:rediones/api/base.dart' show RedionesResponse, Status;
@@ -10,7 +10,7 @@ String? accessToken;
 Future<RedionesResponse<User?>> authenticate(
     Map<String, String> authDetails, String authPath) async {
   bool isLogin = authPath == Pages.login;
-
+  String errorHeader = "Authentication:";
   try {
     Response response = await dio.post(
       "/auth/${isLogin ? "sign-in" : "sign-up"}",
@@ -18,14 +18,6 @@ Future<RedionesResponse<User?>> authenticate(
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      if (response.data["payload"] == null) {
-        return RedionesResponse(
-            message:
-                "Could not ${isLogin ? "sign you in" : "sign you up"}. Please try again",
-            payload: null,
-            status: Status.failed);
-      }
-
       Map<String, dynamic> processedUser =
           response.data["payload"]["user"] as Map<String, dynamic>;
       processUser(processedUser);
@@ -37,28 +29,25 @@ Future<RedionesResponse<User?>> authenticate(
         status: Status.success,
       );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
-    String res = e.toString();
-    log("Auth Error: $e");
-    if (res.contains("403")) {
-      return RedionesResponse(
-        message: !isLogin
-            ? "This username or email already exists"
-            : "Incorrect password",
-        payload: null,
-        status: Status.failed,
-      );
-    }
+    log("Authentication Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again later.",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again later.",
     payload: null,
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse> followUser(String userID) async {
+  String errorHeader = "Follow User:";
   try {
     Response response = await dio.post("/auth/follow-user",
         data: {
@@ -70,23 +59,30 @@ Future<RedionesResponse> followUser(String userID) async {
       log(response.data.toString());
 
       return const RedionesResponse(
-          message: "Posts Fetched", payload: null, status: Status.success);
+        message: "Posts Fetched",
+        payload: null,
+        status: Status.success,
+      );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Follow User Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again.",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again later.",
     payload: null,
     status: Status.failed,
   );
 }
 
 Future<RedionesResponse<User?>> updateUser(Map<String, dynamic> data) async {
-  log(accessToken!);
-  log(data.toString());
-
+  String errorHeader = "Update User:";
   try {
     Response response = await dio.patch(
       "/auth/update-profile",
@@ -100,14 +96,23 @@ Future<RedionesResponse<User?>> updateUser(Map<String, dynamic> data) async {
       processUser(processedUser);
       User user = User.fromJson(processedUser);
       return RedionesResponse(
-          message: "Successful", payload: user, status: Status.success);
+        message: "Successful",
+        payload: user,
+        status: Status.success,
+      );
     }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
   } catch (e) {
     log("Update User Error: $e");
   }
 
-  return const RedionesResponse(
-    message: "An error occurred. Please try again later.",
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again later.",
     payload: null,
     status: Status.failed,
   );
@@ -122,7 +127,8 @@ List<String> fromArrayString(List<dynamic> data) {
 }
 
 void processUser(Map<String, dynamic> data) {
-  data["profilePicture"] ??= "https://gravatar.com/avatar/${data["_id"].hashCode.toString()}?s=400&d=robohash&r=x";
+  data["profilePicture"] ??=
+      "https://gravatar.com/avatar/${data["_id"].hashCode.toString()}?s=400&d=robohash&r=x";
 
   data["following"] = fromArrayString(data["following"]);
   data["followers"] = fromArrayString(data["followers"]);

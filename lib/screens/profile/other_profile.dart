@@ -4,16 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rediones/api/message_service.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/message_data.dart';
-import 'package:rediones/components/poll_data.dart';
-import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/components/user_data.dart';
-import 'package:rediones/api/message_service.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -219,7 +217,8 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                               useSafeArea: true,
                               barrierDismissible: true,
                               builder: (context) {
-                                return FutureBuilder<Conversation?>(
+                                return FutureBuilder<
+                                    RedionesResponse<Conversation?>>(
                                   future: createConversation(widget.data.id),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
@@ -227,13 +226,16 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                       return const Popup();
                                     } else if (snapshot.hasError) {
                                       showToast(
-                                          "An error occurred. Please try again", context);
+                                          "An error occurred. Please try again",
+                                          context);
                                       return const SizedBox.shrink();
                                     } else {
-                                      Conversation? resp = snapshot.data;
+                                      Conversation? resp =
+                                          snapshot.data?.payload;
                                       if (resp == null) {
                                         showToast(
-                                            "An error occurred. Please try again.", context);
+                                            "An error occurred. Please try again.",
+                                            context);
                                       } else {
                                         Future.delayed(Duration.zero,
                                             () => navigate(resp));
@@ -371,11 +373,10 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                 child: SlideAnimation(
                                   verticalOffset: 25.h,
                                   child: FadeInAnimation(
-                                    child: PostObjectContainer(
-                                      postObject: post,
-                                      onCommentClicked: () {},
-                                    )
-                                  ),
+                                      child: PostObjectContainer(
+                                    postObject: post,
+                                    onCommentClicked: () {},
+                                  )),
                                 ),
                               );
                             },

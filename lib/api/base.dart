@@ -34,6 +34,19 @@ Options configuration(String token, {ResponseType? type}) => Options(headers: {
   responseType: type
 );
 
+String dioErrorResponse(String errorHeader, DioException e) {
+  if (e.type == DioExceptionType.connectionError) {
+    return "$errorHeader A connection error occurred. Please try again later.";
+  } else if (e.type == DioExceptionType.connectionTimeout ||
+      e.type == DioExceptionType.receiveTimeout ||
+      e.type == DioExceptionType.sendTimeout) {
+    return "$errorHeader The connection timed out. Please try again later.";
+  } else {
+    return "$errorHeader ${e.response!.data["message"]!}";
+  }
+}
+
+
 enum Status { failed, success }
 
 class RedionesResponse<T> {

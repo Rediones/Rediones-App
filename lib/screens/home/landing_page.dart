@@ -38,6 +38,8 @@ class _LandingPageState extends ConsumerState<LandingPage> {
 
   void _showError(String text) => showToast(text, context);
 
+  void goHome() => context.router.goNamed(Pages.login);
+
 
   void _authenticate() async {
     Map<String, String>? authDetails = await FileHandler.loadAuthDetails();
@@ -45,10 +47,11 @@ class _LandingPageState extends ConsumerState<LandingPage> {
       FlutterNativeSplash.remove();
 
       if (resp.status == Status.failed) {
-        _showError(resp.message);
+        _showError("Unable to log you in. Please try again");
+        goHome();// TODO: This is temporary until the local database is back online
       } else {
-        saveAuthDetails(authDetails, ref);
         _showError("Welcome back, ${resp.payload!.nickname}");
+        saveAuthDetails(authDetails, ref);
         ref.watch(userProvider.notifier).state = resp.payload!;
       }
     });
