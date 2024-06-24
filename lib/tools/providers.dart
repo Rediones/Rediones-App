@@ -24,102 +24,10 @@ final StateProvider<User> userProvider = StateProvider((ref) => dummyUser);
 final StateProvider<List<PostObject>> postsProvider =
     StateProvider((ref) => []);
 
+final StateProvider<int> exitAttemptProvider = StateProvider((ref) => 2);
+
 final StateProvider<List<SpotlightData>> spotlightsProvider = StateProvider(
-  (ref) {
-    if(ref.watch(userProvider) == dummyUser) {
-      return [];
-    }
-
-    DateTime now = DateTime.now();
-
-    return [
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-      SpotlightData(
-        id: "id",
-        url:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
-        poster: ref.watch(userProvider),
-        createdAt: now,
-      ),
-    ];
-
-  },
+  (ref) => [],
 );
 
 final StateProvider<List<NotificationData>> notificationsProvider =
@@ -375,6 +283,7 @@ final StateProvider<bool> spotlightsPlayStatusProvider =
 
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);
+  ref.invalidate(exitAttemptProvider);
   ref.invalidate(spotlightsPlayStatusProvider);
   ref.invalidate(createdProfileProvider);
   ref.invalidate(recentSearchesProvider);

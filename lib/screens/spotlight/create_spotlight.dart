@@ -97,7 +97,7 @@ class _MultimediaGalleryState extends State<MultimediaGallery>
 
       for (Medium medium in page.items) {
         Duration videoDuration = Duration(milliseconds: medium.duration);
-        if (videoDuration.inSeconds > 30) continue;
+        if (videoDuration.inMinutes > 1) continue;
         mediaList.add(medium);
       }
 
@@ -275,10 +275,15 @@ class _MultimediaGalleryState extends State<MultimediaGallery>
                             return;
                           }
 
-                          context.router.pushNamed(
+                          context.router
+                              .pushNamed(
                             Pages.editSpotlight,
                             extra: selectedVideo,
-                          );
+                          )
+                              .then((resp) {
+                            if (resp == null) return;
+                            context.router.pop();
+                          });
                         },
                         child: Text(
                           "Next",

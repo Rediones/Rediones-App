@@ -1,11 +1,19 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_gallery/photo_gallery.dart';
-import 'package:rediones/screens/other/camera.dart';
-import 'constants.dart';
-
+import 'package:rediones/components/community_data.dart';
+import 'package:rediones/components/media_data.dart';
+import 'package:rediones/components/message_data.dart';
+import 'package:rediones/components/user_data.dart';
 import 'package:rediones/screens/auth/create_profile.dart';
 import 'package:rediones/screens/auth/login.dart';
 import 'package:rediones/screens/auth/signup.dart';
+import 'package:rediones/screens/community/community_chat.dart';
+import 'package:rediones/screens/community/community_library.dart';
+import 'package:rediones/screens/community/community_participants.dart';
+import 'package:rediones/screens/community/community_practice.dart';
+import 'package:rediones/screens/community/community_search.dart';
+import 'package:rediones/screens/community/create_community.dart';
 import 'package:rediones/screens/events/create_events.dart';
 import 'package:rediones/screens/events/events_page.dart';
 import 'package:rediones/screens/groups/create_group.dart';
@@ -21,26 +29,18 @@ import 'package:rediones/screens/messaging/inbox.dart';
 import 'package:rediones/screens/messaging/message.dart';
 import 'package:rediones/screens/messaging/pockets.dart';
 import 'package:rediones/screens/messaging/view_story.dart';
+import 'package:rediones/screens/other/camera.dart';
 import 'package:rediones/screens/other/media_view.dart';
 import 'package:rediones/screens/profile/edit_profile.dart';
 import 'package:rediones/screens/profile/my_profile.dart';
 import 'package:rediones/screens/profile/other_profile.dart';
-import 'package:rediones/screens/community/community_chat.dart';
-import 'package:rediones/screens/community/community_practice.dart';
-import 'package:rediones/screens/community/create_community.dart';
-import 'package:rediones/screens/community/community_library.dart';
-import 'package:rediones/screens/community/community_participants.dart';
-import 'package:rediones/screens/community/community_search.dart';
 import 'package:rediones/screens/project/create_project.dart';
 import 'package:rediones/screens/spotlight/create_spotlight.dart';
 import 'package:rediones/screens/spotlight/edit_spotlight.dart';
 import 'package:rediones/screens/spotlight/your_spotlights.dart';
+import 'package:rediones/tools/providers.dart';
 
-import 'package:rediones/components/media_data.dart';
-import 'package:rediones/components/message_data.dart';
-
-import 'package:rediones/components/community_data.dart';
-import 'package:rediones/components/user_data.dart';
+import 'constants.dart';
 
 final List<GoRoute> routes = [
   GoRoute(
@@ -75,6 +75,17 @@ final List<GoRoute> routes = [
     path: Pages.home.path,
     name: Pages.home,
     builder: (_, __) => const LandingPage(),
+    onExit: (context, state) {
+      ProviderContainer container = ProviderContainer();
+      var controller = container.read(exitAttemptProvider.notifier);
+      if(controller.state == 0) {
+        return true;
+      } else {
+        controller.state--;
+        Future.delayed(const Duration(seconds: 2), () => controller.state = 2);
+      }
+      return false;
+    },
   ),
   GoRoute(
     path: Pages.createPosts.path,

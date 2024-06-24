@@ -60,7 +60,7 @@ class User extends Equatable {
   );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
+        '_id': id,
         'profilePicture': profilePicture,
         'email': email,
         'nickname': nickname,

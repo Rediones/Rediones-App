@@ -6,8 +6,6 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rediones/api/post_service.dart';
-import 'package:rediones/components/poll_data.dart';
-import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/providers.dart';
@@ -35,13 +33,12 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
     super.initState();
     controller = TabController(length: 3, vsync: this);
     loadingEvents = loadingPosts = loadingSaved = true;
-
-    getPosts(ref.read(userProvider).id);
+    getPosts();
     getSavedPosts();
   }
 
-  void getPosts(id) {
-    getUsersPosts(id: id).then((resp) {
+  void getPosts() {
+    getUsersPosts(currentUser: ref.read(userProvider)).then((resp) {
       if (!mounted) return;
       if (resp.status == Status.failed) {
         showToast(resp.message, context);
@@ -74,7 +71,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
 
   Future<void> retryPosts() async {
     setState(() => loadingPosts = true);
-    getPosts(ref.watch(userProvider).id);
+    getPosts();
   }
 
   Future<void> retrySaved() async {

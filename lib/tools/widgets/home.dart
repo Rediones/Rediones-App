@@ -1,5 +1,6 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,313 +34,321 @@ class BottomNavBar extends ConsumerWidget {
     bool darkTheme = context.isDark;
     int currentTab = ref.watch(dashboardIndexProvider);
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 120.h,
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 20.h,
-                    left: 160.w,
-                    right: 160.w,
-                    child: GestureDetector(
-                      onTap: () {
-                        if (currentTab == 0) {
-                          showDialog(
-                            context: context,
-                            barrierDismissible: true,
-                            builder: (context) => Dialog(
-                              backgroundColor: Colors.transparent,
-                              elevation: 0.0,
-                              insetPadding: EdgeInsets.only(
-                                left: 130.w,
-                                right: 130.w,
-                                top: 450.h,
-                              ),
-                              child: ClipPath(
-                                clipper: TriangleClipper(
-                                  borderRadius: 10.r,
-                                  triangleHeight: 15.h,
-                                  triangleWidth: 20.h,
+    return KeyboardVisibilityBuilder(
+      builder: (context, isKeyboardVisible) {
+        if(isKeyboardVisible) {
+          return const SizedBox();
+        }
+
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 120.h,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 20.h,
+                        left: 160.w,
+                        right: 160.w,
+                        child: GestureDetector(
+                          onTap: () {
+                            if (currentTab == 0) {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (context) => Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  elevation: 0.0,
+                                  insetPadding: EdgeInsets.only(
+                                    left: 130.w,
+                                    right: 130.w,
+                                    top: 450.h,
+                                  ),
+                                  child: ClipPath(
+                                    clipper: TriangleClipper(
+                                      borderRadius: 10.r,
+                                      triangleHeight: 15.h,
+                                      triangleWidth: 20.h,
+                                    ),
+                                    child: Container(
+                                      color: darkTheme ? primary : theme,
+                                      height: 120.h,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 5.w, vertical: 5.h),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          SizedBox(height: 15.h),
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              context.router
+                                                  .pushNamed(Pages.createPosts);
+                                            },
+                                            child: Text(
+                                              "Create Post",
+                                              style: context.textTheme.titleSmall!
+                                                  .copyWith(
+                                                      fontWeight: FontWeight.w500),
+                                            ),
+                                          ),
+                                          SizedBox(height: 15.h),
+                                          ColoredBox(
+                                            color: Colors.black12,
+                                            child: SizedBox(
+                                              width: 80.w,
+                                              height: 1.h,
+                                            ),
+                                          ),
+                                          SizedBox(height: 15.h),
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              context.router
+                                                  .pushNamed(Pages.askQuestion);
+                                            },
+                                            child: Text(
+                                              "Ask A Question",
+                                              style: context.textTheme.titleSmall!
+                                                  .copyWith(
+                                                      fontWeight: FontWeight.w500),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                child: Container(
-                                  color: darkTheme ? primary : theme,
-                                  height: 120.h,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 5.w, vertical: 5.h),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                              );
+                            } else if (currentTab == 1) {
+                              showDialog(
+                                context: context,
+                                useSafeArea: true,
+                                barrierDismissible: true,
+                                builder: (context) => Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  insetPadding: EdgeInsets.only(
+                                    left: 100.w,
+                                    right: 100.w,
+                                    top: 500.h,
+                                  ),
+                                  elevation: 0.0,
+                                  child: ClipPath(
+                                    clipper: TriangleClipper(
+                                      borderRadius: 10.r,
+                                      triangleHeight: 15.h,
+                                      triangleWidth: 20.h,
+                                    ),
+                                    child: Container(
+                                      color: Colors.white,
+                                      height: 65.h,
+                                      width: 80.w,
+                                      child: Column(
+                                        children: [
+                                          SizedBox(height: 15.h),
+                                          GestureDetector(
+                                            onTap: () async {
+                                              Navigator.pop(context);
+                                              Permission.videos
+                                                  .request()
+                                                  .then((resp) {
+                                                if (resp.isGranted) {
+                                                  ref
+                                                      .watch(
+                                                          spotlightsPlayStatusProvider
+                                                              .notifier)
+                                                      .state = false;
+                                                  context.router
+                                                      .pushNamed(
+                                                        Pages.createSpotlight,
+                                                      )
+                                                      .then((res) => ref
+                                                          .watch(
+                                                              spotlightsPlayStatusProvider
+                                                                  .notifier)
+                                                          .state = true);
+                                                }
+                                              });
+                                            },
+                                            child: Text(
+                                              "Create A Spotlight Video",
+                                              style: context.textTheme.titleSmall!
+                                                  .copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                color: primary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            height: 65.r,
+                            width: 65.r,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: currentTab == 1
+                                  ? goodYellow
+                                  : (darkTheme ? midPrimary : primary),
+                            ),
+                            child: Icon(
+                              Icons.add_rounded,
+                              size: 32.r,
+                              color: currentTab == 1 ? primary : offWhite,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: ClipPath(
+                          clipper: BottomNavBarClipper(
+                            borderRadius: 15.r,
+                            cutoutRadius: 35.r,
+                          ),
+                          child: Container(
+                            color: currentTab == 1
+                                ? primary
+                                : (darkTheme ? midPrimary : primary),
+                            height: 70.h,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 160.w,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
                                     children: [
-                                      SizedBox(height: 15.h),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          context.router
-                                              .pushNamed(Pages.createPosts);
+                                      BottomNavItem(
+                                        color: currentTab == 1 ? offWhite : null,
+                                        selected: currentTab == 0,
+                                        height: 70.h,
+                                        text: "Home",
+                                        activeSVG: "assets/Home Active.svg",
+                                        inactiveSVG: "assets/Home Inactive.svg",
+                                        onSelect: () {
+                                          unFocus();
+                                          if (currentTab != 0) {
+                                            ref
+                                                .watch(
+                                                    dashboardIndexProvider.notifier)
+                                                .state = 0;
+                                            ref
+                                                .watch(spotlightsPlayStatusProvider
+                                                    .notifier)
+                                                .state = false;
+                                          }
                                         },
-                                        child: Text(
-                                          "Create Post",
-                                          style: context.textTheme.titleSmall!
-                                              .copyWith(
-                                                  fontWeight: FontWeight.w500),
-                                        ),
                                       ),
-                                      SizedBox(height: 15.h),
-                                      ColoredBox(
-                                        color: Colors.black12,
-                                        child: SizedBox(
-                                          width: 80.w,
-                                          height: 1.h,
-                                        ),
-                                      ),
-                                      SizedBox(height: 15.h),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          context.router
-                                              .pushNamed(Pages.askQuestion);
+                                      BottomNavItem(
+                                        selected: currentTab == 1,
+                                        color: currentTab == 1 ? appRed : null,
+                                        height: 70.h,
+                                        activeSVG: "assets/Spotlight Active.svg",
+                                        inactiveSVG:
+                                            "assets/Spotlight Inactive.svg",
+                                        text: "Spotlight",
+                                        onSelect: () {
+                                          unFocus();
+                                          if (currentTab != 1) {
+                                            ref
+                                                .watch(
+                                                    dashboardIndexProvider.notifier)
+                                                .state = 1;
+                                            ref
+                                                .watch(spotlightsPlayStatusProvider
+                                                    .notifier)
+                                                .state = true;
+                                          }
                                         },
-                                        child: Text(
-                                          "Ask A Question",
-                                          style: context.textTheme.titleSmall!
-                                              .copyWith(
-                                                  fontWeight: FontWeight.w500),
-                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                            ),
-                          );
-                        } else if (currentTab == 1) {
-                          showDialog(
-                            context: context,
-                            useSafeArea: true,
-                            barrierDismissible: true,
-                            builder: (context) => Dialog(
-                              backgroundColor: Colors.transparent,
-                              insetPadding: EdgeInsets.only(
-                                left: 100.w,
-                                right: 100.w,
-                                top: 500.h,
-                              ),
-                              elevation: 0.0,
-                              child: ClipPath(
-                                clipper: TriangleClipper(
-                                  borderRadius: 10.r,
-                                  triangleHeight: 15.h,
-                                  triangleWidth: 20.h,
-                                ),
-                                child: Container(
-                                  color: Colors.white,
-                                  height: 65.h,
-                                  width: 80.w,
-                                  child: Column(
+                                SizedBox(
+                                  width: 160.w,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
                                     children: [
-                                      SizedBox(height: 15.h),
-                                      GestureDetector(
-                                        onTap: () async {
-                                          Navigator.pop(context);
-                                          Permission.videos
-                                              .request()
+                                      BottomNavItem(
+                                        selected: currentTab == 2,
+                                        color: currentTab == 1 ? offWhite : null,
+                                        height: 70.h,
+                                        text: "Communities",
+                                        activeSVG: "assets/Community.svg",
+                                        inactiveSVG: "assets/Community.svg",
+                                        onSelect: () {
+                                          unFocus();
+                                          ref
+                                              .watch(spotlightsPlayStatusProvider
+                                                  .notifier)
+                                              .state = false;
+                                          context.router
+                                              .pushNamed(Pages.communityPractice)
                                               .then((resp) {
-                                            if (resp.isGranted) {
+                                            if (currentTab == 1) {
                                               ref
                                                   .watch(
                                                       spotlightsPlayStatusProvider
                                                           .notifier)
-                                                  .state = false;
-                                              context.router
-                                                  .pushNamed(
-                                                    Pages.createSpotlight,
-                                                  )
-                                                  .then((res) => ref
-                                                      .watch(
-                                                          spotlightsPlayStatusProvider
-                                                              .notifier)
-                                                      .state = true);
+                                                  .state = true;
                                             }
                                           });
                                         },
-                                        child: Text(
-                                          "Create A Spotlight Video",
-                                          style: context.textTheme.titleSmall!
-                                              .copyWith(
-                                            fontWeight: FontWeight.w500,
-                                            color: primary,
-                                          ),
-                                        ),
+                                      ),
+                                      BottomNavItem(
+                                        selected: currentTab == 3,
+                                        color: currentTab == 1 ? offWhite : null,
+                                        height: 70.h,
+                                        text: "Notification",
+                                        activeSVG: "assets/Notification Active.svg",
+                                        inactiveSVG:
+                                            "assets/Notification Inactive.svg",
+                                        onSelect: () {
+                                          unFocus();
+                                          if (currentTab != 3) {
+                                            ref
+                                                .watch(
+                                                    dashboardIndexProvider.notifier)
+                                                .state = 3;
+                                            ref
+                                                .watch(spotlightsPlayStatusProvider
+                                                    .notifier)
+                                                .state = false;
+                                          }
+                                        },
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                          );
-                        }
-                      },
-                      child: Container(
-                        height: 65.r,
-                        width: 65.r,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: currentTab == 1
-                              ? goodYellow
-                              : (darkTheme ? midPrimary : primary),
-                        ),
-                        child: Icon(
-                          Icons.add_rounded,
-                          size: 32.r,
-                          color: currentTab == 1 ? primary : offWhite,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: ClipPath(
-                      clipper: BottomNavBarClipper(
-                        borderRadius: 15.r,
-                        cutoutRadius: 35.r,
-                      ),
-                      child: Container(
-                        color: currentTab == 1
-                            ? primary
-                            : (darkTheme ? midPrimary : primary),
-                        height: 70.h,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SizedBox(
-                              width: 160.w,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  BottomNavItem(
-                                    color: currentTab == 1 ? offWhite : null,
-                                    selected: currentTab == 0,
-                                    height: 70.h,
-                                    text: "Home",
-                                    activeSVG: "assets/Home Active.svg",
-                                    inactiveSVG: "assets/Home Inactive.svg",
-                                    onSelect: () {
-                                      unFocus();
-                                      if (currentTab != 0) {
-                                        ref
-                                            .watch(
-                                                dashboardIndexProvider.notifier)
-                                            .state = 0;
-                                        ref
-                                            .watch(spotlightsPlayStatusProvider
-                                                .notifier)
-                                            .state = false;
-                                      }
-                                    },
-                                  ),
-                                  BottomNavItem(
-                                    selected: currentTab == 1,
-                                    color: currentTab == 1 ? appRed : null,
-                                    height: 70.h,
-                                    activeSVG: "assets/Spotlight Active.svg",
-                                    inactiveSVG:
-                                        "assets/Spotlight Inactive.svg",
-                                    text: "Spotlight",
-                                    onSelect: () {
-                                      unFocus();
-                                      if (currentTab != 1) {
-                                        ref
-                                            .watch(
-                                                dashboardIndexProvider.notifier)
-                                            .state = 1;
-                                        ref
-                                            .watch(spotlightsPlayStatusProvider
-                                                .notifier)
-                                            .state = true;
-                                      }
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              width: 160.w,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  BottomNavItem(
-                                    selected: currentTab == 2,
-                                    color: currentTab == 1 ? offWhite : null,
-                                    height: 70.h,
-                                    text: "Communities",
-                                    activeSVG: "assets/Community.svg",
-                                    inactiveSVG: "assets/Community.svg",
-                                    onSelect: () {
-                                      unFocus();
-                                      ref
-                                          .watch(spotlightsPlayStatusProvider
-                                              .notifier)
-                                          .state = false;
-                                      context.router
-                                          .pushNamed(Pages.communityPractice)
-                                          .then((resp) {
-                                        if (currentTab == 1) {
-                                          ref
-                                              .watch(
-                                                  spotlightsPlayStatusProvider
-                                                      .notifier)
-                                              .state = true;
-                                        }
-                                      });
-                                    },
-                                  ),
-                                  BottomNavItem(
-                                    selected: currentTab == 3,
-                                    color: currentTab == 1 ? offWhite : null,
-                                    height: 70.h,
-                                    text: "Notification",
-                                    activeSVG: "assets/Notification Active.svg",
-                                    inactiveSVG:
-                                        "assets/Notification Inactive.svg",
-                                    onSelect: () {
-                                      unFocus();
-                                      if (currentTab != 3) {
-                                        ref
-                                            .watch(
-                                                dashboardIndexProvider.notifier)
-                                            .state = 3;
-                                        ref
-                                            .watch(spotlightsPlayStatusProvider
-                                                .notifier)
-                                            .state = false;
-                                      }
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                SizedBox(height: 5.h)
+              ],
             ),
-            SizedBox(height: 5.h)
-          ],
-        ),
-      ),
+          ),
+        );
+      }
     );
   }
 }

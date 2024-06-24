@@ -3,9 +3,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rediones/api/spotlight_service.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/tools/constants.dart';
-import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
@@ -39,10 +39,17 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
 
   Future<void> fetchSpotlights() async {
     if (_shouldRefresh) {
-      List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
-      if (spotlights.isEmpty) return;
+      var response = (await getAllSpotlights()).payload;
+      if (response.isEmpty) {
+        setState(() => _shouldRefresh = false);
+        return;
+      }
 
-      for(FijkPlayer p in spotlightPlayers) {
+      List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
+      spotlights.clear();
+      spotlights.addAll(response);
+
+      for (FijkPlayer p in spotlightPlayers) {
         p.release();
       }
       spotlightStates.clear();
@@ -60,6 +67,8 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
         spotlightPlayers.add(player);
         spotlightStates.add(false);
       }
+
+      spotlightPlayers.first.start();
 
       setState(() => _shouldRefresh = false);
     }
@@ -135,7 +144,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: "No spotlights available finally.",
+                              text: "No spotlights available.",
                               style: context.textTheme.bodyLarge,
                             ),
                             TextSpan(
@@ -238,7 +247,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeOut,
                             child: ColoredBox(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withOpacity(0.15),
                               child: SizedBox(
                                 width: 390.w,
                                 height: 844.h,
@@ -246,7 +255,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                                   child: Icon(
                                     Icons.play_arrow_rounded,
                                     size: 64.r,
-                                    color: Colors.white,
+                                    color: Colors.white60,
                                   ),
                                 ),
                               ),
@@ -256,25 +265,14 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                             right: 10.w,
                             bottom: 80.h,
                             child: SpotlightToolbar(
-                              data: spotlights[index],
-                              liked: true,
-                              onLike: () {},
-                              bookmarked: false,
-                              onCommentClicked: () {},
-                              commentsFuture: () async {
-                                await Future.delayed(Duration.zero);
-                                return 1;
-                              }(),
-                              onBookmark: () {},
+                              spotlight: spotlights[index],
                             ),
                           ),
                           Positioned(
                             left: 10.w,
                             bottom: 100.h,
                             child: SpotlightUserData(
-                              text: loremIpsum,
-                              postedBy: spotlights[index].poster,
-                              timestamp: spotlights[index].createdAt,
+                              spotlight: spotlights[index],
                             ),
                           )
                         ],
@@ -311,9 +309,12 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
           Positioned(
             top: 10.h,
             left: 10.w,
-            child: Text(
-              "Spotlight",
-              style: context.textTheme.titleMedium!.copyWith(color: theme),
+            child: GestureDetector(
+              onTap: () => setState(() => _shouldRefresh = true),
+              child: Text(
+                "Spotlight",
+                style: context.textTheme.titleLarge!.copyWith(color: theme),
+              ),
             ),
           ),
         ],

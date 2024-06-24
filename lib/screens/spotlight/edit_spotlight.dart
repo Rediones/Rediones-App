@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:photo_gallery/photo_gallery.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/spotlight_service.dart';
@@ -65,10 +66,16 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
     _create("$vidPrefix$videoData");
   }
 
+  void popSuccess() => context.router.pop(true);
+
   void _create(String videoData) {
     createSpotlight(data: videoData).then((resp) {
       showToast(resp.message, context);
       Navigator.of(context).pop();
+
+      if(resp.status == Status.success) {
+        popSuccess();
+      }
     });
 
     showDialog(

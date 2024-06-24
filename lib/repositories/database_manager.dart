@@ -1,5 +1,4 @@
 import 'package:get_it/get_it.dart';
-import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/repositories/conversation_repository.dart';
 import 'package:rediones/repositories/messages_repository.dart';
 import 'package:rediones/repositories/poll_choice_repository.dart';

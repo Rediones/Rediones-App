@@ -8,34 +8,85 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:photo_gallery/photo_gallery.dart';
+import 'package:rediones/api/spotlight_service.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:timeago/timeago.dart' as time;
 
-class SpotlightToolbar extends StatelessWidget {
-  final SpotlightData data;
-  final bool liked, bookmarked;
-  final VoidCallback onLike, onBookmark, onCommentClicked;
-  final Future commentsFuture;
+class SpotlightToolbar extends StatefulWidget {
+  final SpotlightData spotlight;
 
   const SpotlightToolbar({
     super.key,
-    required this.data,
-    required this.liked,
-    required this.bookmarked,
-    required this.onLike,
-    required this.onBookmark,
-    required this.onCommentClicked,
-    required this.commentsFuture,
+    required this.spotlight,
   });
 
   @override
-  Widget build(BuildContext context) {
-    bool darkTheme = context.isDark;
+  State<SpotlightToolbar> createState() => _SpotlightToolbarState();
+}
 
+class _SpotlightToolbarState extends State<SpotlightToolbar> {
+  bool liked = false;
+  bool bookmarked = false;
+
+  late Future commentsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+
+    commentsFuture = getComments();
+  }
+
+  Future<int> getComments() async {
+    await Future.delayed(const Duration(seconds: 2));
+    return 0;
+  }
+
+  void onLike() {
+    setState(() => liked = !liked);
+    likeSpotlight(widget.spotlight.id).then((response) {
+      if (response.status == Status.success) {
+        showToast(response.message, context);
+        if (response.payload.contains(currentUserID) &&
+            !widget.spotlight.likes.contains(currentUserID)) {
+          widget.spotlight.likes.add(currentUserID);
+        } else if (!response.payload.contains(currentUserID) &&
+            widget.spotlight.likes.contains(currentUserID)) {
+          widget.spotlight.likes.remove(currentUserID);
+        }
+        setState(() {});
+      } else {
+        setState(() => liked = !liked);
+        showToast("Something went wrong liking your spotlight", context);
+      }
+    });
+  }
+
+  void onBookmark() {
+    setState(() => bookmarked = !bookmarked);
+    // savePost(widget.postObject.id).then((value) {
+    //   if (value.status == Status.success) {
+    //     showToast(value.message, context);
+    //     List<String> postsID =
+    //     ref.watch(userProvider.select((value) => value.savedPosts));
+    //     postsID.clear();
+    //     postsID.addAll(value.payload);
+    //   } else {
+    //     setState(() => bookmarked = !bookmarked);
+    //     showToast("Something went wrong", context);
+    //   }
+    // });
+  }
+
+  void onCommentClicked() {}
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       height: 300.h,
       child: Column(
@@ -62,7 +113,7 @@ class SpotlightToolbar extends StatelessWidget {
               ),
               SizedBox(width: 5.w),
               Text(
-                "${data.likes.length}",
+                "${widget.spotlight.likes.length}",
                 style: context.textTheme.titleSmall!.copyWith(
                   color: Colors.white,
                 ),
@@ -95,7 +146,7 @@ class SpotlightToolbar extends StatelessWidget {
                   return Text(
                     text,
                     style: context.textTheme.titleSmall!.copyWith(
-                        color: Colors.white,
+                      color: Colors.white,
                     ),
                   );
                 },
@@ -130,15 +181,11 @@ class SpotlightToolbar extends StatelessWidget {
 }
 
 class SpotlightUserData extends ConsumerStatefulWidget {
-  final User postedBy;
-  final String text;
-  final DateTime timestamp;
+  final SpotlightData spotlight;
 
   const SpotlightUserData({
     super.key,
-    required this.postedBy,
-    required this.timestamp,
-    required this.text,
+    required this.spotlight,
   });
 
   @override
@@ -155,8 +202,12 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
     ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
     context.router
         .pushNamed(
-          current == widget.postedBy ? Pages.profile : Pages.otherProfile,
-          extra: current != widget.postedBy ? widget.postedBy : null,
+          current == widget.spotlight.postedBy
+              ? Pages.profile
+              : Pages.otherProfile,
+          extra: current != widget.spotlight.postedBy
+              ? widget.spotlight.postedBy
+              : null,
         )
         .then((res) =>
             ref.watch(spotlightsPlayStatusProvider.notifier).state = true);
@@ -164,9 +215,9 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
 
   bool get shouldFollow {
     User currentUser = ref.read(userProvider);
-    if (widget.postedBy == currentUser) return false;
-    if (widget.postedBy.followers.contains(currentUserID) ||
-        currentUser.following.contains(widget.postedBy.id)) {
+    if (widget.spotlight.postedBy == currentUser) return false;
+    if (widget.spotlight.postedBy.followers.contains(currentUserID) ||
+        currentUser.following.contains(widget.spotlight.postedBy.id)) {
       return false;
     }
     return true;
@@ -176,7 +227,7 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
   void initState() {
     super.initState();
     follow = shouldFollow;
-    _time = time.format(widget.timestamp);
+    _time = time.format(widget.spotlight.createdAt);
   }
 
   @override
@@ -190,12 +241,12 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
               children: [
                 TextSpan(
                   text:
-                      "${widget.text.substring(0, expandText ? null : (widget.text.length >= 150 ? 150 : widget.text.length))}"
-                      "${widget.text.length >= 150 && !expandText ? "..." : ""}",
+                      "${widget.spotlight.caption.substring(0, expandText ? null : (widget.spotlight.caption.length >= 150 ? 150 : widget.spotlight.caption.length))}"
+                      "${widget.spotlight.caption.length >= 150 && !expandText ? "..." : ""}",
                   style: context.textTheme.bodyLarge!
                       .copyWith(color: Colors.white),
                 ),
-                if (widget.text.length > 150)
+                if (widget.spotlight.caption.length > 150)
                   TextSpan(
                     text: expandText ? " Read Less" : " Read More",
                     style: context.textTheme.bodyLarge!.copyWith(color: appRed),
@@ -214,7 +265,7 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CachedNetworkImage(
-                    imageUrl: widget.postedBy.profilePicture,
+                    imageUrl: widget.spotlight.postedBy.profilePicture,
                     errorWidget: (context, url, error) => CircleAvatar(
                       backgroundColor: neutral2,
                       radius: 20.r,
@@ -249,7 +300,7 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
                       Row(
                         children: [
                           Text(
-                            widget.postedBy.username,
+                            widget.spotlight.postedBy.username,
                             overflow: TextOverflow.ellipsis,
                             style: context.textTheme.bodyLarge!.copyWith(
                                 fontWeight: FontWeight.w700,
@@ -292,7 +343,7 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
                         ],
                       ),
                       Text(
-                        "@${widget.postedBy.nickname}  -  ${_time == "now" ? "now" : "$_time ago"}",
+                        "@${widget.spotlight.postedBy.nickname}  -  ${_time == "now" ? "now" : "$_time ago"}",
                         style: context.textTheme.labelSmall!
                             .copyWith(color: Colors.white70),
                       )
@@ -413,7 +464,8 @@ class SpotlightMediaList extends StatelessWidget {
                                     children: [
                                       Text(
                                         resp[0],
-                                        style: context.textTheme.bodyLarge!.copyWith(
+                                        style: context.textTheme.bodyLarge!
+                                            .copyWith(
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),

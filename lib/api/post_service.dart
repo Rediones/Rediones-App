@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:rediones/api/base.dart';
 import 'package:rediones/api/profile_service.dart';
@@ -6,6 +7,7 @@ import 'package:rediones/components/comment_data.dart';
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
+import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/providers.dart' show dummyPosts;
 
 export 'package:rediones/api/base.dart' show RedionesResponse, Status;
@@ -47,11 +49,15 @@ Future<RedionesResponse<PostObject?>> createPost(
   );
 }
 
-PostObject processPost(Map<String, dynamic> result) {
-  Map<String, dynamic> user = result["postedBy"] as Map<String, dynamic>;
-  processUser(user);
+PostObject processPost(Map<String, dynamic> result, {User? user}) {
+  if(user == null) {
+    Map<String, dynamic> user = result["postedBy"] as Map<String, dynamic>;
+    processUser(user);
+    // result["postedBy"] = user;
+  } else {
+    result["postedBy"] = user.toJson();
+  }
 
-  result["postedBy"] = user;
   result["likes"] = fromArrayString(result["likes"] as List<dynamic>);
 
   if (result["type"] == "POST") {
@@ -111,13 +117,22 @@ Future<RedionesResponse<List<PostObject>>> getPosts() async {
   );
 }
 
-Future<RedionesResponse<List<PostObject>>> getUsersPosts(
-    {required String id}) async {
+Future<RedionesResponse<List<PostObject>>> getUsersPosts({String? id, User? currentUser}) async {
   String errorHeader = "Get Users Posts:";
+
+  if((id == null && currentUser == null) || (id != null && currentUser != null)) {
+    return RedionesResponse(
+      message: "$errorHeader You can only provide either the ID or the User object but not both nor neither.",
+      payload: [],
+      status: Status.failed,
+    );
+  }
+
+
   try {
     Response response = await dio.post(
       "/post/get-post-by-user",
-      data: {"userId": id},
+      data: {"userId": currentUser == null ? id : currentUser.id},
       options: configuration(accessToken!),
     );
 
@@ -125,7 +140,7 @@ Future<RedionesResponse<List<PostObject>>> getUsersPosts(
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
       List<PostObject> posts = [];
       for (var element in postList) {
-        posts.add(processPost(element as Map<String, dynamic>));
+        posts.add(processPost(element as Map<String, dynamic>, user: currentUser));
       }
 
       return RedionesResponse(

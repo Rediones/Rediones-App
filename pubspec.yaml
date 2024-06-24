@@ -70,6 +70,7 @@ dependencies:
   camera_camera:
   image:
   flutter_quick_video_encoder:
+  flutter_keyboard_visibility:
 #  device_preview:
 
 

@@ -16,7 +16,6 @@ Future<RedionesResponse<List<SpotlightData>>> getAllSpotlights() async {
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       List<dynamic> data = response.data["payload"] as List<dynamic>;
       List<SpotlightData> spotlights = [];
-      log(data.toString());
       for (var element in data) {
         processUser(element["postedBy"]);
         element["likes"] = fromArrayString(element["likes"]);
@@ -28,7 +27,6 @@ Future<RedionesResponse<List<SpotlightData>>> getAllSpotlights() async {
         payload: spotlights,
         status: Status.success,
       );
-      ;
     }
   } on DioException catch (e) {
     return RedionesResponse(
@@ -48,21 +46,31 @@ Future<RedionesResponse<List<SpotlightData>>> getAllSpotlights() async {
 }
 
 Future<RedionesResponse> createSpotlight(
-    {required String data, String name = "", String extension = ""}) async {
+    {required String data, String? caption}) async {
   String errorHeader = "Create Spotlight:";
+
+  Map<String, dynamic> map = {
+    "link": {
+      "base64": data,
+    },
+  };
+  if (caption != null) {
+    map["caption"] = caption;
+  }
+
   try {
     Response response = await dio.post(
       "/spotlights/create",
-      data: {
-        "link": {
-          "base64": data,
-        },
-      },
+      data: map,
       options: configuration(accessToken!),
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      log(response.data.toString());
+      return const RedionesResponse(
+        message: "Success",
+        payload: null,
+        status: Status.success,
+      );
     }
   } on DioException catch (e) {
     return RedionesResponse(
@@ -99,13 +107,13 @@ Future<RedionesResponse<List<String>>> likeSpotlight(String spotlightID) async {
         status: Status.success,
       );
     }
-  }  on DioException catch (e) {
+  } on DioException catch (e) {
     return RedionesResponse(
       message: dioErrorResponse(errorHeader, e),
       payload: [],
       status: Status.failed,
     );
-  }  catch (e) {
+  } catch (e) {
     log("Like Spotlight Error: $e");
   }
 

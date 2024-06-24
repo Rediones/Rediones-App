@@ -27,10 +27,6 @@ import 'tools/styles.dart';
 import 'repositories/database_manager.dart';
 
 void main() async {
-  // var rootIsolateToken = RootIsolateToken.instance!;
-  // BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
-
-
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -39,7 +35,7 @@ void main() async {
   c.currentCamera = 0;
 
   await ScreenUtil.ensureScreenSize();
-  // await DatabaseManager.init();
+  await DatabaseManager.init();
   // await DatabaseManager.clearDatabase();
 
   bool goHome = await FileHandler.hasAuthDetails;
@@ -59,15 +55,11 @@ class Rediones extends ConsumerStatefulWidget {
 class _RedionesState extends ConsumerState<Rediones>
     with WidgetsBindingObserver {
   late GoRouter _router;
-  late RootIsolateToken _rootIsolateToken;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
-    _rootIsolateToken = RootIsolateToken.instance!;
-    BackgroundIsolateBinaryMessenger.ensureInitialized(_rootIsolateToken);
 
     _router = GoRouter(
       initialLocation: widget.goHome ? Pages.home.path : Pages.login.path,
@@ -154,31 +146,31 @@ class _RedionesState extends ConsumerState<Rediones>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
-    // if (state == AppLifecycleState.paused) {
-    //   ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
-    //
-    //   final List<PostObject> posts = ref.watch(postsProvider);
-    //   final List<Conversation> conversations = ref.watch(conversationsProvider);
-    //   final User user = ref.watch(userProvider);
-    //
-    //   await _savePosts(posts);
-    //   await _saveUser(user);
-    //   await _saveConversations(conversations);
-    //
-    //
-    // } else if (state == AppLifecycleState.resumed) {
-    //   List<PostObject> posts = await _loadPosts();
-    //   ref.watch(postsProvider).clear();
-    //   ref.watch(postsProvider).addAll(posts);
-    //
-    //   User? user = await _loadUser();
-    //   if (user != null) {
-    //     ref.watch(userProvider.notifier).state = user;
-    //   }
-    //
-    //   List<Conversation> conversations = await _loadConversations();
-    //   ref.watch(conversationsProvider).clear();
-    //   ref.watch(conversationsProvider).addAll(conversations);
-    // }
+    if (state == AppLifecycleState.paused) {
+      ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+
+      final List<PostObject> posts = ref.watch(postsProvider);
+      final List<Conversation> conversations = ref.watch(conversationsProvider);
+      final User user = ref.watch(userProvider);
+
+      await _savePosts(posts);
+      await _saveUser(user);
+      await _saveConversations(conversations);
+
+
+    } else if (state == AppLifecycleState.resumed) {
+      List<PostObject> posts = await _loadPosts();
+      ref.watch(postsProvider).clear();
+      ref.watch(postsProvider).addAll(posts);
+
+      User? user = await _loadUser();
+      if (user != null) {
+        ref.watch(userProvider.notifier).state = user;
+      }
+
+      List<Conversation> conversations = await _loadConversations();
+      ref.watch(conversationsProvider).clear();
+      ref.watch(conversationsProvider).addAll(conversations);
+    }
   }
 }

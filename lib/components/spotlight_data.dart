@@ -3,7 +3,8 @@ import 'user_data.dart';
 class SpotlightData {
   final String id;
   final String url;
-  final User poster;
+  final User postedBy;
+  final String caption;
   final DateTime createdAt;
 
   final List<String> likes;
@@ -12,7 +13,8 @@ class SpotlightData {
   const SpotlightData({
     required this.id,
     required this.url,
-    required this.poster,
+    required this.postedBy,
+    required this.caption,
     required this.createdAt,
     this.likes = const [],
     this.comments = 0,
@@ -20,12 +22,11 @@ class SpotlightData {
 
   factory SpotlightData.fromJson(Map<String, dynamic> data) => SpotlightData(
         id: data["_id"],
-        url:
-            "https://medbolt-website.vercel.app/static/media/doctors_talking.80509c04b8b459ccc95f.mp4",
-        //   data["link"],
-        poster: data['postedBy'],
+        url: data["link"],
+        postedBy: User.fromJson(data['postedBy']),
         likes: data['likes'],
         comments: 0,
-        createdAt: DateTime.now(),
+        caption: data["caption"] ?? "",
+        createdAt: DateTime.parse(data["createdAt"]),
       );
 }
