@@ -2,33 +2,42 @@ import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/functions.dart';
 
+import 'package:isar/isar.dart';
+
+part 'poll_data.g.dart';
+
+@embedded
 class PollChoice {
+  final Id id = Isar.autoIncrement;
+  final String uuid;
   final String name;
   final List<String> voters;
-  final String id;
-  final String rootID;
+
 
   const PollChoice({
-    this.id = "",
-    this.rootID = "",
+    this.uuid = "",
     this.name = "",
     this.voters = const [],
   });
 
   @override
   String toString() {
-    return "Choice { name: $name, id: $id, voters: ${voters.length} }";
+    return "Choice { name: $name, id: $uuid, voters: ${voters.length} }";
   }
 }
 
+@collection
 class PollData extends PostObject {
+  final Id id = Isar.autoIncrement;
+
+
   final int totalVotes;
   final List<PollChoice> polls;
   final int durationInHours;
 
 
   const PollData({
-    super.id,
+    super.uuid,
     super.text,
     required super.timestamp,
     required super.poster,
@@ -44,8 +53,6 @@ class PollData extends PostObject {
    return "Poll { totalVotes: $totalVotes, text: $text: polls: $polls }";
   }
 
-  @override
-  List<Object> get props => [id];
 
   factory PollData.fromJson(Map<String, dynamic> map) {
     Map<String, dynamic> poll = map["poll"];
@@ -57,9 +64,8 @@ class PollData extends PostObject {
       List<String> voters = toStringList(element["voters"]);
       PollChoice choice = PollChoice(
         name: element["title"],
-        id: element["_id"],
+        uuid: element["_id"],
         voters: voters,
-        rootID: poll["_id"],
       );
       choices.add(choice);
       count += voters.length;
@@ -68,7 +74,7 @@ class PollData extends PostObject {
     return PollData(
         timestamp: DateTime.parse(poll["createdAt"]),
         poster: User.fromJson(map["postedBy"]),
-        id: poll["_id"],
+        uuid: poll["_id"],
         likes: map["likes"],
         polls: choices,
         shares: 0,

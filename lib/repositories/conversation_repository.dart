@@ -32,8 +32,8 @@ class ConversationRepository extends BaseRepository<Conversation> {
       "serverID": value.id,
       "lastMessage": value.lastMessage,
       "timestamp": value.timestamp!.millisecondsSinceEpoch,
-      "firstUser": value.users[0].id,
-      "secondUser": value.users[1].id,
+      "firstUser": value.users[0].uuid,
+      "secondUser": value.users[1].uuid,
     };
   }
 }

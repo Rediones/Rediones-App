@@ -1,8 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:rediones/components/user_data.dart';
 
-abstract class PostObject extends Equatable {
-  final String id;
+import 'package:isar/isar.dart';
+
+
+
+abstract class PostObject{
+  final String uuid;
   final String text;
 
   final User poster;
@@ -12,14 +16,11 @@ abstract class PostObject extends Equatable {
   final DateTime timestamp;
 
   const PostObject({
-    this.id = "",
+    this.uuid = "",
     this.text = "",
     required this.poster,
     this.likes = const [],
     this.shares = 0,
     required this.timestamp,
   });
-
-  @override
-  List<Object> get props => [id];
 }

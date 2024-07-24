@@ -217,7 +217,7 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
     User currentUser = ref.read(userProvider);
     if (widget.spotlight.postedBy == currentUser) return false;
     if (widget.spotlight.postedBy.followers.contains(currentUserID) ||
-        currentUser.following.contains(widget.spotlight.postedBy.id)) {
+        currentUser.following.contains(widget.spotlight.postedBy.uuid)) {
       return false;
     }
     return true;

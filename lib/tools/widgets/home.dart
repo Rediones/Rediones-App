@@ -562,14 +562,14 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     }
 
     User user = ref.read(userProvider);
-    currentUserID = user.id;
+    currentUserID = user.uuid;
     liked = widget.postObject.likes.contains(currentUserID);
-    bookmarked = user.savedPosts.contains(widget.postObject.id);
+    bookmarked = user.savedPosts.contains(widget.postObject.uuid);
     commentsFuture = _getCommentsCount();
   }
 
   Future<int> _getCommentsCount() async {
-    int value = (await getComments(widget.postObject.id)).payload.length;
+    int value = (await getComments(widget.postObject.uuid)).payload.length;
     return value;
   }
 
@@ -635,7 +635,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
 
   void onLike() {
     setState(() => liked = !liked);
-    likePost(widget.postObject.id).then((response) {
+    likePost(widget.postObject.uuid).then((response) {
       if (response.status == Status.success) {
         showToast(response.message, context);
         if (response.payload.contains(currentUserID) &&
@@ -655,7 +655,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
 
   void onBookmark() {
     setState(() => bookmarked = !bookmarked);
-    savePost(widget.postObject.id).then((value) {
+    savePost(widget.postObject.uuid).then((value) {
       if (value.status == Status.success) {
         showToast(value.message, context);
         List<String> postsID =
@@ -673,7 +673,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     User currentUser = ref.watch(userProvider);
     if (widget.postObject.poster == currentUser) return false;
     if (widget.postObject.poster.followers.contains(currentUserID) ||
-        currentUser.following.contains(widget.postObject.poster.id)) {
+        currentUser.following.contains(widget.postObject.poster.uuid)) {
       return false;
     }
     return true;
@@ -843,7 +843,7 @@ class _PostHeader extends StatelessWidget {
                             SizedBox(width: 10.w),
                             GestureDetector(
                               onTap: () async {
-                                await followUser(object.poster.id);
+                                await followUser(object.poster.uuid);
                               },
                               child: Container(
                                 height: 18.r,
@@ -1136,7 +1136,7 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
   void initState() {
     super.initState();
 
-    currentUserID = ref.read(userProvider).id;
+    currentUserID = ref.read(userProvider).uuid;
 
     for (int i = 0; i < widget.poll.polls.length; ++i) {
       PollChoice choice = widget.poll.polls[i];
@@ -1197,7 +1197,7 @@ class _PollContainerState extends ConsumerState<_PollContainer> {
                       GestureDetector(
                         onTap: () {
                           if (!hasVoted) {
-                            vote(choice.id, index);
+                            vote(choice.uuid, index);
                           }
                         },
                         child: Row(

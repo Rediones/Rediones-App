@@ -18,7 +18,7 @@ import 'package:rediones/tools/constants.dart';
 
 import '../components/community_data.dart';
 
-const User dummyUser = User(id: "dummy");
+const User dummyUser = User(uuid: "dummy");
 final StateProvider<User> userProvider = StateProvider((ref) => dummyUser);
 
 final StateProvider<List<PostObject>> postsProvider =
@@ -254,7 +254,7 @@ final List<Post> dummyPosts = List.generate(
   4,
   (index) => Post(
     poster: dummyUser,
-    id: "Dummy Post ID: $index",
+    uuid: "Dummy Post ID: $index",
     text: loremIpsum,
     timestamp: DateTime(1900),
     shares: 0,

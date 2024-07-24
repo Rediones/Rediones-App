@@ -48,7 +48,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
       ),
     );
 
-    userID = ref.read(userProvider).id;
+    userID = ref.read(userProvider).uuid;
 
     // getLocalConversations();
   }
@@ -495,7 +495,7 @@ class LastMessageContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     late User? sender;
-    sender = data.users.firstWhere((element) => element.id != currentID,
+    sender = data.users.firstWhere((element) => element.uuid != currentID,
         orElse: () => dummyUser);
 
     return GestureDetector(

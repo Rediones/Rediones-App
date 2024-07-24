@@ -39,7 +39,7 @@ class UserRepository extends BaseRepository<User> {
     List<String> saved = response.map((resp) => resp.value).toList();
 
     return User(
-      id: map["serverID"],
+      uuid: map["serverID"],
       profilePicture: map["profilePicture"],
       email: map["email"],
       nickname: map["nickname"],
@@ -59,17 +59,17 @@ class UserRepository extends BaseRepository<User> {
   @override
   Future<Map<String, dynamic>> toJson(User value) async {
 
-    var response = value.followers.map((val) => StringListModel(referenceID: value.id, value: val)).toList();
+    var response = value.followers.map((val) => StringListModel(referenceID: value.uuid, value: val)).toList();
     await followersRepository.addAll(response);
 
-    response = value.following.map((val) => StringListModel(referenceID: value.id, value: val)).toList();
+    response = value.following.map((val) => StringListModel(referenceID: value.uuid, value: val)).toList();
     await followingRepository.addAll(response);
 
-    response = value.savedPosts.map((val) => StringListModel(referenceID: value.id, value: val)).toList();
+    response = value.savedPosts.map((val) => StringListModel(referenceID: value.uuid, value: val)).toList();
     await savedPostsRepository.addAll(response);
 
     return {
-      'serverID': value.id,
+      'serverID': value.uuid,
       'profilePicture': value.profilePicture,
       'email': value.email,
       'nickname': value.nickname,

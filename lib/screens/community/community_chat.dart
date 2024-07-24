@@ -218,7 +218,7 @@ class _CommunityChatContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    String currentUserID = ref.watch(userProvider).id;
+    String currentUserID = ref.watch(userProvider).uuid;
     bool darkTheme = context.isDark;
     bool isCurrentUser = currentUserID == data.userId;
 

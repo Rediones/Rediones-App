@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -114,8 +116,8 @@ class _RedionesState extends ConsumerState<Rediones>
   Future<void> _saveUser(User user) async {
     final UserRepository userRepository = GetIt.I.get();
     if (user != dummyUser) {
-      userRepository.updateByIdAndColumn(user.id, "serverID", user);
-      FileHandler.saveString(currentUserID, user.id);
+      userRepository.updateByIdAndColumn(user.uuid, "serverID", user);
+      FileHandler.saveString(currentUserID, user.uuid);
     }
   }
 
@@ -147,30 +149,34 @@ class _RedionesState extends ConsumerState<Rediones>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
-      ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
-
-      final List<PostObject> posts = ref.watch(postsProvider);
-      final List<Conversation> conversations = ref.watch(conversationsProvider);
-      final User user = ref.watch(userProvider);
-
-      await _savePosts(posts);
-      await _saveUser(user);
-      await _saveConversations(conversations);
+      // ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+      //
+      // final List<PostObject> posts = ref.watch(postsProvider);
+      // final List<Conversation> conversations = ref.watch(conversationsProvider);
+      // final User user = ref.watch(userProvider);
+      //
+      // log("Saving ${posts.length}");
+      //
+      // await _savePosts(posts);
+      // await _saveUser(user);
+      // await _saveConversations(conversations);
 
 
     } else if (state == AppLifecycleState.resumed) {
-      List<PostObject> posts = await _loadPosts();
-      ref.watch(postsProvider).clear();
-      ref.watch(postsProvider).addAll(posts);
-
-      User? user = await _loadUser();
-      if (user != null) {
-        ref.watch(userProvider.notifier).state = user;
-      }
-
-      List<Conversation> conversations = await _loadConversations();
-      ref.watch(conversationsProvider).clear();
-      ref.watch(conversationsProvider).addAll(conversations);
+      // List<PostObject> posts = await _loadPosts();
+      // ref.watch(postsProvider).clear();
+      // ref.watch(postsProvider).addAll(posts);
+      //
+      // log("Resuming with ${posts.length}");
+      //
+      // User? user = await _loadUser();
+      // if (user != null) {
+      //   ref.watch(userProvider.notifier).state = user;
+      // }
+      //
+      // List<Conversation> conversations = await _loadConversations();
+      // ref.watch(conversationsProvider).clear();
+      // ref.watch(conversationsProvider).addAll(conversations);
     }
   }
 }

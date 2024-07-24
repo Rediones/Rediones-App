@@ -26,7 +26,7 @@ class PollChoiceRepository extends BaseRepository<PollChoice> {
     return PollChoice(
       voters: voters,
       name: map["title"],
-      id: map["choiceServerID"],
+      uuid: map["choiceServerID"],
       rootID: map["pollID"],
     );
   }
@@ -35,17 +35,17 @@ class PollChoiceRepository extends BaseRepository<PollChoice> {
   @override
   Future<Map<String, dynamic>> toJson(PollChoice value) async {
     var response = value.voters
-        .map((val) => StringListModel(referenceID: value.id, value: val))
+        .map((val) => StringListModel(referenceID: value.uuid, value: val))
         .toList();
 
     await votersRepository.clearAllAndAddAllWhere(response,
-      whereArgs: [value.id],
+      whereArgs: [value.uuid],
       where: "${StringListModel.referenceColumn} = ?",
     );
 
     return {
       'title': value.name,
-      'choiceServerID': value.id,
+      'choiceServerID': value.uuid,
       'pollID': value.rootID,
     };
   }

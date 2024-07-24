@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -23,6 +25,7 @@ class LandingPage extends ConsumerStatefulWidget {
 class _LandingPageState extends ConsumerState<LandingPage> {
   late List<Widget> navPages;
 
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +36,8 @@ class _LandingPageState extends ConsumerState<LandingPage> {
       NotificationPage(),
     ];
 
-    _authenticate();
+    _authenticate(5);
+    Future.delayed(Duration.zero, () => FlutterNativeSplash.remove());
   }
 
   void _showError(String text) => showToast(text, context);
@@ -41,20 +45,23 @@ class _LandingPageState extends ConsumerState<LandingPage> {
   void goHome() => context.router.goNamed(Pages.login);
 
 
-  void _authenticate() async {
-    Map<String, String>? authDetails = await FileHandler.loadAuthDetails();
-    authenticate(authDetails!, Pages.login).then((resp) {
-      FlutterNativeSplash.remove();
+  void _authenticate(int level) async {
+    if(level == 0) {
+      _showError("Could not login you in automatically");
+      goHome();
+      return;
+    }
 
-      if (resp.status == Status.failed) {
-        _showError("Unable to log you in. Please try again");
-        goHome();// TODO: This is temporary until the local database is back online
-      } else {
-        _showError("Welcome back, ${resp.payload!.nickname}");
-        saveAuthDetails(authDetails, ref);
-        ref.watch(userProvider.notifier).state = resp.payload!;
-      }
-    });
+    Map<String, String>? authDetails = await FileHandler.loadAuthDetails();
+    var resp = await authenticate(authDetails!, Pages.login);
+    if (resp.status == Status.failed) {
+      _showError("Unable to log you in. Retrying");
+      _authenticate(level - 1);
+    } else {
+      _showError("Welcome back, ${resp.payload!.nickname}");
+      saveAuthDetails(authDetails, ref);
+      ref.watch(userProvider.notifier).state = resp.payload!;
+    }
   }
 
   @override

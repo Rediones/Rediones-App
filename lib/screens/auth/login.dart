@@ -40,15 +40,9 @@ class _LoginState extends ConsumerState<Login> {
 
 
   void navigate(RedionesResponse<User?> result) {
-    String location = Pages.home;
     saveAuthDetails(_authDetails, ref);
     ref.watch(userProvider.notifier).state = result.payload!;
-
-    if (!result.payload!.isProfileComplete) {
-      location = Pages.editProfile;
-    }
-
-    context.router.pushReplacementNamed(location);
+    context.router.pushReplacementNamed(Pages.home);
   }
 
   void submit() {

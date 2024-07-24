@@ -132,7 +132,7 @@ Future<RedionesResponse<List<PostObject>>> getUsersPosts({String? id, User? curr
   try {
     Response response = await dio.post(
       "/post/get-post-by-user",
-      data: {"userId": currentUser == null ? id : currentUser.id},
+      data: {"userId": currentUser == null ? id : currentUser.uuid},
       options: configuration(accessToken!),
     );
 

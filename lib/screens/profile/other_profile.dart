@@ -219,7 +219,7 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                               builder: (context) {
                                 return FutureBuilder<
                                     RedionesResponse<Conversation?>>(
-                                  future: createConversation(widget.data.id),
+                                  future: createConversation(widget.data.uuid),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
@@ -326,7 +326,7 @@ class _OtherProfilePageState extends State<OtherProfilePage>
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                 child: FutureBuilder<RedionesResponse<List<PostObject>>>(
-                  future: getUsersPosts(id: widget.data.id),
+                  future: getUsersPosts(id: widget.data.uuid),
                   builder: (_, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Skeletonizer(

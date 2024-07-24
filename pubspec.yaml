@@ -18,7 +18,7 @@ dependencies:
   intl:
   clipboard:
   camera:
-  path_provider:
+  path_provider: ^2.1.3
   equatable:
   flutter_boxicons:
   flutter_screenutil:
@@ -71,6 +71,9 @@ dependencies:
   image:
   flutter_quick_video_encoder:
   flutter_keyboard_visibility:
+  zero_story_editor:
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
 #  device_preview:
 
 
@@ -79,6 +82,8 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^3.0.1
+  isar_generator: ^3.1.0+1
+  build_runner:
 
 flutter_icons:
   image_path_android: "assets/Icon.png"

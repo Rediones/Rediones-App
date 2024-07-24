@@ -11,30 +11,37 @@ void showToast(String message, BuildContext context) {
   AnimatedSnackBar snackBar = AnimatedSnackBar(
     builder: (context) => ConstrainedBox(
       constraints: BoxConstraints(
-        minWidth: 50.w,
         maxWidth: 220.w,
-        minHeight: 50.h,
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: appRed,
-          borderRadius: BorderRadius.circular(5.r),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 5.w),
-        alignment: Alignment.center,
-        child: Text(
-          message,
-          style: context.textTheme.bodyMedium!.copyWith(
-            color: theme,
-            fontWeight: FontWeight.w700,
+      child: IntrinsicWidth(
+        child: Container(
+          constraints: BoxConstraints(
+            minWidth: 60.w,
+            minHeight: 35.h,
           ),
-          textAlign: TextAlign.center,
+          decoration: BoxDecoration(
+            color: appRed,
+            borderRadius: BorderRadius.circular(5.r),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          alignment: Alignment.center,
+          child: Text(
+            message,
+            style: context.textTheme.bodyMedium!.copyWith(
+              color: theme,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ),
     ),
     mobileSnackBarPosition: MobileSnackBarPosition.top,
+    mobilePositionSettings: const MobilePositionSettings(topOnAppearance: 100),
     animationCurve: Curves.ease,
-    snackBarStrategy: RemoveSnackBarStrategy(),
+    snackBarStrategy: const ColumnSnackBarStrategy(),
     duration: const Duration(seconds: 4),
     animationDuration: const Duration(milliseconds: 350),
   );

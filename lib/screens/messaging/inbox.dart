@@ -42,10 +42,10 @@ class _InboxState extends ConsumerState<Inbox> {
     super.initState();
 
     User currentUser = ref.read(userProvider);
-    currentUserID = currentUser.id;
+    currentUserID = currentUser.uuid;
     otherUser = widget.details.users
         .firstWhere((user) => user != currentUser, orElse: () => currentUser);
-    otherID = otherUser.id;
+    otherID = otherUser.uuid;
     conversationID = widget.details.id;
 
     users = [

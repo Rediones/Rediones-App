@@ -1,11 +1,17 @@
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
 
+import 'package:isar/isar.dart';
+
+part 'post_data.g.dart';
+
+@collection
 class Post extends PostObject {
+  final Id id = Isar.autoIncrement;
   final List<String> media;
 
   const Post({
-    super.id,
+    super.uuid,
     super.text,
     required super.timestamp,
     this.media = const [],
@@ -16,7 +22,7 @@ class Post extends PostObject {
 
   factory Post.fromJson(Map<String, dynamic> map) => Post(
         text: map["content"],
-        id: map["_id"],
+        uuid: map["_id"],
         timestamp: DateTime.parse(map["createdAt"]),
         likes: map["likes"],
         shares: (map["shares"] as num).toInt(),
@@ -26,7 +32,7 @@ class Post extends PostObject {
 
   Map<String, dynamic> toJson() => {
         'content': text,
-        '_id': id,
+        '_id': uuid,
         'shares': shares,
         'createdAt': timestamp.toIso8601String(),
         'likes': likes,
@@ -34,12 +40,11 @@ class Post extends PostObject {
         'media': media
       };
 
+  @ignore
   bool get has => media.isNotEmpty;
 
+  @ignore
   MediaType get type => has ? MediaType.imageAndText : MediaType.textOnly;
-
-  @override
-  List<Object> get props => [super.id];
 }
 
 enum MediaType {

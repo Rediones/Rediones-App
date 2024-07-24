@@ -1,7 +1,12 @@
-import 'package:equatable/equatable.dart';
+import 'package:isar/isar.dart';
+part 'user_data.g.dart';
 
-class User extends Equatable {
-  final String id;
+@collection
+class User {
+  final Id id = Isar.autoIncrement;
+
+
+  final String uuid;
   final String profilePicture;
   final String email;
   final String nickname;
@@ -17,7 +22,7 @@ class User extends Equatable {
   final String gender;
 
   const User({
-    required this.id,
+    required this.uuid,
     this.profilePicture = "",
     this.gender = "",
     this.nickname = "",
@@ -39,11 +44,11 @@ class User extends Equatable {
     return true;
   }
 
-  @override
-  List<Object> get props => [id];
+  // @override
+  // @ignore List<Object> get props => [uuid];
 
   factory User.fromJson(Map<String, dynamic> map) => User(
-      id: map["_id"],
+      uuid: map["_id"],
       email: map["email"],
       profilePicture: map["profilePicture"],
       firstName: map["firstName"] ?? "",
@@ -60,7 +65,7 @@ class User extends Equatable {
   );
 
   Map<String, dynamic> toJson() => {
-        '_id': id,
+        '_id': uuid,
         'profilePicture': profilePicture,
         'email': email,
         'nickname': nickname,

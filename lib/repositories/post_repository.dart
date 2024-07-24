@@ -36,7 +36,7 @@ class PostRepository extends BaseRepository<Post> {
 
     return Post(
       text: map["content"],
-      id: map["serverID"],
+      uuid: map["serverID"],
       shares: map["shares"],
       timestamp: DateTime.fromMillisecondsSinceEpoch(map["createdAt"]),
       media: media,
@@ -48,20 +48,20 @@ class PostRepository extends BaseRepository<Post> {
   @override
   Future<Map<String, dynamic>> toJson(Post value) async {
 
-    var response = value.likes.map((val) => StringListModel(referenceID: value.id, value: val)).toList();
+    var response = value.likes.map((val) => StringListModel(referenceID: value.uuid, value: val)).toList();
     await likesRepository.addAll(response);
 
-    response = value.media.map((val) => StringListModel(referenceID: value.id, value: val)).toList();
+    response = value.media.map((val) => StringListModel(referenceID: value.uuid, value: val)).toList();
     await mediaRepository.addAll(response);
 
     userRepository.add(value.poster);
 
     return {
       'content': value.text,
-      'serverID': value.id,
+      'serverID': value.uuid,
       'shares': value.shares,
       'createdAt': value.timestamp.millisecondsSinceEpoch,
-      'posterID': value.poster.id,
+      'posterID': value.poster.uuid,
     };
   }
 

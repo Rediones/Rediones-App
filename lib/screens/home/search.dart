@@ -31,35 +31,35 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     suggested = [
       const User(
-        id: "123456",
+        uuid: "123456",
         nickname: "chuks",
         firstName: "Desmond",
         lastName: "Chukwu",
         profilePicture: "assets/hotel.jpg",
       ),
       const User(
-        id: "123456",
+        uuid: "123456",
         nickname: "nigger12",
         firstName: "Abdullahi",
         lastName: "Francis",
         profilePicture: "assets/yacht.jpg",
       ),
       const User(
-        id: "123456",
+        uuid: "123456",
         nickname: "testys",
         firstName: "Testimony",
         lastName: "Adekoya",
         profilePicture: "assets/three.jpg",
       ),
       const User(
-        id: "123456",
+        uuid: "123456",
         nickname: "emma",
         firstName: "Dev",
         lastName: "Emmy",
         profilePicture: "assets/watch man.jpg",
       ),
       const User(
-        id: "123456",
+        uuid: "123456",
         nickname: "ripper",
         firstName: "Folayimi",
         lastName: "Ripper",

@@ -10,10 +10,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/postable.dart';
-import 'package:rediones/tools/providers.dart';
+import 'package:rediones/repositories/post_object_repository.dart';
 import 'package:rediones/screens/home/comments.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' show showToast, unFocus;
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -33,9 +34,28 @@ class _HomeState extends ConsumerState<Home> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
-  void refreshPosts() {}
+  @override
+  void initState() {
+    super.initState();
+    searchFocus.addListener(() {
+      if (searchFocus.hasFocus) {
+        unFocus();
+        context.router.pushNamed(Pages.search);
+      }
+    });
+
+    if (ref.read(createdProfileProvider)) {
+      fetchPosts();
+    } else {
+      Future.delayed(Duration.zero, getLocalPosts);
+    }
+  }
+
+  void showMessage(String message) => showToast(message, context);
 
   Future<void> fetchPosts() async {
+    showMessage("Refreshing your posts");
+
     var response = await getPosts();
     if (!mounted) return;
 
@@ -54,39 +74,16 @@ class _HomeState extends ConsumerState<Home> {
     posts.clear();
     posts.addAll(p);
 
-    // final PostObjectRepository repository = GetIt.I.get();
-    // repository.clearAllAndAddAll(p);
-
+    final PostObjectRepository repository = GetIt.I.get();
+    repository.clearAllAndAddAll(p);
     setState(() => loading = false);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    searchFocus.addListener(() {
-      if (searchFocus.hasFocus) {
-        unFocus();
-        context.router.pushNamed(Pages.search);
-      }
-    });
-
-    if (ref.read(createdProfileProvider)) {
-      fetchPosts();
-    }
-
-    Future.delayed(Duration.zero, getLocalPosts);
-  }
-
   Future<void> getLocalPosts() async {
-    // final PostObjectRepository repository = GetIt.I.get();
-    // List<PostObject> posts = await repository.getAll();
-    // if (posts.isEmpty) {
-    //   fetchPosts();
-    // } else {
-    //   ref.watch(postsProvider.notifier).state.addAll(posts);
-    //   setState(() => loading = false);
-    // }
-    await fetchPosts();
+    final PostObjectRepository repository = GetIt.I.get();
+    List<PostObject> posts = await repository.getAll();
+    ref.watch(postsProvider.notifier).state.addAll(posts);
+    setState(() => loading = false);
   }
 
   @override
@@ -108,31 +105,25 @@ class _HomeState extends ConsumerState<Home> {
     );
   }
 
-  Future<void> refresh() async {
-    setState(() => loading = true);
-    ref.watch(postsProvider).clear();
-    fetchPosts();
-  }
-
   void checkForChanges() {
-      ref.listen(userProvider, (oldUser, newUser) {
-          if(oldUser == dummyUser && newUser != dummyUser && ref.watch(postsProvider).isEmpty) {
-            refresh();
-          }
-      });
+    ref.listen(isLoggedInProvider, (oldVal, newVal) {
+      if (!oldVal! && newVal) {
+        fetchPosts();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     checkForChanges();
     List<PostObject> posts = ref.watch(postsProvider);
+
     String profilePicture =
         ref.watch(userProvider.select((value) => value.profilePicture));
     String username = ref.watch(userProvider.select((value) => value.username));
     String nickname = ref.watch(userProvider.select((value) => value.nickname));
 
     bool darkTheme = context.isDark;
-
     bool isLoggedIn = ref.watch(userProvider) != dummyUser;
 
     return Scaffold(
@@ -264,7 +255,7 @@ class _HomeState extends ConsumerState<Home> {
             padding: EdgeInsets.only(left: 10.w),
             child: GestureDetector(
               onTap: () {
-                if(isLoggedIn) {
+                if (isLoggedIn) {
                   _scaffoldKey.currentState!.openDrawer();
                 }
               },
@@ -358,7 +349,7 @@ class _HomeState extends ConsumerState<Home> {
                                 style: context.textTheme.bodyLarge!
                                     .copyWith(color: appRed),
                                 recognizer: TapGestureRecognizer()
-                                  ..onTap = refresh),
+                                  ..onTap = fetchPosts),
                           ],
                         ),
                       ),
@@ -366,7 +357,7 @@ class _HomeState extends ConsumerState<Home> {
                   : AnimationLimiter(
                       child: RefreshIndicator(
                         color: appRed,
-                        onRefresh: refresh,
+                        onRefresh: fetchPosts,
                         child: ListView.separated(
                           physics: const BouncingScrollPhysics(),
                           controller: scrollController,
@@ -418,8 +409,8 @@ class _HomeState extends ConsumerState<Home> {
                                   child: PostObjectContainer(
                                     postObject: post,
                                     onCommentClicked: () => onCommentClicked(
-                                      post.id,
-                                      getComments(post.id),
+                                      post.uuid,
+                                      getComments(post.uuid),
                                     ),
                                   ),
                                 ),

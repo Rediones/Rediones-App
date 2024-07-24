@@ -33,7 +33,7 @@ class PollRepository extends BaseRepository<PollData> {
 
     return PollData(
       text: map["content"],
-      id: map["serverID"],
+      uuid: map["serverID"],
       shares: map["shares"],
       timestamp: DateTime.fromMillisecondsSinceEpoch(map["createdAt"]),
       totalVotes: map["votes"],
@@ -46,14 +46,14 @@ class PollRepository extends BaseRepository<PollData> {
   @override
   Future<Map<String, dynamic>> toJson(PollData value) async {
     var response = value.likes
-        .map((val) => StringListModel(referenceID: value.id, value: val))
+        .map((val) => StringListModel(referenceID: value.uuid, value: val))
         .toList();
 
     await likesRepository.addAll(response);
     await pollChoiceRepository.clearAllAndAddAllWhere(
       value.polls,
       where: "pollID = ?",
-      whereArgs: [value.id],
+      whereArgs: [value.uuid],
     );
 
 
@@ -61,10 +61,10 @@ class PollRepository extends BaseRepository<PollData> {
 
     return {
       'content': value.text,
-      'serverID': value.id,
+      'serverID': value.uuid,
       'shares': value.shares,
       'createdAt': value.timestamp.millisecondsSinceEpoch,
-      'posterID': value.poster.id,
+      'posterID': value.poster.uuid,
       "votes": value.totalVotes,
     };
   }

@@ -7,11 +7,13 @@ abstract class BaseRepository<T> {
   String get table;
 
   Future<void> add(T t) async {
-    await _database.insert(
-      table,
-      await toJson(t),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _database.transaction((txn) async {
+      await txn.insert(
+        table,
+        await toJson(t),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
   }
 
   Future<void> addAll(List<T> t) async {
@@ -21,32 +23,38 @@ abstract class BaseRepository<T> {
     }
 
     await _database.transaction((txn) async {
+      Batch batch = txn.batch();
       for (var element in data) {
-        await txn.insert(
+        batch.insert(
           table,
           element,
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }
+      await batch.commit(noResult: true);
     });
   }
 
   Future<void> updateByIdAndColumn(String id, String column, T t) async {
-    await _database.update(
-      table,
-      await toJson(t),
-      where: "$column = ?",
-      whereArgs: [id],
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _database.transaction((txn) async {
+      await txn.update(
+        table,
+        await toJson(t),
+        where: "$column = ?",
+        whereArgs: [id],
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
   }
 
   Future<void> delete(String id, String column) async {
-    await _database.delete(
-      table,
-      where: "$column = ?",
-      whereArgs: [id],
-    );
+    await _database.transaction((txn) async {
+      await txn.delete(
+        table,
+        where: "$column = ?",
+        whereArgs: [id],
+      );
+    });
   }
 
   Future<void> clearAllAndAddAll(List<T> t) async {
@@ -54,7 +62,8 @@ abstract class BaseRepository<T> {
     await addAll(t);
   }
 
-  Future<void> clearAllAndAddAllWhere(List<T> t,  {String where = "", List<String> whereArgs = const []}) async {
+  Future<void> clearAllAndAddAllWhere(List<T> t,
+      {String where = "", List<String> whereArgs = const []}) async {
     await deleteAllWhere(
       where: where,
       whereArgs: whereArgs,
@@ -64,45 +73,55 @@ abstract class BaseRepository<T> {
 
   Future<void> deleteAllWhere(
       {String where = "", List<String> whereArgs = const []}) async {
-    await _database.delete(
-      table,
-      where: where,
-      whereArgs: whereArgs,
-    );
+    await _database.transaction((txn) async {
+      await txn.delete(
+        table,
+        where: where,
+        whereArgs: whereArgs,
+      );
+    });
   }
 
   Future<void> deleteAll() async {
-    await _database.delete(table);
+    await _database.transaction((txn) async {
+      await txn.delete(table);
+    });
   }
 
   Future<T?> getByIdAndColumn(String column, String id) async {
-    List<Map<String, dynamic>> response = await _database.query(
-      table,
-      where: "$column = ?",
-      whereArgs: [id],
-    );
+    await _database.transaction((txn) async {
+      List<Map<String, dynamic>> response = await txn.query(
+        table,
+        where: "$column = ?",
+        whereArgs: [id],
+      );
+      if (response.isEmpty) return null;
+      return fromJson(response.first);
+    });
 
-    if (response.isEmpty) return null;
-    return fromJson(response.first);
+    return null;
   }
 
   Future<List<T>> getAll(
       {String? where, List<String>? whereArgs, String? orderBy}) async {
-    List<Map<String, dynamic>> response = await _database.query(
-      table,
-      where: where,
-      whereArgs: whereArgs,
-      orderBy: orderBy,
-    );
+    await _database.transaction((txn) async {
+      List<Map<String, dynamic>> response = await txn.query(
+        table,
+        where: where,
+        whereArgs: whereArgs,
+        orderBy: orderBy,
+      );
 
-    if (response.isEmpty) return [];
+      if (response.isEmpty) return [];
 
-    List<T> t = [];
-    for (var element in response) {
-      t.add(await fromJson(element));
-    }
+      List<T> t = [];
+      for (var element in response) {
+        t.add(await fromJson(element));
+      }
 
-    return t;
+      return t;
+    });
+    return [];
   }
 
   Future<T> fromJson(Map<String, dynamic> map);
