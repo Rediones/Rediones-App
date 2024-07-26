@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/components/user_data.dart';
-import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' as f;
 import 'package:rediones/tools/widgets.dart';

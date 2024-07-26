@@ -1,7 +1,7 @@
 import 'package:rediones/components/notification_data.dart';
 
 import 'base.dart';
-import 'profile_service.dart' as ps;
+import 'user_service.dart' as ps;
 
 //ignore_for_file: empty_catches
 

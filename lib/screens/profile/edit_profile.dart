@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/providers.dart';
-import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';

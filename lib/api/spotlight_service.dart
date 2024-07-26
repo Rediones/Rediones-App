@@ -1,4 +1,4 @@
-import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/spotlight_data.dart';
 
 import 'base.dart';

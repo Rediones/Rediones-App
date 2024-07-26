@@ -1,5 +1,5 @@
 import 'package:rediones/api/base.dart';
-import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/event_data.dart';
 
 export 'package:rediones/api/base.dart' show RedionesResponse, Status;

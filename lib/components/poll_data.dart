@@ -8,7 +8,6 @@ part 'poll_data.g.dart';
 
 @embedded
 class PollChoice {
-  final Id id = Isar.autoIncrement;
   final String uuid;
   final String name;
   final List<String> voters;
@@ -27,7 +26,7 @@ class PollChoice {
 }
 
 @collection
-class PollData extends PostObject {
+class Poll extends PostObject {
   final Id id = Isar.autoIncrement;
 
 
@@ -36,7 +35,7 @@ class PollData extends PostObject {
   final int durationInHours;
 
 
-  const PollData({
+  const Poll({
     super.uuid,
     super.text,
     required super.timestamp,
@@ -54,7 +53,7 @@ class PollData extends PostObject {
   }
 
 
-  factory PollData.fromJson(Map<String, dynamic> map) {
+  factory Poll.fromJson(Map<String, dynamic> map) {
     Map<String, dynamic> poll = map["poll"];
 
     List<PollChoice> choices = [];
@@ -71,9 +70,9 @@ class PollData extends PostObject {
       count += voters.length;
     }
 
-    return PollData(
+    return Poll(
         timestamp: DateTime.parse(poll["createdAt"]),
-        poster: User.fromJson(map["postedBy"]),
+        poster: map["postedBy"]["_id"],
         uuid: poll["_id"],
         likes: map["likes"],
         polls: choices,

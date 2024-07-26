@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:rediones/api/base.dart';
-import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/comment_data.dart';
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
@@ -64,7 +64,7 @@ PostObject processPost(Map<String, dynamic> result, {User? user}) {
     result["media"] = fromArrayString(result["media"] as List<dynamic>);
     return Post.fromJson(result);
   } else if (result["type"] == "POLL") {
-    return PollData.fromJson(result);
+    return Poll.fromJson(result);
   }
 
   return dummyPosts.first;

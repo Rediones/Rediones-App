@@ -371,13 +371,13 @@ class _ForYouContainer extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        CircleAvatar(
-                          foregroundColor: Colors.transparent,
-                          backgroundColor: Colors.transparent,
-                          backgroundImage: AssetImage(
-                              data.groupPosts.last.poster.profilePicture),
-                          radius: 18.r,
-                        ),
+                        // CircleAvatar(
+                        //   foregroundColor: Colors.transparent,
+                        //   backgroundColor: Colors.transparent,
+                        //   backgroundImage: AssetImage(
+                        //       data.groupPosts.last.poster.profilePicture),
+                        //   radius: 18.r,
+                        // ),
                         SizedBox(
                           width: 11.w,
                         ),
@@ -385,15 +385,15 @@ class _ForYouContainer extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(data.groupPosts.last.poster.username,
-                                style: context.textTheme.labelMedium!
-                                    .copyWith(fontWeight: FontWeight.w700)),
+                            // Text(data.groupPosts.last.poster.username,
+                            //     style: context.textTheme.labelMedium!
+                            //         .copyWith(fontWeight: FontWeight.w700),),
                             Wrap(
                               spacing: 5.w,
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                Text("@${data.groupPosts.last.poster.nickname}",
-                                    style: context.textTheme.labelSmall),
+                                // Text("@${data.groupPosts.last.poster.nickname}",
+                                //     style: context.textTheme.labelSmall),
                                 Container(
                                   color: appRed,
                                   width: 2.w,

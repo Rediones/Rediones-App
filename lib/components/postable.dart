@@ -4,12 +4,11 @@ import 'package:rediones/components/user_data.dart';
 import 'package:isar/isar.dart';
 
 
-
 abstract class PostObject{
   final String uuid;
   final String text;
 
-  final User poster;
+  final String poster;
 
   final List<String> likes;
   final int shares;
@@ -18,7 +17,7 @@ abstract class PostObject{
   const PostObject({
     this.uuid = "",
     this.text = "",
-    required this.poster,
+    this.poster = "",
     this.likes = const [],
     this.shares = 0,
     required this.timestamp,

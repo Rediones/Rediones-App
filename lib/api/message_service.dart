@@ -3,7 +3,7 @@ import 'package:rediones/components/pocket_data.dart';
 import 'package:rediones/components/user_data.dart';
 
 import 'base.dart';
-import 'profile_service.dart';
+import 'user_service.dart';
 
 export 'base.dart' show RedionesResponse, Status;
 

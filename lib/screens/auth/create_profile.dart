@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/api/file_handler.dart';
-import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';

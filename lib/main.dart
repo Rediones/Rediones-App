@@ -1,32 +1,19 @@
-import 'dart:developer';
-
 import 'package:camera/camera.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rediones/components/postable.dart';
-import 'package:rediones/repositories/conversation_repository.dart';
-import 'package:rediones/repositories/post_object_repository.dart';
-
-import 'api/file_handler.dart';
-
-import 'package:rediones/tools/providers.dart';
-import 'package:rediones/repositories/user_repository.dart';
-
 import 'package:rediones/tools/constants.dart' as c;
 import 'package:rediones/tools/constants.dart';
 import 'package:timeago/timeago.dart' as time;
 
-import 'components/message_data.dart';
-import 'components/user_data.dart';
+import 'api/file_handler.dart';
+import 'repositories/database_manager.dart';
 import 'tools/routes.dart';
 import 'tools/styles.dart';
-import 'repositories/database_manager.dart';
 
 void main() async {
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +25,6 @@ void main() async {
 
   await ScreenUtil.ensureScreenSize();
   await DatabaseManager.init();
-  // await DatabaseManager.clearDatabase();
 
   bool goHome = await FileHandler.hasAuthDetails;
 
@@ -108,75 +94,13 @@ class _RedionesState extends ConsumerState<Rediones>
     );
   }
 
-  Future<void> _savePosts(List<PostObject> posts) async {
-    final PostObjectRepository repository = GetIt.I.get();
-    await repository.clearAllAndAddAll(posts);
-  }
-
-  Future<void> _saveUser(User user) async {
-    final UserRepository userRepository = GetIt.I.get();
-    if (user != dummyUser) {
-      userRepository.updateByIdAndColumn(user.uuid, "serverID", user);
-      FileHandler.saveString(currentUserID, user.uuid);
-    }
-  }
-
-  Future<User?> _loadUser() async {
-    final UserRepository userRepository = GetIt.I.get();
-    String? userID = await FileHandler.loadString(currentUserID);
-    if (userID != null) {
-      return userRepository.getById(userID);
-    }
-    return null;
-  }
-
-  Future<List<PostObject>> _loadPosts() async {
-    final PostObjectRepository repository = GetIt.I.get();
-    return repository.getAll();
-  }
-
-  Future<void> _saveConversations(List<Conversation> conversations) async {
-    final ConversationRepository conversationRepository = GetIt.I.get();
-    conversationRepository.clearAllAndAddAll(conversations);
-  }
-
-  Future<List<Conversation>> _loadConversations() async {
-    final ConversationRepository conversationRepository = GetIt.I.get();
-    return conversationRepository.getAll();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused) {
-      // ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
-      //
-      // final List<PostObject> posts = ref.watch(postsProvider);
-      // final List<Conversation> conversations = ref.watch(conversationsProvider);
-      // final User user = ref.watch(userProvider);
-      //
-      // log("Saving ${posts.length}");
-      //
-      // await _savePosts(posts);
-      // await _saveUser(user);
-      // await _saveConversations(conversations);
-
-
-    } else if (state == AppLifecycleState.resumed) {
-      // List<PostObject> posts = await _loadPosts();
-      // ref.watch(postsProvider).clear();
-      // ref.watch(postsProvider).addAll(posts);
-      //
-      // log("Resuming with ${posts.length}");
-      //
-      // User? user = await _loadUser();
-      // if (user != null) {
-      //   ref.watch(userProvider.notifier).state = user;
-      // }
-      //
-      // List<Conversation> conversations = await _loadConversations();
-      // ref.watch(conversationsProvider).clear();
-      // ref.watch(conversationsProvider).addAll(conversations);
-    }
-  }
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) async {
+  //   super.didChangeAppLifecycleState(state);
+  //   if (state == AppLifecycleState.paused) {
+  //
+  //   } else if (state == AppLifecycleState.resumed) {
+  //
+  //   }
+  // }
 }

@@ -118,6 +118,45 @@ Future<RedionesResponse<User?>> updateUser(Map<String, dynamic> data) async {
   );
 }
 
+Future<RedionesResponse<User?>> getUser(String id) async {
+  String errorHeader = "Get User By ID:";
+  try {
+    Response response = await dio.get(
+      "/auth/update-profile",
+      queryParameters: {
+        "id": id,
+      },
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      Map<String, dynamic> processedUser =
+      response.data["payload"] as Map<String, dynamic>;
+      processUser(processedUser);
+      User user = User.fromJson(processedUser);
+      return RedionesResponse(
+        message: "Successful",
+        payload: user,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Get User Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again later.",
+    payload: null,
+    status: Status.failed,
+  );
+}
+
 List<String> fromArrayString(List<dynamic> data) {
   List<String> response = [];
   for (var element in data) {

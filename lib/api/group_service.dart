@@ -1,4 +1,4 @@
-import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/group_data.dart';
 import 'package:rediones/components/postable.dart';
 

@@ -8,9 +8,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
+import 'package:isar/isar.dart';
 import 'package:rediones/api/post_service.dart';
+import 'package:rediones/components/poll_data.dart';
+import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
-import 'package:rediones/repositories/post_object_repository.dart';
 import 'package:rediones/screens/home/comments.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' show showToast, unFocus;
@@ -71,18 +73,30 @@ class _HomeState extends ConsumerState<Home> {
     }
 
     List<PostObject> posts = ref.watch(postsProvider.notifier).state;
-    posts.clear();
-    posts.addAll(p);
-
-    final PostObjectRepository repository = GetIt.I.get();
-    repository.clearAllAndAddAll(p);
+    posts.insertAll(0, p);
     setState(() => loading = false);
+
+
+    Isar isar = GetIt.I.get();
+    await isar.writeTxn(() async {
+      List<Post> serverPosts = p.whereType<Post>().toList();
+      List<Poll> serverPolls = p.whereType<Poll>().toList();
+
+      await isar.posts.putAll(serverPosts);
+      await isar.polls.putAll(serverPolls);
+    });
   }
 
   Future<void> getLocalPosts() async {
-    final PostObjectRepository repository = GetIt.I.get();
-    List<PostObject> posts = await repository.getAll();
-    ref.watch(postsProvider.notifier).state.addAll(posts);
+    Isar isar = GetIt.I.get();
+
+    List<Post> sortedPosts = (await isar.posts.getAll([])).whereType<Post>().toList();
+    List<Poll> sortedPolls = (await isar.polls.getAll([])).whereType<Poll>().toList();
+
+    List<PostObject> objects = [...sortedPosts, ...sortedPolls];
+    objects.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    ref.watch(postsProvider.notifier).state.addAll(objects);
     setState(() => loading = false);
   }
 

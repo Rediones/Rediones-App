@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rediones/api/file_handler.dart';
-import 'package:rediones/api/profile_service.dart';
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/event_data.dart';
 import 'package:rediones/components/group_data.dart';
 import 'package:rediones/components/media_data.dart';
@@ -253,7 +253,7 @@ final StateProvider<List<String>> communityCategoriesProvider = StateProvider(
 final List<Post> dummyPosts = List.generate(
   4,
   (index) => Post(
-    poster: dummyUser,
+    poster: dummyUser.uuid,
     uuid: "Dummy Post ID: $index",
     text: loremIpsum,
     timestamp: DateTime(1900),

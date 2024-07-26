@@ -1,5 +1,4 @@
 import 'package:rediones/components/postable.dart';
-import 'package:rediones/components/user_data.dart';
 
 import 'package:isar/isar.dart';
 
@@ -27,7 +26,7 @@ class Post extends PostObject {
         likes: map["likes"],
         shares: (map["shares"] as num).toInt(),
         media: map["media"],
-        poster: User.fromJson(map["postedBy"]),
+        poster: map["postedBy"]["_id"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -36,7 +35,7 @@ class Post extends PostObject {
         'shares': shares,
         'createdAt': timestamp.toIso8601String(),
         'likes': likes,
-        'postedBy': poster.toJson(),
+        'postedBy': poster,
         'media': media
       };
 
