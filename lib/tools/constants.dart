@@ -27,6 +27,8 @@ const Color border = Color.fromRGBO(31, 31, 31, 0.15);
 
 const Color authFieldBackground = Color.fromRGBO(242, 242, 242, 0.7);
 
+const String userIsarId = "USER_ISAR_DB_ID";
+
 List<CameraDescription> allCameras = [];
 int currentCamera = 0;
 

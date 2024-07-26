@@ -18,7 +18,7 @@ import 'package:rediones/tools/constants.dart';
 
 import '../components/community_data.dart';
 
-const User dummyUser = User(uuid: "dummy");
+User dummyUser = User(uuid: "dummy");
 final StateProvider<User> userProvider = StateProvider((ref) => dummyUser);
 
 final StateProvider<List<PostObject>> postsProvider =

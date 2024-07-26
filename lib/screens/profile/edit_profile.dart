@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:isar/isar.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/api/user_service.dart';
@@ -74,13 +76,16 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
   }
 
   void navigate(RedionesResponse<User?> result) {
+    saveToDatabase(result.payload!);
     ref.watch(userProvider.notifier).state = result.payload!;
-    if (ref.watch(isNewUserProvider.notifier).state) {
-      ref.watch(isNewUserProvider.notifier).state = false;
-      context.pushReplacementNamed(Pages.home);
-    } else {
-      context.router.pop();
-    }
+    context.router.pop();
+  }
+
+  Future<void> saveToDatabase(User user) async {
+    Isar isar = GetIt.I.get();
+    await isar.writeTxn(() async {
+      await isar.users.put(user);
+    });
   }
 
   void edit() {

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
+import 'package:isar/isar.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/user_service.dart';
 import 'package:rediones/tools/providers.dart';
@@ -34,10 +36,20 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
   int page = 1;
 
   void navigate(RedionesResponse<User?> result) {
+    saveToDatabase(result.payload!);
+
     ref.watch(userProvider.notifier).state = result.payload!;
     ref.watch(isNewUserProvider.notifier).state = false;
     ref.watch(createdProfileProvider.notifier).state = true;
     context.router.pushReplacementNamed(Pages.home);
+
+  }
+
+  Future<void> saveToDatabase(User user) async {
+    Isar isar = GetIt.I.get();
+    await isar.writeTxn(() async {
+      await isar.users.put(user);
+    });
   }
 
   void createProfile() {

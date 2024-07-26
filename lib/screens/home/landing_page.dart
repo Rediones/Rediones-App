@@ -1,18 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:animated_snack_bar/animated_snack_bar.dart';
+import 'package:get_it/get_it.dart';
+import 'package:isar/isar.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/user_service.dart';
-import 'package:rediones/tools/functions.dart';
-import 'package:rediones/tools/providers.dart';
+import 'package:rediones/components/user_data.dart';
 import 'package:rediones/screens/home/home.dart';
 import 'package:rediones/screens/notification/notification.dart';
 import 'package:rediones/screens/spotlight/spotlight.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class LandingPage extends ConsumerStatefulWidget {
@@ -24,7 +25,6 @@ class LandingPage extends ConsumerStatefulWidget {
 
 class _LandingPageState extends ConsumerState<LandingPage> {
   late List<Widget> navPages;
-
 
   @override
   void initState() {
@@ -44,9 +44,8 @@ class _LandingPageState extends ConsumerState<LandingPage> {
 
   void goHome() => context.router.goNamed(Pages.login);
 
-
   void _authenticate(int level) async {
-    if(level == 0) {
+    if (level == 0) {
       _showError("Could not login you in automatically");
       goHome();
       return;
@@ -59,9 +58,17 @@ class _LandingPageState extends ConsumerState<LandingPage> {
       _authenticate(level - 1);
     } else {
       _showError("Welcome back, ${resp.payload!.nickname}");
+      saveToDatabase(resp.payload!);
       saveAuthDetails(authDetails, ref);
       ref.watch(userProvider.notifier).state = resp.payload!;
     }
+  }
+
+  Future<void> saveToDatabase(User user) async {
+    Isar isar = GetIt.I.get();
+    await isar.writeTxn(() async {
+      await isar.users.put(user);
+    });
   }
 
   @override

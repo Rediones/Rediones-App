@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rediones/components/community_data.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
@@ -30,35 +30,35 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     super.initState();
 
     suggested = [
-      const User(
+      User(
         uuid: "123456",
         nickname: "chuks",
         firstName: "Desmond",
         lastName: "Chukwu",
         profilePicture: "assets/hotel.jpg",
       ),
-      const User(
+      User(
         uuid: "123456",
         nickname: "nigger12",
         firstName: "Abdullahi",
         lastName: "Francis",
         profilePicture: "assets/yacht.jpg",
       ),
-      const User(
+      User(
         uuid: "123456",
         nickname: "testys",
         firstName: "Testimony",
         lastName: "Adekoya",
         profilePicture: "assets/three.jpg",
       ),
-      const User(
+      User(
         uuid: "123456",
         nickname: "emma",
         firstName: "Dev",
         lastName: "Emmy",
         profilePicture: "assets/watch man.jpg",
       ),
-      const User(
+      User(
         uuid: "123456",
         nickname: "ripper",
         firstName: "Folayimi",
@@ -296,8 +296,10 @@ class SuggestedContainer extends StatelessWidget {
                 SizedBox(
                   width: 100.w,
                   child: Center(
-                    child: Text("@${user.nickname}",
-                        style: context.textTheme.labelMedium,),
+                    child: Text(
+                      "@${user.nickname}",
+                      style: context.textTheme.labelMedium,
+                    ),
                   ),
                 ),
                 SizedBox(height: 10.h),

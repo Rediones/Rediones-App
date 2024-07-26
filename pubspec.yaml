@@ -55,16 +55,12 @@ dependencies:
   crop_image:
   skeletonizer:
   path:
-  sqflite:
   get_it:
-  fluttertoast:
   flex_color_scheme:
   video_player:
   fijkplayer:
   dropdown_button2:
   animated_snack_bar:
-  flutter_media_downloader:
-  is_first_run:
   awesome_notifications:
   uuid:
   camera_camera:

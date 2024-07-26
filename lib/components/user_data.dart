@@ -1,11 +1,9 @@
 import 'package:isar/isar.dart';
+import 'package:rediones/tools/functions.dart';
 part 'user_data.g.dart';
 
 @collection
 class User {
-  final Id id = Isar.autoIncrement;
-
-
   final String uuid;
   final String profilePicture;
   final String email;
@@ -21,7 +19,7 @@ class User {
   final String description;
   final String gender;
 
-  const User({
+  User({
     required this.uuid,
     this.profilePicture = "",
     this.gender = "",
@@ -38,8 +36,12 @@ class User {
     this.school = "",
   });
 
+  @ignore
   String get username => "$firstName $lastName";
 
+  Id get isarId => fastHash(uuid);
+
+  @ignore
   bool get isProfileComplete {
     return true;
   }

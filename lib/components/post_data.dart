@@ -1,12 +1,13 @@
 import 'package:rediones/components/postable.dart';
 
 import 'package:isar/isar.dart';
+import 'package:rediones/tools/functions.dart';
 
 part 'post_data.g.dart';
 
 @collection
 class Post extends PostObject {
-  final Id id = Isar.autoIncrement;
+
   final List<String> media;
 
   const Post({
@@ -41,6 +42,8 @@ class Post extends PostObject {
 
   @ignore
   bool get has => media.isNotEmpty;
+
+  Id get isarId => fastHash(uuid);
 
   @ignore
   MediaType get type => has ? MediaType.imageAndText : MediaType.textOnly;

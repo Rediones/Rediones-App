@@ -1,5 +1,4 @@
 import 'package:rediones/components/postable.dart';
-import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/functions.dart';
 
 import 'package:isar/isar.dart';
@@ -27,8 +26,6 @@ class PollChoice {
 
 @collection
 class Poll extends PostObject {
-  final Id id = Isar.autoIncrement;
-
 
   final int totalVotes;
   final List<PollChoice> polls;
@@ -52,6 +49,7 @@ class Poll extends PostObject {
    return "Poll { totalVotes: $totalVotes, text: $text: polls: $polls }";
   }
 
+  Id get isarId => fastHash(uuid);
 
   factory Poll.fromJson(Map<String, dynamic> map) {
     Map<String, dynamic> poll = map["poll"];

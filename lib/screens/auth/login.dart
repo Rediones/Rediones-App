@@ -1,13 +1,16 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rediones/tools/providers.dart';
-import 'package:rediones/components/user_data.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
+import 'package:isar/isar.dart';
+import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/user_service.dart';
+import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' as f;
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class Login extends ConsumerStatefulWidget {
@@ -35,14 +38,22 @@ class _LoginState extends ConsumerState<Login> {
       }
     });
 
-    Future.delayed(const Duration(milliseconds: 500), () => FlutterNativeSplash.remove());
+    Future.delayed(
+        const Duration(milliseconds: 500), () => FlutterNativeSplash.remove());
   }
 
-
   void navigate(RedionesResponse<User?> result) {
+    saveToDatabase(result.payload!);
     saveAuthDetails(_authDetails, ref);
     ref.watch(userProvider.notifier).state = result.payload!;
     context.router.pushReplacementNamed(Pages.home);
+  }
+
+  Future<void> saveToDatabase(User user) async {
+    Isar isar = GetIt.I.get();
+    await isar.writeTxn(() async {
+      await isar.users.put(user);
+    });
   }
 
   void submit() {

@@ -43,6 +43,17 @@ class FileHandler {
     return value;
   }
 
+  static Future<void> saveInt(String key, int value) async {
+    SharedPreferences instance = await SharedPreferences.getInstance();
+    await instance.setInt(key, value);
+  }
+
+  static Future<int?> loadInt(String key) async {
+    SharedPreferences instance = await SharedPreferences.getInstance();
+    int? value = instance.getInt(key);
+    return value;
+  }
+
   static Future<List<Uint8List>> loadToBytes(
       {FileType type = FileType.custom}) async {
     FilePickerResult? result =
