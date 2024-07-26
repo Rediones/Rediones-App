@@ -76,7 +76,6 @@ class _HomeState extends ConsumerState<Home> {
     posts.insertAll(0, p);
     setState(() => loading = false);
 
-
     Isar isar = GetIt.I.get();
     await isar.writeTxn(() async {
       List<Post> serverPosts = p.whereType<Post>().toList();
@@ -90,8 +89,14 @@ class _HomeState extends ConsumerState<Home> {
   Future<void> getLocalPosts() async {
     Isar isar = GetIt.I.get();
 
-    List<Post> sortedPosts = (await isar.posts.getAll([])).whereType<Post>().toList();
-    List<Poll> sortedPolls = (await isar.polls.getAll([])).whereType<Poll>().toList();
+    List<Post> sortedPosts =
+        (await isar.posts.where().offset(25).limit(25).findAll())
+            .whereType<Post>()
+            .toList();
+    List<Poll> sortedPolls =
+        (await isar.polls.where().offset(25).limit(25).findAll())
+            .whereType<Poll>()
+            .toList();
 
     List<PostObject> objects = [...sortedPosts, ...sortedPolls];
     objects.sort((a, b) => a.timestamp.compareTo(b.timestamp));

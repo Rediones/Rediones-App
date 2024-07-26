@@ -68,8 +68,35 @@ const PollSchema = CollectionSchema(
   serialize: _pollSerialize,
   deserialize: _pollDeserialize,
   deserializeProp: _pollDeserializeProp,
-  idName: r'id',
-  indexes: {},
+  idName: r'isarId',
+  indexes: {
+    r'poster': IndexSchema(
+      id: -423404102861763612,
+      name: r'poster',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'poster',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    ),
+    r'timestamp': IndexSchema(
+      id: 1852253767416892198,
+      name: r'timestamp',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'timestamp',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {r'PollChoice': PollChoiceSchema},
   getId: _pollGetId,
@@ -190,7 +217,7 @@ P _pollDeserializeProp<P>(
 }
 
 Id _pollGetId(Poll object) {
-  return object.id;
+  return object.isarId;
 }
 
 List<IsarLinkBase<dynamic>> _pollGetLinks(Poll object) {
@@ -200,74 +227,215 @@ List<IsarLinkBase<dynamic>> _pollGetLinks(Poll object) {
 void _pollAttach(IsarCollection<dynamic> col, Id id, Poll object) {}
 
 extension PollQueryWhereSort on QueryBuilder<Poll, Poll, QWhere> {
-  QueryBuilder<Poll, Poll, QAfterWhere> anyId() {
+  QueryBuilder<Poll, Poll, QAfterWhere> anyIsarId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterWhere> anyTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'timestamp'),
+      );
     });
   }
 }
 
 extension PollQueryWhere on QueryBuilder<Poll, Poll, QWhereClause> {
-  QueryBuilder<Poll, Poll, QAfterWhereClause> idEqualTo(Id id) {
+  QueryBuilder<Poll, Poll, QAfterWhereClause> isarIdEqualTo(Id isarId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
+        lower: isarId,
+        upper: isarId,
       ));
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<Poll, Poll, QAfterWhereClause> isarIdNotEqualTo(Id isarId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
+              IdWhereClause.lessThan(upper: isarId, includeUpper: false),
             )
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
+              IdWhereClause.greaterThan(lower: isarId, includeLower: false),
             );
       } else {
         return query
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
+              IdWhereClause.greaterThan(lower: isarId, includeLower: false),
             )
             .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
+              IdWhereClause.lessThan(upper: isarId, includeUpper: false),
             );
       }
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterWhereClause> idGreaterThan(Id id,
+  QueryBuilder<Poll, Poll, QAfterWhereClause> isarIdGreaterThan(Id isarId,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: id, includeLower: include),
+        IdWhereClause.greaterThan(lower: isarId, includeLower: include),
       );
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterWhereClause> idLessThan(Id id,
+  QueryBuilder<Poll, Poll, QAfterWhereClause> isarIdLessThan(Id isarId,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.lessThan(upper: id, includeUpper: include),
+        IdWhereClause.lessThan(upper: isarId, includeUpper: include),
       );
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterWhereClause> idBetween(
-    Id lowerId,
-    Id upperId, {
+  QueryBuilder<Poll, Poll, QAfterWhereClause> isarIdBetween(
+    Id lowerIsarId,
+    Id upperIsarId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
+        lower: lowerIsarId,
         includeLower: includeLower,
-        upper: upperId,
+        upper: upperIsarId,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterWhereClause> posterEqualTo(String poster) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'poster',
+        value: [poster],
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterWhereClause> posterNotEqualTo(String poster) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'poster',
+              lower: [],
+              upper: [poster],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'poster',
+              lower: [poster],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'poster',
+              lower: [poster],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'poster',
+              lower: [],
+              upper: [poster],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterWhereClause> timestampEqualTo(
+      DateTime timestamp) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'timestamp',
+        value: [timestamp],
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterWhereClause> timestampNotEqualTo(
+      DateTime timestamp) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'timestamp',
+              lower: [],
+              upper: [timestamp],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'timestamp',
+              lower: [timestamp],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'timestamp',
+              lower: [timestamp],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'timestamp',
+              lower: [],
+              upper: [timestamp],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterWhereClause> timestampGreaterThan(
+    DateTime timestamp, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'timestamp',
+        lower: [timestamp],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterWhereClause> timestampLessThan(
+    DateTime timestamp, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'timestamp',
+        lower: [],
+        upper: [timestamp],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterWhereClause> timestampBetween(
+    DateTime lowerTimestamp,
+    DateTime upperTimestamp, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'timestamp',
+        lower: [lowerTimestamp],
+        includeLower: includeLower,
+        upper: [upperTimestamp],
         includeUpper: includeUpper,
       ));
     });
@@ -328,42 +496,42 @@ extension PollQueryFilter on QueryBuilder<Poll, Poll, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterFilterCondition> idEqualTo(Id value) {
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> isarIdEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
+        property: r'isarId',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterFilterCondition> idGreaterThan(
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> isarIdGreaterThan(
     Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'id',
+        property: r'isarId',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterFilterCondition> idLessThan(
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> isarIdLessThan(
     Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'id',
+        property: r'isarId',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterFilterCondition> idBetween(
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> isarIdBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -371,7 +539,7 @@ extension PollQueryFilter on QueryBuilder<Poll, Poll, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
+        property: r'isarId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1330,15 +1498,15 @@ extension PollQuerySortThenBy on QueryBuilder<Poll, Poll, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterSortBy> thenById() {
+  QueryBuilder<Poll, Poll, QAfterSortBy> thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.asc);
+      return query.addSortBy(r'isarId', Sort.asc);
     });
   }
 
-  QueryBuilder<Poll, Poll, QAfterSortBy> thenByIdDesc() {
+  QueryBuilder<Poll, Poll, QAfterSortBy> thenByIsarIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.desc);
+      return query.addSortBy(r'isarId', Sort.desc);
     });
   }
 
@@ -1469,9 +1637,9 @@ extension PollQueryWhereDistinct on QueryBuilder<Poll, Poll, QDistinct> {
 }
 
 extension PollQueryProperty on QueryBuilder<Poll, Poll, QQueryProperty> {
-  QueryBuilder<Poll, int, QQueryOperations> idProperty() {
+  QueryBuilder<Poll, int, QQueryOperations> isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
+      return query.addPropertyName(r'isarId');
     });
   }
 
