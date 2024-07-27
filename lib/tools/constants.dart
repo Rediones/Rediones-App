@@ -64,6 +64,7 @@ class Pages
   static const String messagePocket = "message-pocket";
   static const String inbox = "inbox";
   static const String createPosts = "create-post";
+  static const String createGroupPosts = 'create-group-posts';
   static const String createProject = "create-project";
   static const String createStory = "create-story";
   static const String createGroup = "create-group";
@@ -82,6 +83,7 @@ class Pages
   static const String communityLibrary = 'community-library';
   static const String communityParticipants = 'community-participants';
   static const String communitySearch = 'community-search';
+  static const String groupHome = 'group-home';
  }
 
 const String helpMeID = "65454b4db0916c7a0990af7f";

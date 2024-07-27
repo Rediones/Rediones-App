@@ -6,9 +6,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/post_service.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class CreatePostPage extends ConsumerStatefulWidget {
@@ -107,7 +107,8 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                         ),
                         title: Text(
                           "Gallery",
-                          style: context.textTheme.bodyLarge,
+                          style: context.textTheme.titleSmall!
+                              .copyWith(fontWeight: FontWeight.w500),
                         ),
                         onTap: () async {
                           unFocus();
@@ -117,13 +118,16 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                           setState(() => mediaBytes.addAll(images));
                         },
                       ),
-                      ListTile(
-                        leading:
-                            SvgPicture.asset("assets/Profile Location.svg"),
-                        title: Text("Location",
-                            style: context.textTheme.bodyLarge),
-                        onTap: () {},
-                      ),
+                      // ListTile(
+                      //   leading:
+                      //       SvgPicture.asset("assets/Profile Location.svg"),
+                      //   title: Text(
+                      //     "Location",
+                      //     style: context.textTheme.titleSmall!
+                      //         .copyWith(fontWeight: FontWeight.w500),
+                      //   ),
+                      //   onTap: () {},
+                      // ),
                       SizedBox(height: 70.h),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(

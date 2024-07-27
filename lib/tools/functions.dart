@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/tools/constants.dart';
 
 void showToast(String message, BuildContext context) {
-  if(message.isEmpty) return;
+  if (message.isEmpty) return;
 
   HapticFeedback.vibrate();
   AnimatedSnackBar snackBar = AnimatedSnackBar(
@@ -48,7 +48,6 @@ void showToast(String message, BuildContext context) {
   snackBar.show(context);
 }
 
-
 void unFocus() => FocusManager.instance.primaryFocus?.unfocus();
 
 String formatRawAmount(int price) => formatAmount(price.toString());
@@ -83,18 +82,26 @@ String formatDate(String dateTime, {bool shorten = false}) {
   return "${month(m, shorten)} ${day(d)}, $y";
 }
 
+String formatTime(DateTime dateTime) {
+  int hr = dateTime.hour;
+  int min = dateTime.minute;
+
+  return "${hr > 12 ? hr % 12 : (hr == 12 || hr == 0) ? "12" : hr}:$min ${hr > 12 ? "pm" : "am"}";
+}
+
 String formatDuration(Duration duration) {
-  String twoDigits(int n) => n >= 10 ? "$n" : "0$n"; // Helper function to pad single digits with zero
+  String twoDigits(int n) =>
+      n >= 10 ? "$n" : "0$n"; // Helper function to pad single digits with zero
 
   String formattedDuration = "";
   if (duration.inHours > 0) {
     formattedDuration += "${twoDigits(duration.inHours)}:";
   }
-  formattedDuration += "${twoDigits(duration.inMinutes.remainder(60))}:${twoDigits(duration.inSeconds.remainder(60))}";
+  formattedDuration +=
+      "${twoDigits(duration.inMinutes.remainder(60))}:${twoDigits(duration.inSeconds.remainder(60))}";
 
   return formattedDuration;
 }
-
 
 String month(String val, bool shorten) {
   int month = int.parse(val);
@@ -141,7 +148,6 @@ String day(String val) {
   }
 }
 
-
 int fastHash(String string) {
   var hash = 0xcbf29ce484222325;
   int i = 0;
@@ -166,9 +172,10 @@ bool validateForm(GlobalKey<FormState> formKey) {
   }
   return false;
 }
+
 List<String> toStringList(List<dynamic> data) {
   List<String> result = [];
-  for(var element in data) {
+  for (var element in data) {
     result.add(element as String);
   }
   return result;

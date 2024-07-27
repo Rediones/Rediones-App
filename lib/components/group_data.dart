@@ -7,7 +7,7 @@ class GroupData {
   final String groupName;
   final String groupDescription;
   final List<Post> groupPosts;
-  final List<String> groupUsers;
+  final List<User> groupUsers;
   final List<String> categories;
   final DateTime created;
 
@@ -25,11 +25,11 @@ class GroupData {
   factory GroupData.fromJson(Map<String, dynamic> map) {
     return GroupData(
       id: map["_id"],
-      groupCoverImage: map["cover"],
-      groupName: map["title"],
-      groupDescription: map["description"],
-      groupUsers: map["members"],
-      categories: map["categories"],
+      groupCoverImage: map["cover"] ?? "",
+      groupName: map["title"] ?? "",
+      groupDescription: map["description"] ?? "",
+      groupUsers: map["members"] ?? [],
+      categories: map["categories"] ?? [],
       created: DateTime.parse(map["createdAt"]),
     );
   }

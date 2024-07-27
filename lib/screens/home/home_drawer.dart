@@ -42,7 +42,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                         errorWidget: (context, url, error) => CircleAvatar(
                           backgroundColor: neutral2,
                           radius: 32.r,
-                          child: Icon(Icons.person_outline_rounded, size: 24.r),
+
                         ),
                         progressIndicatorBuilder: (context, url, download) =>
                             Container(

@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/api/group_service.dart';
+import 'package:rediones/components/community_data.dart';
 import 'package:rediones/components/group_data.dart';
-import 'package:rediones/components/poll_data.dart';
-import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/screens/other/media_view.dart';
 import 'package:rediones/tools/constants.dart';
@@ -25,6 +25,7 @@ class _GroupHomeState extends State<GroupHome> {
   final List<PostObject> posts = [];
 
   final ScrollController scrollController = ScrollController();
+
 
   @override
   void initState() {
@@ -87,26 +88,18 @@ class _GroupHomeState extends State<GroupHome> {
               controller: scrollController,
               slivers: [
                 SliverAppBar(
-                  expandedHeight: 320.h,
+                  expandedHeight: 290.h,
                   title: AnimatedOpacity(
                     duration: const Duration(milliseconds: 200),
                     opacity: isCollapsed ? 1 : 0,
-                    child: Text("Group", style: context.textTheme.titleLarge),
+                    child: Text(
+                      widget.data.groupName,
+                      style: context.textTheme.titleLarge,
+                    ),
                   ),
+                  centerTitle: true,
                   pinned: true,
-                  leading: IconButton(
-                    splashRadius: 0.01,
-                    icon: Icon(Icons.chevron_left, size: 26.r),
-                    onPressed: () => context.router.pop(),
-                  ),
-                  actions: [
-                    IconButton(
-                      splashRadius: 0.01,
-                      iconSize: 26.r,
-                      icon: const Icon(Icons.more_horiz_rounded),
-                      onPressed: () {},
-                    )
-                  ],
+                  automaticallyImplyLeading: isCollapsed,
                   flexibleSpace: FlexibleSpaceBar(
                     background: SizedBox(
                       width: 390.w,
@@ -125,11 +118,11 @@ class _GroupHomeState extends State<GroupHome> {
                               errorWidget: (context, url, error) => Container(
                                 width: 390.w,
                                 height: 124.h,
-                                decoration: const BoxDecoration(
-                                  image: DecorationImage(
-                                    image: AssetImage("assets/error.jpeg"),
-                                    fit: BoxFit.fill,
-                                  ),
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  Icons.broken_image_outlined,
+                                  color: appRed,
+                                  size: 36,
                                 ),
                               ),
                               progressIndicatorBuilder:
@@ -161,7 +154,7 @@ class _GroupHomeState extends State<GroupHome> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     SizedBox(
-                                      width: 200.w,
+                                      width: 180.w,
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -176,99 +169,134 @@ class _GroupHomeState extends State<GroupHome> {
                                                 CrossAxisAlignment.center,
                                             children: [
                                               SizedBox(
-                                                width: 170.w,
-                                                // child: MultiMemberImage(
-                                                //   images: const [
-                                                //     "images/hotel.jpg",
-                                                //     "images/street.jpg",
-                                                //     "images/watch man.jpg"
-                                                //   ],
-                                                //   size: 16.r,
-                                                //   border: goodYellow,
-                                                // ),
+                                                width: 100.w,
+                                                child: MultiMemberImage(
+                                                  alignment: ImageAlign.start,
+                                                  total: widget
+                                                      .data.groupUsers.length,
+                                                  images: widget.data.groupUsers
+                                                      .map((u) =>
+                                                          u.profilePicture)
+                                                      .toList(),
+                                                  size: 14.r,
+                                                  border: goodYellow,
+                                                ),
                                               ),
-                                              // Text(
-                                              //   "${widget.data.groupUsers.length} member${widget.data.groupUsers.length == 1 ? "" : "s"}",
-                                              //   style: context.textTheme.bodyLarge,
-                                              // ),
+                                              Text(
+                                                "${widget.data.groupUsers.length} member${widget.data.groupUsers.length == 1 ? "" : "s"}",
+                                                style:
+                                                    context.textTheme.bodyLarge,
+                                              ),
                                             ],
                                           )
                                         ],
                                       ),
                                     ),
-                                    GestureDetector(
-                                      onTap: () => context.router
-                                          .pushNamed(
-                                        Pages.createPosts,
-                                        extra: widget.data.id,
-                                      )
-                                          .then((value) {
-                                        if (value == null) return;
-                                        if (value == true) refresh();
-                                      }),
-                                      child: Container(
-                                        height: 40.h,
-                                        width: 130.w,
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          borderRadius:
-                                              BorderRadius.circular(6.r),
-                                          border: Border.all(
-                                            color: darkTheme
-                                                ? neutral3
-                                                : fadedPrimary,
+                                    Row(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () => context.router
+                                              .pushNamed(
+                                            Pages.createPosts,
+                                            extra: widget.data.id,
+                                          )
+                                              .then((value) {
+                                            if (value == null) return;
+                                            if (value == true) refresh();
+                                          }),
+                                          child: Container(
+                                            height: 40.h,
+                                            width: 120.w,
+                                            decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(20.h),
+                                              border: Border.all(
+                                                  color: darkTheme
+                                                      ? neutral3
+                                                      : fadedPrimary),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  width: 18.r,
+                                                  height: 18.r,
+                                                  alignment: Alignment.center,
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          color: appRed),
+                                                  child: Center(
+                                                      child: Icon(
+                                                          Icons.add_rounded,
+                                                          color: theme,
+                                                          size: 14.r)),
+                                                ),
+                                                Text(
+                                                  "Make a Post",
+                                                  style: context
+                                                      .textTheme.titleSmall!
+                                                      .copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              width: 18.r,
-                                              height: 18.r,
-                                              alignment: Alignment.center,
-                                              decoration: const BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: appRed),
-                                              child: Icon(Icons.add_rounded,
-                                                  color: theme, size: 14.r),
+                                        SizedBox(width: 10.w),
+                                        GestureDetector(
+                                          onTap: () => context.router.pushNamed(
+                                            Pages.communityChat,
+                                            extra: CommunityData.fromGroupData(
+                                                widget.data),
+                                          ),
+                                          child: Container(
+                                            height: 40.h,
+                                            width: 40.h,
+                                            decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                  color: darkTheme
+                                                      ? neutral3
+                                                      : fadedPrimary),
                                             ),
-                                            Text(
-                                              "Make A Post",
-                                              style: context
-                                                  .textTheme.bodyLarge!
-                                                  .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w600),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    )
+                                            child: const Icon(
+                                              Boxicons.bx_message_alt_detail,
+                                              color: appRed,
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ],
                                 ),
                                 SizedBox(height: 20.h),
                                 Container(
                                   alignment: Alignment.center,
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: 10.w, vertical: 5.h),
+                                      horizontal: 10.w, vertical: 10.h),
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10.r),
                                       color: darkTheme ? midPrimary : neutral),
                                   child: Text(
-                                      widget.data.groupDescription.substring(
-                                          0,
-                                          (widget.data.groupDescription
-                                                      .length >=
-                                                  250
-                                              ? 250
-                                              : widget.data.groupDescription
-                                                  .length)),
-                                      style: context.textTheme.bodyMedium),
+                                    widget.data.groupDescription.substring(
+                                      0,
+                                      (widget.data.groupDescription.length >=
+                                              250
+                                          ? 250
+                                          : widget
+                                              .data.groupDescription.length),
+                                    ),
+                                    style: context.textTheme.bodyLarge,
+                                  ),
                                 ),
-                                SizedBox(height: 30.h),
                               ],
                             ),
                           ),

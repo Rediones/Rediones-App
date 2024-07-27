@@ -1,11 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rediones/api/group_service.dart';
+import 'package:rediones/api/message_service.dart';
 import 'package:rediones/components/community_data.dart';
-import 'package:rediones/tools/providers.dart';
+import 'package:rediones/components/message_data.dart';
 import 'package:rediones/tools/constants.dart';
-
-
+import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class CommunityChatPage extends ConsumerStatefulWidget {
@@ -25,6 +28,9 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
 
   final TextEditingController textController = TextEditingController();
 
+  String conversationID = "", currentID = "";
+  bool loading = true;
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +46,9 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
         reverseCurve: Curves.easeOut,
       ),
     );
+
+    currentID = ref.read(userProvider).uuid;
+    getAllCommunityMessages();
   }
 
   @override
@@ -47,6 +56,41 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
     textController.dispose();
     controller.dispose();
     super.dispose();
+  }
+
+  void getAllCommunityMessages() {
+    getGroupMessages(widget.data.id).then((resp) {
+      if (!mounted) return;
+
+      if (resp.status == Status.failed) {
+        showToast(resp.message, context);
+        return;
+      }
+
+      List<CommunityChatData> chats = ref.watch(communityChatProvider);
+
+      chats.clear();
+      chats.addAll(resp.payload.chats);
+
+      setState(() {
+        loading = false;
+        conversationID = resp.payload.conversationId;
+      });
+    });
+  }
+
+  void send(String msg) {
+    sendMessage(
+      MessageData(
+        timestamp: DateTime.now(),
+        id: "",
+        content: msg,
+        sender: currentID,
+        conversationID: conversationID,
+      ),
+    ).then((resp) {
+      if (resp.payload == null) return;
+    });
   }
 
   @override
@@ -90,20 +134,25 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
       body: SafeArea(
         child: Stack(
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.w),
-              child: ListView.separated(
-                itemBuilder: (_, index) {
-                  if (index == communityChats.length) {
-                    return SizedBox(height: 50.h);
-                  }
+            loading
+                ? const Center(
+                    child: loader,
+                  )
+                : Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w),
+                    child: ListView.separated(
+                      itemBuilder: (_, index) {
+                        if (index == communityChats.length) {
+                          return SizedBox(height: 50.h);
+                        }
 
-                  return _CommunityChatContainer(data: communityChats[index]);
-                },
-                separatorBuilder: (_, __) => SizedBox(height: 10.h),
-                itemCount: communityChats.length + 1,
-              ),
-            ),
+                        return _CommunityChatContainer(
+                            data: communityChats[index]);
+                      },
+                      separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                      itemCount: communityChats.length + 1,
+                    ),
+                  ),
             SizeTransition(
               sizeFactor: animation,
               child: Container(
@@ -118,8 +167,8 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
                       onTap: () {},
                       child: Text(
                         "Announcement (7)",
-                        style: context.textTheme.bodyLarge!.copyWith(
-                            color: darkTheme ? neutral3 : midPrimary),
+                        style: context.textTheme.bodyLarge!
+                            .copyWith(color: darkTheme ? neutral3 : midPrimary),
                       ),
                     ),
                     SizedBox(height: 20.h),
@@ -132,8 +181,8 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
                       }),
                       child: Text(
                         "Participants (500)",
-                        style: context.textTheme.bodyLarge!.copyWith(
-                            color: darkTheme ? neutral3 : midPrimary),
+                        style: context.textTheme.bodyLarge!
+                            .copyWith(color: darkTheme ? neutral3 : midPrimary),
                       ),
                     ),
                     SizedBox(height: 20.h),
@@ -146,8 +195,8 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
                       }),
                       child: Text(
                         "Library (15)",
-                        style: context.textTheme.bodyLarge!.copyWith(
-                            color: darkTheme ? neutral3 : midPrimary),
+                        style: context.textTheme.bodyLarge!
+                            .copyWith(color: darkTheme ? neutral3 : midPrimary),
                       ),
                     ),
                   ],
@@ -194,7 +243,14 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
                 ),
                 SizedBox(width: 8.w),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    String msg = textController.text;
+                    msg = msg.trim();
+                    if (msg.isNotEmpty) {
+                      send(msg);
+                      textController.clear();
+                    }
+                  },
                   child: Icon(
                     Icons.send_rounded,
                     size: 28.r,
@@ -227,9 +283,20 @@ class _CommunityChatContainer extends ConsumerWidget {
           isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         if (!isCurrentUser)
-          CircleAvatar(
-            radius: 18.r,
-            backgroundImage: AssetImage(data.image),
+          CachedNetworkImage(
+            imageUrl: data.image,
+            errorWidget: (context, url, error) => CircleAvatar(
+              radius: 18.r,
+              backgroundColor: neutral2,
+            ),
+            progressIndicatorBuilder: (context, url, download) => CircleAvatar(
+              radius: 18.r,
+              backgroundColor: neutral2,
+            ),
+            imageBuilder: (context, provider) => CircleAvatar(
+              radius: 18.r,
+              backgroundImage: provider,
+            ),
           ),
         if (!isCurrentUser) SizedBox(width: 10.w),
         SizedBox(
@@ -244,7 +311,7 @@ class _CommunityChatContainer extends ConsumerWidget {
                   children: [
                     if (isCurrentUser)
                       TextSpan(
-                        text: "7:44 am  ",
+                        text: "${formatTime(data.timestamp)}  ",
                         style: context.textTheme.bodySmall!.copyWith(
                             fontSize: 10,
                             color: darkTheme ? offWhite : midPrimary),
@@ -256,7 +323,7 @@ class _CommunityChatContainer extends ConsumerWidget {
                     ),
                     if (!isCurrentUser)
                       TextSpan(
-                        text: "  7:44 am",
+                        text: "  ${formatTime(data.timestamp)}",
                         style: context.textTheme.bodySmall!.copyWith(
                             fontSize: 10,
                             color: darkTheme ? offWhite : midPrimary),

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:photo_gallery/photo_gallery.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/components/community_data.dart';
+import 'package:rediones/components/group_data.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/user_data.dart';
@@ -18,6 +19,7 @@ import 'package:rediones/screens/community/create_community.dart';
 import 'package:rediones/screens/events/create_events.dart';
 import 'package:rediones/screens/events/events_page.dart';
 import 'package:rediones/screens/groups/create_group.dart';
+import 'package:rediones/screens/groups/group_home.dart';
 import 'package:rediones/screens/groups/groups.dart';
 import 'package:rediones/screens/home/ask_question.dart';
 import 'package:rediones/screens/home/create_post.dart';
@@ -235,5 +237,10 @@ final List<GoRoute> routes = [
     path: Pages.camera.path,
     name: Pages.camera,
     builder: (_, __) => const CameraPage(),
+  ),
+  GoRoute(
+    path: Pages.groupHome.path,
+    name: Pages.groupHome,
+    builder: (_, state) => GroupHome(data: state.extra as GroupData),
   ),
 ];

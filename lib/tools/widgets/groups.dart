@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:rediones/screens/other/camera.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 
@@ -111,11 +110,14 @@ class PostPreview extends StatelessWidget {
   }
 }
 
+enum ImageAlign { start, center }
+
 class MultiMemberImage extends StatelessWidget {
   final List<String> images;
   final double size;
   final Color border;
   final int total;
+  final ImageAlign alignment;
 
   const MultiMemberImage({
     super.key,
@@ -123,61 +125,51 @@ class MultiMemberImage extends StatelessWidget {
     required this.size,
     required this.border,
     required this.total,
+    this.alignment = ImageAlign.center,
   });
-
-  double leftPadding(int count) {
-    return 225;
-  }
 
   @override
   Widget build(BuildContext context) {
-    int count = images.length > 3 ? 4 : (images.length + 1);
+    bool hasExtra = images.length > 3;
+    int count = images.length > 3 ? 4 : images.length;
 
     if (images.isEmpty) return const SizedBox();
 
     return SizedBox(
-      width: 170.w,
-      height: 50.h,
-      child: Center(
-        child: SizedBox(
-          width: 150.w,
-          child: Center(
-            child: Stack(
-              children: List.generate(
-                count,
-                (index) => Positioned(
-                  left: 22.5.w * (index + 1),
-                  child: (index == count - 1)
-                      ? CircleAvatar(
-                          backgroundColor: border,
-                          radius: size,
-                          child: CircleAvatar(
-                            foregroundColor: Colors.transparent,
-                            backgroundColor: Colors.transparent,
-                            radius: size * 0.9,
-                            child: Text(
-                              "+${total - images.length}",
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                  fontWeight: FontWeight.w600, color: primary),
-                            ),
-                          ),
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: images[0],
-                          errorWidget: (_, url, error) => CircleAvatar(
-                            radius: size,
-                            backgroundColor: neutral2,
-                          ),
-                          progressIndicatorBuilder: (_, url, error) =>
-                              CircleAvatar(
-                            radius: size,
-                            backgroundColor: neutral2,
-                          ),
-                          imageBuilder: (_, provider) => CircleAvatar(
-                            backgroundColor: border,
-                            radius: size,
-                          ),
-                        ),
+      height: size * 2,
+      child: Stack(
+        children: List.generate(
+          count,
+              (index) => Positioned(
+            left: alignment == ImageAlign.start ? (index * size * 0.7) : (22.5.w * (index + 1)),
+            child: (hasExtra && index == count - 1)
+                ? CircleAvatar(
+              backgroundColor: const Color(0xFFF5F5F5),
+              radius: size,
+              child: Text(
+                "+${total - images.length}",
+                style: context.textTheme.bodySmall!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: primary,
+                ),
+              ),
+            )
+                : CachedNetworkImage(
+              imageUrl: images[0],
+              errorWidget: (_, url, error) => CircleAvatar(
+                radius: size,
+                backgroundColor: neutral2,
+              ),
+              progressIndicatorBuilder: (_, url, error) => CircleAvatar(
+                radius: size,
+                backgroundColor: neutral2,
+              ),
+              imageBuilder: (_, provider) => CircleAvatar(
+                backgroundColor: border,
+                radius: size,
+                child: CircleAvatar(
+                  radius: size * 0.9,
+                  backgroundImage: provider,
                 ),
               ),
             ),
@@ -185,5 +177,6 @@ class MultiMemberImage extends StatelessWidget {
         ),
       ),
     );
+
   }
 }

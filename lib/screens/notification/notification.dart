@@ -1,13 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rediones/api/notification_service.dart';
 import 'package:rediones/components/notification_data.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:timeago/timeago.dart' as time;
 
@@ -54,7 +53,9 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
 
   void checkForChanges() {
     ref.listen(userProvider, (oldUser, newUser) {
-      if(oldUser == dummyUser && newUser != dummyUser && ref.watch(postsProvider).isEmpty) {
+      if (oldUser == dummyUser &&
+          newUser != dummyUser &&
+          ref.watch(postsProvider).isEmpty) {
         refresh();
       }
     });
@@ -84,9 +85,10 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
               indicatorColor: appRed,
               dividerColor: context.isDark ? Colors.white12 : Colors.black12,
               labelColor: appRed,
-              labelStyle: context.textTheme.bodyLarge!
+              labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
+              labelStyle: context.textTheme.titleSmall!
                   .copyWith(fontWeight: FontWeight.w600),
-              unselectedLabelStyle: context.textTheme.bodyLarge!
+              unselectedLabelStyle: context.textTheme.titleSmall!
                   .copyWith(fontWeight: FontWeight.w500),
               tabs: const [
                 Tab(text: "All"),
@@ -103,65 +105,132 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
         children: [
           Padding(
             padding: EdgeInsets.only(left: 15.w),
-            child: Column(children: [
-              SizedBox(height: 10.h),
-              Expanded(
-                child: !loaded
-                    ? const CenteredPopup()
-                    : (notifications.isEmpty)
-                        ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                "assets/No Data.png",
-                                width: 150.r,
-                                height: 150.r,
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(height: 20.h),
-                              Text(
-                                "There are no notifications available",
-                                style: context.textTheme.titleSmall!.copyWith(
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              SizedBox(height: 10.h),
-                              GestureDetector(
-                                onTap: refresh,
-                                child: Text(
-                                  "Refresh",
-                                  style:
-                                  context.textTheme.titleSmall!.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: appRed,
+            child: Column(
+              children: [
+                SizedBox(height: 10.h),
+                Expanded(
+                  child: !loaded
+                      ? const CenteredPopup()
+                      : (notifications.isEmpty)
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    "assets/No Data.png",
+                                    width: 150.r,
+                                    height: 150.r,
+                                    fit: BoxFit.cover,
                                   ),
-                                ),
-                              ),
-                            ],
-                          )
-                        )
-                        : RefreshIndicator(
-                            onRefresh: refresh,
-                            child: ListView.separated(
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: notifications.length + 1,
-                              itemBuilder: (_, index) =>
-                                  (index == notifications.length)
-                                      ? SizedBox(height: 100.h)
-                                      : NotificationHeader(
-                                          notifications[index],
-                                          username: username,
-                                        ),
-                              separatorBuilder: (_, __) =>
                                   SizedBox(height: 20.h),
+                                  Text(
+                                    "There are no notifications available",
+                                    style:
+                                        context.textTheme.titleSmall!.copyWith(
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  GestureDetector(
+                                    onTap: refresh,
+                                    child: Text(
+                                      "Refresh",
+                                      style: context.textTheme.titleSmall!
+                                          .copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: appRed,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : RefreshIndicator(
+                              onRefresh: refresh,
+                              child: ListView.separated(
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: notifications.length + 1,
+                                itemBuilder: (_, index) =>
+                                    (index == notifications.length)
+                                        ? SizedBox(height: 100.h)
+                                        : NotificationHeader(
+                                            notifications[index],
+                                            username: username,
+                                          ),
+                                separatorBuilder: (_, __) =>
+                                    SizedBox(height: 20.h),
+                              ),
                             ),
-                          ),
-              ),
-            ]),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(),
-          const SizedBox(),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    "assets/No Data.png",
+                    width: 150.r,
+                    height: 150.r,
+                    fit: BoxFit.cover,
+                  ),
+                  SizedBox(height: 20.h),
+                  Text(
+                    "There are no verified notifications available",
+                    style: context.textTheme.titleSmall!.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  GestureDetector(
+                    onTap: refresh,
+                    child: Text(
+                      "Refresh",
+                      style: context.textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: appRed,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    "assets/No Data.png",
+                    width: 150.r,
+                    height: 150.r,
+                    fit: BoxFit.cover,
+                  ),
+                  SizedBox(height: 20.h),
+                  Text(
+                    "There are no tags and mentions available",
+                    style: context.textTheme.titleSmall!.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  GestureDetector(
+                    onTap: refresh,
+                    child: Text(
+                      "Refresh",
+                      style: context.textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: appRed,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -314,7 +383,8 @@ class _NotificationHeaderState extends State<NotificationHeader> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "@${widget.notification.postedBy.nickname}",
+                                  text:
+                                      "@${widget.notification.postedBy.nickname}",
                                   style: context.textTheme.bodyLarge!.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),

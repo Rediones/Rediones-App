@@ -73,7 +73,8 @@ class _HomeState extends ConsumerState<Home> {
     }
 
     List<PostObject> posts = ref.watch(postsProvider.notifier).state;
-    posts.insertAll(0, p);
+    posts.clear();
+    posts.addAll(p);
     setState(() => loadingServer = false);
 
     Isar isar = GetIt.I.get();
@@ -146,7 +147,6 @@ class _HomeState extends ConsumerState<Home> {
                 errorWidget: (context, url, error) => CircleAvatar(
                   backgroundColor: neutral2,
                   radius: 20.r,
-                  child: Icon(Icons.person_outline_rounded, size: 16.r),
                 ),
                 progressIndicatorBuilder: (context, url, download) => Container(
                   width: 40.r,
