@@ -1,15 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:rediones/api/group_service.dart';
-import 'package:rediones/tools/functions.dart';
-import 'package:timeago/timeago.dart' as time;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:rediones/api/group_service.dart';
 import 'package:rediones/components/group_data.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
+import 'package:timeago/timeago.dart' as time;
 
 class GroupsPage extends ConsumerStatefulWidget {
   const GroupsPage({
@@ -33,31 +34,11 @@ class _GroupsPageState extends ConsumerState<GroupsPage>
   void initState() {
     super.initState();
     tabController = TabController(length: 2, vsync: this);
-    fetchGroups();
-  }
-
-  void fetchGroups() {
-    getGroups().then((result) {
-      if (result.status == Status.failed) {
-        showToast(result.message, context);
-        return;
-      }
-      if (!mounted) return;
-      setState(() => loaded = true);
-      ref.watch(groupsProvider).clear();
-      ref.watch(groupsProvider).addAll(result.payload);
-    });
-  }
-
-  Future<void> refreshGroups() async {
-    setState(() => loaded = false);
-    fetchGroups();
   }
 
   @override
   Widget build(BuildContext context) {
     bool darkTheme = context.isDark;
-    List<GroupData> groups = ref.watch(groupsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -68,30 +49,26 @@ class _GroupsPageState extends ConsumerState<GroupsPage>
           onPressed: () => context.router.pop(),
         ),
         elevation: 0.0,
-        title: Text("Groups", style: context.textTheme.titleLarge),
+        leadingWidth: 30.w,
+        title: Text("Community Practice", style: context.textTheme.titleLarge),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 15.w),
             child: Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
-                onTap: () =>
-                    context.router.pushNamed(Pages.createGroup).then((resp) {
-                  if (resp != null && resp == true) {
-                    refreshGroups();
-                  }
-                }),
+                onTap: () => context.router.pushNamed(Pages.createCommunity),
                 child: Container(
                   height: 35.h,
-                  width: 90.w,
+                  width: 100.w,
                   decoration: BoxDecoration(
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(6.r),
+                    borderRadius: BorderRadius.circular(17.5.h),
                     border:
                         Border.all(color: darkTheme ? neutral3 : fadedPrimary),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
@@ -104,7 +81,12 @@ class _GroupsPageState extends ConsumerState<GroupsPage>
                             child: Icon(Icons.add_rounded,
                                 color: theme, size: 14.r)),
                       ),
-                      Text("Create", style: context.textTheme.bodyLarge)
+                      Text(
+                        "Create",
+                        style: context.textTheme.titleSmall!.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -118,7 +100,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage>
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Column(
             children: [
-              SizedBox(height: 20.h),
+              SizedBox(height: 10.h),
               SpecialForm(
                 width: 390.w,
                 height: 40.h,
@@ -128,64 +110,175 @@ class _GroupsPageState extends ConsumerState<GroupsPage>
                 borderColor: Colors.transparent,
                 action: TextInputAction.go,
                 onActionPressed: (value) {},
-                prefix: Icon(Icons.search_rounded, size: 20.r, color: appRed),
+                prefix: SizedBox(
+                  height: 40.h,
+                  width: 40.h,
+                  child: SvgPicture.asset(
+                    "assets/Search Icon.svg",
+                    width: 20.h,
+                    height: 20.h,
+                    color: darkTheme ? Colors.white54 : Colors.black45,
+                    fit: BoxFit.scaleDown,
+                  ),
+                ),
+              ),
+              SizedBox(height: 5.h),
+              const CommunitiesSection(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CommunitiesSection extends ConsumerStatefulWidget {
+  const CommunitiesSection({super.key});
+
+  @override
+  ConsumerState<CommunitiesSection> createState() => _CommunitiesSectionState();
+}
+
+class _CommunitiesSectionState extends ConsumerState<CommunitiesSection>
+    with SingleTickerProviderStateMixin {
+  late TabController controller;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TabController(length: 2, vsync: this);
+    fetchGroups();
+  }
+
+  void showMessage(String message) => showToast(message, context);
+
+  Future<void> fetchGroups() async {
+    setState(() => loading = true);
+
+    var result = await getGroups();
+    if (!mounted) return;
+
+    setState(() => loading = false);
+
+    if (result.status == Status.failed) {
+      showMessage(result.message);
+      return;
+    }
+
+    ref.watch(myGroupsProvider).clear();
+    ref.watch(myGroupsProvider).addAll(result.payload.myGroups);
+
+    ref.watch(forYouGroupsProvider).clear();
+    ref.watch(forYouGroupsProvider).addAll(result.payload.forYou);
+  }
+
+  Future<void> refreshGroups() async {
+    setState(() => loading = true);
+    fetchGroups();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<GroupData> myGroups = ref.watch(myGroupsProvider),
+        forYou = ref.watch(forYouGroupsProvider);
+
+    if (loading) {
+      return const Expanded(child: Center(child: loader));
+    }
+
+    if (!loading && (myGroups.isEmpty && forYou.isEmpty)) {
+      return Expanded(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                "assets/No Data.png",
+                width: 150.r,
+                height: 150.r,
+                fit: BoxFit.cover,
               ),
               SizedBox(height: 20.h),
-              TabBar(
-                controller: tabController,
-                dividerColor: neutral2,
-                tabs: [
-                  Tab(
-                    child:
-                        Text("Your Groups", style: context.textTheme.bodyLarge),
-                  ),
-                  Tab(
-                    child: Text("For You", style: context.textTheme.bodyLarge),
-                  ),
-                ],
+              Text(
+                "There are no communities available",
+                style: context.textTheme.titleSmall!.copyWith(
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-              SizedBox(height: 20.h),
-              Expanded(
-                child: TabBarView(
-                  controller: tabController,
-                  children: [
-                    !loaded
-                        ? const CenteredPopup()
-                        : groups.isEmpty
-                            ? Center(
-                                child: Text("No Groups Available",
-                                    style: context.textTheme.bodyLarge),
-                              )
-                            : RefreshIndicator(
-                                onRefresh: refreshGroups,
-                                child: GridView.builder(
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    mainAxisSpacing: 10.h,
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 10.h,
-                                  ),
-                                  itemCount: groups.length,
-                                  itemBuilder: (_, index) =>
-                                      _GroupDataContainer(
-                                    data: groups[index],
-                                  ),
-                                ),
-                              ),
-                    ListView.separated(
-                      separatorBuilder: (_, __) => SizedBox(height: 25.h),
-                      itemCount: forYou.length,
-                      itemBuilder: (_, index) => _ForYouContainer(
-                        data: forYou[index],
-                      ),
-                    ),
-                  ],
+              SizedBox(height: 10.h),
+              GestureDetector(
+                onTap: fetchGroups,
+                child: Text(
+                  "Refresh",
+                  style: context.textTheme.titleSmall!.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: appRed,
+                  ),
                 ),
               ),
             ],
           ),
         ),
-      ),
+      );
+    }
+
+    return Column(
+      children: [
+        TabBar(
+          controller: controller,
+          indicatorColor: appRed,
+          dividerColor: Colors.transparent,
+          labelStyle: context.textTheme.titleMedium!.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          unselectedLabelStyle: context.textTheme.titleMedium!.copyWith(
+            fontWeight: FontWeight.w400,
+          ),
+          labelPadding: EdgeInsets.symmetric(horizontal: 20.w),
+          tabAlignment: TabAlignment.center,
+          labelColor: context.isDark ? theme : primary,
+          tabs: const [
+            Tab(
+              text: "Communities",
+            ),
+            Tab(text: "For You"),
+          ],
+        ),
+        SizedBox(height: 20.h),
+        SizedBox(
+          height: 550.h,
+          child: TabBarView(
+            controller: controller,
+            children: [
+              GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  mainAxisSpacing: 10.h,
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10.h,
+                ),
+                itemCount: myGroups.length,
+                itemBuilder: (_, index) => _GroupDataContainer(
+                  data: myGroups[index],
+                ),
+              ),
+              ListView.separated(
+                separatorBuilder: (_, __) => SizedBox(height: 25.h),
+                itemCount: forYou.length,
+                itemBuilder: (_, index) => _ForYouContainer(
+                  data: forYou[index],
+                ),
+              ),
+            ],
+          ),
+        )
+      ],
     );
   }
 }
@@ -207,7 +300,7 @@ class _GroupDataContainerState extends State<_GroupDataContainer> {
     super.initState();
 
     for (int i = 0; i < widget.data.groupUsers.length; ++i) {
-      String image = widget.data.groupUsers[i].profilePicture;
+      String image = widget.data.groupUsers[i];
       memberImages.add(image);
 
       if (i == 2) break;

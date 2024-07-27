@@ -122,10 +122,7 @@ Future<RedionesResponse<User?>> getUser(String id) async {
   String errorHeader = "Get User By ID:";
   try {
     Response response = await dio.get(
-      "/auth/update-profile",
-      queryParameters: {
-        "id": id,
-      },
+      "/auth/user/$id",
       options: configuration(accessToken!),
     );
 

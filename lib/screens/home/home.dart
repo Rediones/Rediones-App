@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,6 +13,7 @@ import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/screens/home/comments.dart';
+import 'package:rediones/screens/home/home_drawer.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' show showToast, unFocus;
 import 'package:rediones/tools/providers.dart';
@@ -32,7 +32,7 @@ class _HomeState extends ConsumerState<Home> {
   final ScrollController scrollController = ScrollController();
 
   final FocusNode searchFocus = FocusNode();
-  bool loading = true;
+  bool loadingServer = false;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
@@ -48,15 +48,15 @@ class _HomeState extends ConsumerState<Home> {
 
     if (ref.read(createdProfileProvider)) {
       fetchPosts();
-    } else {
-      Future.delayed(Duration.zero, getLocalPosts);
     }
   }
 
   void showMessage(String message) => showToast(message, context);
 
   Future<void> fetchPosts() async {
-    showMessage("Refreshing your posts");
+    if (loadingServer) return;
+    setState(() => loadingServer = true);
+    showMessage("Refreshing");
 
     var response = await getPosts();
     if (!mounted) return;
@@ -68,13 +68,13 @@ class _HomeState extends ConsumerState<Home> {
     List<PostObject> p = response.payload;
     if (response.status == Status.failed) {
       showToast(response.message, context);
-      setState(() => loading = false);
+      setState(() => loadingServer = false);
       return;
     }
 
     List<PostObject> posts = ref.watch(postsProvider.notifier).state;
     posts.insertAll(0, p);
-    setState(() => loading = false);
+    setState(() => loadingServer = false);
 
     Isar isar = GetIt.I.get();
     await isar.writeTxn(() async {
@@ -84,25 +84,6 @@ class _HomeState extends ConsumerState<Home> {
       await isar.posts.putAll(serverPosts);
       await isar.polls.putAll(serverPolls);
     });
-  }
-
-  Future<void> getLocalPosts() async {
-    Isar isar = GetIt.I.get();
-
-    List<Post> sortedPosts =
-        (await isar.posts.where().offset(25).limit(25).findAll())
-            .whereType<Post>()
-            .toList();
-    List<Poll> sortedPolls =
-        (await isar.polls.where().offset(25).limit(25).findAll())
-            .whereType<Poll>()
-            .toList();
-
-    List<PostObject> objects = [...sortedPosts, ...sortedPolls];
-    objects.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-    ref.watch(postsProvider.notifier).state.addAll(objects);
-    setState(() => loading = false);
   }
 
   @override
@@ -139,132 +120,14 @@ class _HomeState extends ConsumerState<Home> {
 
     String profilePicture =
         ref.watch(userProvider.select((value) => value.profilePicture));
-    String username = ref.watch(userProvider.select((value) => value.username));
-    String nickname = ref.watch(userProvider.select((value) => value.nickname));
 
     bool darkTheme = context.isDark;
     bool isLoggedIn = ref.watch(userProvider) != dummyUser;
+    bool loadingLocal = ref.watch(loadingLocalPostsProvider);
 
     return Scaffold(
       key: _scaffoldKey,
-      drawer: SizedBox(
-        width: 290.w,
-        child: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.router.pushNamed(Pages.profile);
-                  },
-                  child: SizedBox(
-                    height: 50.h,
-                    child: Row(
-                      children: [
-                        CachedNetworkImage(
-                          imageUrl: profilePicture,
-                          errorWidget: (context, url, error) => CircleAvatar(
-                            backgroundColor: neutral2,
-                            radius: 32.r,
-                            child:
-                                Icon(Icons.person_outline_rounded, size: 24.r),
-                          ),
-                          progressIndicatorBuilder: (context, url, download) =>
-                              Container(
-                            width: 40.r,
-                            height: 40.r,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: neutral2,
-                            ),
-                          ),
-                          imageBuilder: (context, provider) => CircleAvatar(
-                            backgroundImage: provider,
-                            radius: 32.r,
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: 140.w,
-                              child: Text(
-                                username,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.titleLarge!.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 32.sp),
-                              ),
-                            ),
-                            Text(
-                              "@$nickname",
-                              overflow: TextOverflow.ellipsis,
-                              style: context.textTheme.bodyLarge,
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 30.h),
-              ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
-                leading: SvgPicture.asset(
-                  "assets/Groups.svg",
-                  color: appRed,
-                ),
-                title: Text("Groups", style: context.textTheme.bodyLarge),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.router.pushNamed(Pages.groups);
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
-                leading: SvgPicture.asset(
-                  "assets/Community.svg",
-                  color: appRed,
-                ),
-                title: Text("Projects", style: context.textTheme.bodyLarge),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.router.pushNamed(Pages.communityPractice);
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
-                leading: SvgPicture.asset(
-                  "assets/Events.svg",
-                  color: appRed,
-                ),
-                title: Text("Events", style: context.textTheme.bodyLarge),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.router.pushNamed(Pages.events);
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
-                onTap: () {
-                  logout(ref);
-                  context.router.goNamed(Pages.login);
-                },
-                leading: SvgPicture.asset(
-                  "assets/Logout.svg",
-                  color: appRed,
-                ),
-                title: Text("Log Out", style: context.textTheme.bodyLarge),
-              ),
-            ],
-          ),
-        ),
-      ),
+      drawer: const HomeDrawer(),
       onDrawerChanged: (change) =>
           ref.watch(hideBottomProvider.notifier).state = change,
       appBar: AppBar(
@@ -305,7 +168,6 @@ class _HomeState extends ConsumerState<Home> {
         title: GestureDetector(
           onTap: () {
             if (posts.length < 4) {
-              setState(() => loading = true);
               fetchPosts();
             } else {
               scrollController.animateTo(
@@ -342,7 +204,7 @@ class _HomeState extends ConsumerState<Home> {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-          child: loading
+          child: loadingLocal
               ? Skeletonizer(
                   enabled: true,
                   child: ListView.separated(
@@ -354,21 +216,38 @@ class _HomeState extends ConsumerState<Home> {
                     separatorBuilder: (_, __) => SizedBox(height: 20.h),
                   ),
                 )
-              : (!loading && posts.isEmpty)
-                  ? Center(
-                      child: RichText(
-                        text: TextSpan(
+              : (posts.isEmpty)
+                  ? SizedBox(
+                      height: 650.h,
+                      width: 390.w,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            TextSpan(
-                              text: "No posts available.",
-                              style: context.textTheme.bodyLarge,
+                            Image.asset(
+                              "assets/No Data.png",
+                              width: 150.r,
+                              height: 150.r,
+                              fit: BoxFit.cover,
                             ),
-                            TextSpan(
-                                text: " Tap to refresh",
-                                style: context.textTheme.bodyLarge!
-                                    .copyWith(color: appRed),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = fetchPosts),
+                            SizedBox(height: 20.h),
+                            Text(
+                              "There are no posts available",
+                              style: context.textTheme.titleSmall!.copyWith(
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            SizedBox(height: 10.h),
+                            GestureDetector(
+                              onTap: fetchPosts,
+                              child: Text(
+                                "Refresh",
+                                style: context.textTheme.titleSmall!.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: appRed,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),

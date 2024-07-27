@@ -128,6 +128,11 @@ class FileHandler {
     return response;
   }
 
+  static Future<String> convertFilePathToBase64(String path) async {
+    var data = await convertSingleToData(path);
+    return convertTo64(data);
+  }
+
   static String convertTo64(Uint8List data) => base64.encode(data);
 
   static Future<SingleFileResponse?> single(

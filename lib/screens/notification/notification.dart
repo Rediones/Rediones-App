@@ -109,15 +109,38 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
                 child: !loaded
                     ? const CenteredPopup()
                     : (notifications.isEmpty)
-                        ? GestureDetector(
-                            onTap: refresh,
-                            child: Center(
-                              child: Text(
-                                "No notifications available. Tap to refresh",
-                                style: context.textTheme.bodyLarge,
+                        ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                "assets/No Data.png",
+                                width: 150.r,
+                                height: 150.r,
+                                fit: BoxFit.cover,
                               ),
-                            ),
+                              SizedBox(height: 20.h),
+                              Text(
+                                "There are no notifications available",
+                                style: context.textTheme.titleSmall!.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              SizedBox(height: 10.h),
+                              GestureDetector(
+                                onTap: refresh,
+                                child: Text(
+                                  "Refresh",
+                                  style:
+                                  context.textTheme.titleSmall!.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: appRed,
+                                  ),
+                                ),
+                              ),
+                            ],
                           )
+                        )
                         : RefreshIndicator(
                             onRefresh: refresh,
                             child: ListView.separated(
@@ -158,14 +181,12 @@ class NotificationHeader extends StatefulWidget {
 class _NotificationHeaderState extends State<NotificationHeader> {
   void showExtra() => showModalBottomSheet(
         context: context,
+        showDragHandle: true,
         builder: (context) => SizedBox(
-          height: 300.h,
+          height: 270.h,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 20.h),
-              SvgPicture.asset("assets/Modal Line.svg"),
-              SizedBox(height: 30.h),
               ListTile(
                 leading: SvgPicture.asset("assets/Less Often.svg"),
                 title: Text(

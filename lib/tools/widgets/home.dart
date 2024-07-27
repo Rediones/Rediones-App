@@ -303,7 +303,7 @@ class BottomNavBar extends ConsumerWidget {
                                                 .notifier)
                                             .state = false;
                                         context.router
-                                            .pushNamed(Pages.communityPractice)
+                                            .pushNamed(Pages.groups)
                                             .then((resp) {
                                           if (currentTab == 1) {
                                             ref

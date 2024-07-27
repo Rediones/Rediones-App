@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:camera/camera.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
@@ -5,12 +7,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:isar/isar.dart';
 import 'package:rediones/tools/constants.dart' as c;
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:timeago/timeago.dart' as time;
 
 import 'api/file_handler.dart';
+import 'components/poll_data.dart';
+import 'components/post_data.dart';
+import 'components/postable.dart';
 import 'repositories/database_manager.dart';
 import 'tools/routes.dart';
 import 'tools/styles.dart';
@@ -54,6 +62,26 @@ class _RedionesState extends ConsumerState<Rediones>
       routes: routes,
     );
     time.setDefaultLocale('en_short');
+
+    if(widget.goHome) {
+      Future.delayed(Duration.zero, getLocalPosts);
+    }
+  }
+
+
+  Future<void> getLocalPosts() async {
+    Isar isar = GetIt.I.get();
+
+    List<Post> sortedPosts =
+    (await isar.posts.where().findAll()).whereType<Post>().toList();
+    List<Poll> sortedPolls =
+    (await isar.polls.where().findAll()).whereType<Poll>().toList();
+
+    List<PostObject> objects = [...sortedPosts, ...sortedPolls];
+    objects.sort((b, a) => a.timestamp.compareTo(b.timestamp));
+
+    ref.watch(postsProvider.notifier).state.addAll(objects);
+    ref.watch(loadingLocalPostsProvider.notifier).state = false;
   }
 
   @override

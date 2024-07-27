@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -49,8 +48,6 @@ class _MultimediaGalleryState extends State<MultimediaGallery>
   String? videoPath;
 
   int selectedAlbum = 0;
-
-  final ReceivePort receivePort = ReceivePort();
 
   late Future deviceVideoFuture;
   Medium? selectedVideo;
@@ -111,25 +108,6 @@ class _MultimediaGalleryState extends State<MultimediaGallery>
   Future<void> getMediaForAlbum() async {
     setState(() => loadedDeviceVideos = false);
     Album album = allAlbums[selectedAlbum];
-
-    // Isolate.spawn((SendPort sendPort) async {
-    //   try {
-    //     MediaPage page = await album.listMedia();
-    //     List<Medium> mediaList = [];
-    //
-    //     for (Medium medium in page.items) {
-    //       Duration videoDuration = Duration(milliseconds: medium.duration);
-    //       if (videoDuration.inSeconds > 30) continue;
-    //       mediaList.add(medium);
-    //     }
-    //     sendPort.send(mediaList);
-    //   } catch (e) {
-    //     log("$e");
-    //     rethrow;
-    //   }
-    // }, receivePort.sendPort);
-    //
-    // List<Medium> mediaList = await receivePort.first;
 
     List<Medium> mediaList = await computeMediaForAlbum(album);
 

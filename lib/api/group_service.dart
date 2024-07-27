@@ -7,8 +7,18 @@ import 'post_service.dart';
 
 export 'base.dart' show RedionesResponse, Status, imgPrefix;
 
-Future<RedionesResponse<List<GroupData>>> getGroups() async {
-  String errorHeader = "Get Groups:";
+class JointGroup {
+  final List<GroupData> myGroups;
+  final List<GroupData> forYou;
+
+  const JointGroup({
+    this.myGroups = const [],
+    this.forYou = const [],
+  });
+}
+
+Future<RedionesResponse<JointGroup>> getGroups() async {
+  String errorHeader = "Get Communities:";
   try {
     Response response = await dio.get(
       "/groups/all",
@@ -16,31 +26,36 @@ Future<RedionesResponse<List<GroupData>>> getGroups() async {
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      List<dynamic> eventList = response.data as List<dynamic>;
-      List<GroupData> groups = [];
-      for (var element in eventList) {
-        groups.add(_processGroup(element as Map<String, dynamic>));
+      List<dynamic> myGroupList = response.data["myGroups"],
+          forYouList = response.data["forYou"];
+
+      List<GroupData> myGroups = [], forYou = [];
+      for (var element in myGroupList) {
+        myGroups.add(_processGroup(element as Map<String, dynamic>));
       }
+      // for (var element in forYouList) {
+      //   forYou.add(_processGroup(element as Map<String, dynamic>));
+      // }
 
       return RedionesResponse(
         message: "Groups Fetched",
-        payload: groups,
+        payload: JointGroup(forYou: forYou, myGroups: myGroups),
         status: Status.success,
       );
     }
   } on DioException catch (e) {
     return RedionesResponse(
       message: dioErrorResponse(errorHeader, e),
-      payload: [],
+      payload: const JointGroup(),
       status: Status.failed,
     );
   } catch (e) {
-    log("Get Groups Error: $e");
+    log("Get Communities Error: $e");
   }
 
   return RedionesResponse(
     message: "$errorHeader An unknown error occurred. Please try again.",
-    payload: [],
+    payload: const JointGroup(),
     status: Status.failed,
   );
 }
@@ -85,7 +100,8 @@ Future<RedionesResponse<List<PostObject>>> getGroupPosts(String id) async {
 }
 
 GroupData _processGroup(Map<String, dynamic> map) {
-  map["members"] = processUsers(map["members"]);
+  map["members"] = fromArrayString(map["members"]);
+  map["categories"] = fromArrayString(map["categories"]);
   return GroupData.fromJson(map);
 }
 
@@ -105,6 +121,45 @@ Future<RedionesResponse<GroupData?>> createGroup(
       GroupData group = _processGroup(result);
       return RedionesResponse(
         message: "Group Created",
+        payload: group,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Create Group Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An error occurred. Please try again.",
+    payload: null,
+    status: Status.failed,
+  );
+}
+
+
+Future<RedionesResponse<GroupData?>> createCommunity(
+    Map<String, dynamic> data) async {
+  String errorHeader = "Create Community:";
+  try {
+    Response response = await dio.post(
+      "/groups",
+      data: data,
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      log(response.data.toString());
+      Map<String, dynamic> result =
+      response.data["payload"] as Map<String, dynamic>;
+      GroupData group = _processGroup(result);
+      return RedionesResponse(
+        message: "Community Created",
         payload: group,
         status: Status.success,
       );

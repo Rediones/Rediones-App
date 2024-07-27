@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_gallery/photo_gallery.dart';
+import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/components/community_data.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
@@ -160,7 +161,7 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.createStory.path,
     name: Pages.createStory,
-    builder: (_, __) => const CreateStoryPage(),
+    builder: (_, state) => CreateStoryPage(media: state.extra as List<SingleFileResponse>),
   ),
   GoRoute(
     path: Pages.inbox.path,

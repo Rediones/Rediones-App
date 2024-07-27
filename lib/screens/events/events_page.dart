@@ -41,6 +41,11 @@ class _EventsPageState extends ConsumerState<EventsPage> {
     });
   }
 
+  void refreshEvents() {
+    setState(() => loadedForYou = false);
+    fetchEvents();
+  }
+
   @override
   Widget build(BuildContext context) {
     bool darkTheme = context.isDark;
@@ -55,6 +60,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
           onPressed: () => context.router.pop(),
         ),
         elevation: 0.0,
+        leadingWidth: 30.w,
         title: Text(
           "Events",
           style: context.textTheme.titleLarge,
@@ -68,15 +74,15 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                 onTap: () => context.router.pushNamed(Pages.createEvents),
                 child: Container(
                   height: 35.h,
-                  width: 90.w,
+                  width: 100.w,
                   decoration: BoxDecoration(
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(6.r),
+                    borderRadius: BorderRadius.circular(17.5.h),
                     border:
                         Border.all(color: darkTheme ? neutral3 : fadedPrimary),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
@@ -89,7 +95,12 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                             child: Icon(Icons.add_rounded,
                                 color: theme, size: 14.r)),
                       ),
-                      Text("Create", style: context.textTheme.bodyLarge)
+                      Text(
+                        "Create",
+                        style: context.textTheme.titleSmall!.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -103,7 +114,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Column(
             children: [
-              SizedBox(height: 20.h),
+              SizedBox(height: 10.h),
               SpecialForm(
                 width: 390.w,
                 height: 40.h,
@@ -131,24 +142,35 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                     ? const CenteredPopup()
                     : events.isEmpty
                         ? Center(
-                            child: RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "No events available.",
-                                    style: context.textTheme.bodyLarge,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  "assets/No Data.png",
+                                  width: 150.r,
+                                  height: 150.r,
+                                  fit: BoxFit.cover,
+                                ),
+                                SizedBox(height: 20.h),
+                                Text(
+                                  "There are no events available",
+                                  style: context.textTheme.titleSmall!.copyWith(
+                                    fontWeight: FontWeight.w400,
                                   ),
-                                  TextSpan(
-                                      text: " Tap to refresh",
-                                      style: context.textTheme.bodyLarge!
-                                          .copyWith(color: appRed),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          setState(() => loadedForYou = false);
-                                          fetchEvents();
-                                        }),
-                                ],
-                              ),
+                                ),
+                                SizedBox(height: 10.h),
+                                GestureDetector(
+                                  onTap: refreshEvents,
+                                  child: Text(
+                                    "Refresh",
+                                    style:
+                                        context.textTheme.titleSmall!.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: appRed,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                         : RefreshIndicator(

@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
+import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/message_service.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
@@ -109,6 +110,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
           icon: const Icon(Icons.chevron_left),
           onPressed: () => context.router.pop(),
         ),
+        leadingWidth: 30.w,
         elevation: 0.0,
         title: Text(
           "Inbox",
@@ -378,15 +380,25 @@ class StoryContainer extends StatelessWidget {
   }
 }
 
-class _AddStory extends ConsumerWidget {
+class _AddStory extends ConsumerStatefulWidget {
   const _AddStory();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AddStory> createState() => _AddStoryState();
+}
+
+class _AddStoryState extends ConsumerState<_AddStory> {
+  @override
+  Widget build(BuildContext context) {
     String image = ref.read(userProvider).profilePicture;
 
     return GestureDetector(
-      onTap: () => context.router.pushNamed(Pages.createStory),
+      onTap: () {
+        FileHandler.multiple(type: FileType.media).then((resp) {
+          if (resp == null || resp.isEmpty) return;
+          context.router.pushNamed(Pages.createStory, extra: resp);
+        });
+      },
       child: Container(
         width: 90.r,
         height: 120.r,
@@ -431,7 +443,6 @@ class _AddStory extends ConsumerWidget {
                 ),
               ],
             ),
-
             SizedBox(
               width: 90.r,
               child: Column(

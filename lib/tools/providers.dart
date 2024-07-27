@@ -36,8 +36,10 @@ final StateProvider<List<NotificationData>> notificationsProvider =
 final StateProvider<List<EventData>> eventsProvider =
     StateProvider((ref) => []);
 
-final StateProvider<List<GroupData>> groupsProvider =
+final StateProvider<List<GroupData>> myGroupsProvider =
     StateProvider((ref) => []);
+final StateProvider<List<GroupData>> forYouGroupsProvider =
+StateProvider((ref) => []);
 
 final StateProvider<List<Conversation>> conversationsProvider =
     StateProvider((ref) => []);
@@ -281,8 +283,12 @@ final StateProvider<int> dashboardIndexProvider = StateProvider((ref) => 0);
 final StateProvider<bool> spotlightsPlayStatusProvider =
     StateProvider((ref) => false);
 
+final StateProvider<bool> loadingLocalPostsProvider =
+StateProvider((ref) => true);
+
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);
+  ref.invalidate(loadingLocalPostsProvider);
   ref.invalidate(exitAttemptProvider);
   ref.invalidate(spotlightsPlayStatusProvider);
   ref.invalidate(createdProfileProvider);
@@ -296,7 +302,8 @@ void logout(WidgetRef ref) {
   ref.invalidate(isLoggedInProvider);
   ref.invalidate(initializedProvider);
   ref.invalidate(storiesProvider);
-  ref.invalidate(groupsProvider);
+  ref.invalidate(myGroupsProvider);
+  ref.invalidate(forYouGroupsProvider);
   ref.invalidate(eventsProvider);
   ref.invalidate(notificationsProvider);
   ref.invalidate(spotlightsProvider);

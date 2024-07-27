@@ -7,7 +7,8 @@ class GroupData {
   final String groupName;
   final String groupDescription;
   final List<Post> groupPosts;
-  final List<User> groupUsers;
+  final List<String> groupUsers;
+  final List<String> categories;
   final DateTime created;
 
   const GroupData({
@@ -18,6 +19,7 @@ class GroupData {
     required this.created,
     this.groupPosts = const [],
     this.groupUsers = const [],
+    this.categories = const [],
   });
 
   factory GroupData.fromJson(Map<String, dynamic> map) {
@@ -27,7 +29,10 @@ class GroupData {
       groupName: map["title"],
       groupDescription: map["description"],
       groupUsers: map["members"],
+      categories: map["categories"],
       created: DateTime.parse(map["createdAt"]),
     );
   }
 }
+
+
