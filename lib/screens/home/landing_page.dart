@@ -68,6 +68,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     Isar isar = GetIt.I.get();
     await isar.writeTxn(() async {
       await isar.users.put(user);
+      FileHandler.saveString(userIsarId, user.uuid);
     });
   }
 

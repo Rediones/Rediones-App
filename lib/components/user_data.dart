@@ -20,7 +20,7 @@ class User {
   final String gender;
 
   User({
-    required this.uuid,
+    this.uuid = "",
     this.profilePicture = "",
     this.gender = "",
     this.nickname = "",

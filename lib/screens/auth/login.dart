@@ -39,7 +39,9 @@ class _LoginState extends ConsumerState<Login> {
     });
 
     Future.delayed(
-        const Duration(milliseconds: 500), () => FlutterNativeSplash.remove());
+      const Duration(milliseconds: 500),
+      () => FlutterNativeSplash.remove(),
+    );
   }
 
   void navigate(RedionesResponse<User?> result) {
@@ -53,6 +55,7 @@ class _LoginState extends ConsumerState<Login> {
     Isar isar = GetIt.I.get();
     await isar.writeTxn(() async {
       await isar.users.put(user);
+      FileHandler.saveString(userIsarId, user.uuid);
     });
   }
 

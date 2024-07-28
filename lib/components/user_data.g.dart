@@ -185,7 +185,7 @@ User _userDeserialize(
     profilePicture: reader.readStringOrNull(offsets[10]) ?? "",
     savedPosts: reader.readStringList(offsets[11]) ?? const [],
     school: reader.readStringOrNull(offsets[12]) ?? "",
-    uuid: reader.readString(offsets[13]),
+    uuid: reader.readStringOrNull(offsets[13]) ?? "",
   );
   return object;
 }
@@ -224,7 +224,7 @@ P _userDeserializeProp<P>(
     case 12:
       return (reader.readStringOrNull(offset) ?? "") as P;
     case 13:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? "") as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }

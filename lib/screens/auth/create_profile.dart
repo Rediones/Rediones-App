@@ -49,6 +49,7 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
     Isar isar = GetIt.I.get();
     await isar.writeTxn(() async {
       await isar.users.put(user);
+      FileHandler.saveString(userIsarId, user.uuid);
     });
   }
 

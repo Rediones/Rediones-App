@@ -52,10 +52,8 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
   }
 
   void checkForChanges() {
-    ref.listen(userProvider, (oldUser, newUser) {
-      if (oldUser == dummyUser &&
-          newUser != dummyUser &&
-          ref.watch(postsProvider).isEmpty) {
+    ref.listen(isLoggedInProvider, (oldVal, newVal) {
+      if (!oldVal! && newVal) {
         refresh();
       }
     });

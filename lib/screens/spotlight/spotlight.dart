@@ -105,11 +105,12 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
       }
     });
 
-    ref.listen(userProvider, (oldUser, newUser) {
-      if (oldUser == dummyUser && newUser != dummyUser) {
+    ref.listen(isLoggedInProvider, (oldVal, newVal) {
+      if (!oldVal! && newVal) {
         setState(() => _shouldRefresh = true);
       }
     });
+
   }
 
   bool get available {

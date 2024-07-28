@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:camera/camera.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar/isar.dart';
+import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart' as c;
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/providers.dart';
@@ -42,6 +41,7 @@ void main() async {
 
 class Rediones extends ConsumerStatefulWidget {
   final bool goHome;
+
   const Rediones({super.key, required this.goHome});
 
   @override
@@ -63,25 +63,32 @@ class _RedionesState extends ConsumerState<Rediones>
     );
     time.setDefaultLocale('en_short');
 
-    if(widget.goHome) {
-      Future.delayed(Duration.zero, getLocalPosts);
+    if (widget.goHome) {
+      Future.delayed(Duration.zero, getLocalData);
     }
   }
 
-
-  Future<void> getLocalPosts() async {
+  Future<void> getLocalData() async {
     Isar isar = GetIt.I.get();
 
     List<Post> sortedPosts =
-    (await isar.posts.where().findAll()).whereType<Post>().toList();
+        (await isar.posts.where().findAll()).whereType<Post>().toList();
     List<Poll> sortedPolls =
-    (await isar.polls.where().findAll()).whereType<Poll>().toList();
+        (await isar.polls.where().findAll()).whereType<Poll>().toList();
 
     List<PostObject> objects = [...sortedPosts, ...sortedPolls];
     objects.sort((b, a) => a.timestamp.compareTo(b.timestamp));
 
     ref.watch(postsProvider.notifier).state.addAll(objects);
     ref.watch(loadingLocalPostsProvider.notifier).state = false;
+
+    String? id = await FileHandler.loadString(userIsarId);
+    if (id != null) {
+      User? user = await isar.users.filter().uuidEqualTo(id).findFirst();
+      if (user != null) {
+        ref.watch(userProvider.notifier).state = user;
+      }
+    }
   }
 
   @override
@@ -122,13 +129,13 @@ class _RedionesState extends ConsumerState<Rediones>
     );
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) async {
-  //   super.didChangeAppLifecycleState(state);
-  //   if (state == AppLifecycleState.paused) {
-  //
-  //   } else if (state == AppLifecycleState.resumed) {
-  //
-  //   }
-  // }
+// @override
+// void didChangeAppLifecycleState(AppLifecycleState state) async {
+//   super.didChangeAppLifecycleState(state);
+//   if (state == AppLifecycleState.paused) {
+//
+//   } else if (state == AppLifecycleState.resumed) {
+//
+//   }
+// }
 }
