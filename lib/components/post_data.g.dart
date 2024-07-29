@@ -27,28 +27,43 @@ const PostSchema = CollectionSchema(
       name: r'media',
       type: IsarType.stringList,
     ),
-    r'poster': PropertySchema(
+    r'posterID': PropertySchema(
       id: 2,
-      name: r'poster',
+      name: r'posterID',
+      type: IsarType.string,
+    ),
+    r'posterName': PropertySchema(
+      id: 3,
+      name: r'posterName',
+      type: IsarType.string,
+    ),
+    r'posterPicture': PropertySchema(
+      id: 4,
+      name: r'posterPicture',
+      type: IsarType.string,
+    ),
+    r'posterUsername': PropertySchema(
+      id: 5,
+      name: r'posterUsername',
       type: IsarType.string,
     ),
     r'shares': PropertySchema(
-      id: 3,
+      id: 6,
       name: r'shares',
       type: IsarType.long,
     ),
     r'text': PropertySchema(
-      id: 4,
+      id: 7,
       name: r'text',
       type: IsarType.string,
     ),
     r'timestamp': PropertySchema(
-      id: 5,
+      id: 8,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'uuid': PropertySchema(
-      id: 6,
+      id: 9,
       name: r'uuid',
       type: IsarType.string,
     )
@@ -59,14 +74,14 @@ const PostSchema = CollectionSchema(
   deserializeProp: _postDeserializeProp,
   idName: r'isarId',
   indexes: {
-    r'poster': IndexSchema(
-      id: -423404102861763612,
-      name: r'poster',
+    r'posterID': IndexSchema(
+      id: -165509240594948126,
+      name: r'posterID',
       unique: false,
       replace: false,
       properties: [
         IndexPropertySchema(
-          name: r'poster',
+          name: r'posterID',
           type: IndexType.hash,
           caseSensitive: true,
         )
@@ -114,7 +129,10 @@ int _postEstimateSize(
       bytesCount += value.length * 3;
     }
   }
-  bytesCount += 3 + object.poster.length * 3;
+  bytesCount += 3 + object.posterID.length * 3;
+  bytesCount += 3 + object.posterName.length * 3;
+  bytesCount += 3 + object.posterPicture.length * 3;
+  bytesCount += 3 + object.posterUsername.length * 3;
   bytesCount += 3 + object.text.length * 3;
   bytesCount += 3 + object.uuid.length * 3;
   return bytesCount;
@@ -128,11 +146,14 @@ void _postSerialize(
 ) {
   writer.writeStringList(offsets[0], object.likes);
   writer.writeStringList(offsets[1], object.media);
-  writer.writeString(offsets[2], object.poster);
-  writer.writeLong(offsets[3], object.shares);
-  writer.writeString(offsets[4], object.text);
-  writer.writeDateTime(offsets[5], object.timestamp);
-  writer.writeString(offsets[6], object.uuid);
+  writer.writeString(offsets[2], object.posterID);
+  writer.writeString(offsets[3], object.posterName);
+  writer.writeString(offsets[4], object.posterPicture);
+  writer.writeString(offsets[5], object.posterUsername);
+  writer.writeLong(offsets[6], object.shares);
+  writer.writeString(offsets[7], object.text);
+  writer.writeDateTime(offsets[8], object.timestamp);
+  writer.writeString(offsets[9], object.uuid);
 }
 
 Post _postDeserialize(
@@ -144,11 +165,14 @@ Post _postDeserialize(
   final object = Post(
     likes: reader.readStringList(offsets[0]) ?? const [],
     media: reader.readStringList(offsets[1]) ?? const [],
-    poster: reader.readStringOrNull(offsets[2]) ?? "",
-    shares: reader.readLongOrNull(offsets[3]) ?? 0,
-    text: reader.readStringOrNull(offsets[4]) ?? "",
-    timestamp: reader.readDateTime(offsets[5]),
-    uuid: reader.readStringOrNull(offsets[6]) ?? "",
+    posterID: reader.readStringOrNull(offsets[2]) ?? "",
+    posterName: reader.readStringOrNull(offsets[3]) ?? "",
+    posterPicture: reader.readStringOrNull(offsets[4]) ?? "",
+    posterUsername: reader.readStringOrNull(offsets[5]) ?? "",
+    shares: reader.readLongOrNull(offsets[6]) ?? 0,
+    text: reader.readStringOrNull(offsets[7]) ?? "",
+    timestamp: reader.readDateTime(offsets[8]),
+    uuid: reader.readStringOrNull(offsets[9]) ?? "",
   );
   return object;
 }
@@ -167,12 +191,18 @@ P _postDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset) ?? "") as P;
     case 3:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readStringOrNull(offset) ?? "") as P;
     case 4:
       return (reader.readStringOrNull(offset) ?? "") as P;
     case 5:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? "") as P;
     case 6:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 7:
+      return (reader.readStringOrNull(offset) ?? "") as P;
+    case 8:
+      return (reader.readDateTime(offset)) as P;
+    case 9:
       return (reader.readStringOrNull(offset) ?? "") as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -271,43 +301,44 @@ extension PostQueryWhere on QueryBuilder<Post, Post, QWhereClause> {
     });
   }
 
-  QueryBuilder<Post, Post, QAfterWhereClause> posterEqualTo(String poster) {
+  QueryBuilder<Post, Post, QAfterWhereClause> posterIDEqualTo(String posterID) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'poster',
-        value: [poster],
+        indexName: r'posterID',
+        value: [posterID],
       ));
     });
   }
 
-  QueryBuilder<Post, Post, QAfterWhereClause> posterNotEqualTo(String poster) {
+  QueryBuilder<Post, Post, QAfterWhereClause> posterIDNotEqualTo(
+      String posterID) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'poster',
+              indexName: r'posterID',
               lower: [],
-              upper: [poster],
+              upper: [posterID],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'poster',
-              lower: [poster],
+              indexName: r'posterID',
+              lower: [posterID],
               includeLower: false,
               upper: [],
             ));
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'poster',
-              lower: [poster],
+              indexName: r'posterID',
+              lower: [posterID],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'poster',
+              indexName: r'posterID',
               lower: [],
-              upper: [poster],
+              upper: [posterID],
               includeUpper: false,
             ));
       }
@@ -886,20 +917,20 @@ extension PostQueryFilter on QueryBuilder<Post, Post, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterEqualTo(
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'poster',
+        property: r'posterID',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterGreaterThan(
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -907,14 +938,14 @@ extension PostQueryFilter on QueryBuilder<Post, Post, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'poster',
+        property: r'posterID',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterLessThan(
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -922,14 +953,14 @@ extension PostQueryFilter on QueryBuilder<Post, Post, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'poster',
+        property: r'posterID',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterBetween(
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -938,7 +969,7 @@ extension PostQueryFilter on QueryBuilder<Post, Post, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'poster',
+        property: r'posterID',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -948,67 +979,458 @@ extension PostQueryFilter on QueryBuilder<Post, Post, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterStartsWith(
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'poster',
+        property: r'posterID',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterEndsWith(
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'poster',
+        property: r'posterID',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterContains(String value,
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDContains(String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'poster',
+        property: r'posterID',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterMatches(String pattern,
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDMatches(
+      String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'poster',
+        property: r'posterID',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterIsEmpty() {
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'poster',
+        property: r'posterID',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Post, Post, QAfterFilterCondition> posterIsNotEmpty() {
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterIDIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'poster',
+        property: r'posterID',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'posterName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'posterName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'posterName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'posterName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'posterName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'posterName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'posterName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'posterName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'posterName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'posterName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'posterPicture',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'posterPicture',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'posterPicture',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'posterPicture',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'posterPicture',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'posterPicture',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'posterPicture',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'posterPicture',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'posterPicture',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterPictureIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'posterPicture',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'posterUsername',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'posterUsername',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'posterUsername',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'posterUsername',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'posterUsername',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'posterUsername',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'posterUsername',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'posterUsername',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'posterUsername',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> posterUsernameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'posterUsername',
         value: '',
       ));
     });
@@ -1381,15 +1803,51 @@ extension PostQueryObject on QueryBuilder<Post, Post, QFilterCondition> {}
 extension PostQueryLinks on QueryBuilder<Post, Post, QFilterCondition> {}
 
 extension PostQuerySortBy on QueryBuilder<Post, Post, QSortBy> {
-  QueryBuilder<Post, Post, QAfterSortBy> sortByPoster() {
+  QueryBuilder<Post, Post, QAfterSortBy> sortByPosterID() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'poster', Sort.asc);
+      return query.addSortBy(r'posterID', Sort.asc);
     });
   }
 
-  QueryBuilder<Post, Post, QAfterSortBy> sortByPosterDesc() {
+  QueryBuilder<Post, Post, QAfterSortBy> sortByPosterIDDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'poster', Sort.desc);
+      return query.addSortBy(r'posterID', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> sortByPosterName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> sortByPosterNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> sortByPosterPicture() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterPicture', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> sortByPosterPictureDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterPicture', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> sortByPosterUsername() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterUsername', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> sortByPosterUsernameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterUsername', Sort.desc);
     });
   }
 
@@ -1455,15 +1913,51 @@ extension PostQuerySortThenBy on QueryBuilder<Post, Post, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Post, Post, QAfterSortBy> thenByPoster() {
+  QueryBuilder<Post, Post, QAfterSortBy> thenByPosterID() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'poster', Sort.asc);
+      return query.addSortBy(r'posterID', Sort.asc);
     });
   }
 
-  QueryBuilder<Post, Post, QAfterSortBy> thenByPosterDesc() {
+  QueryBuilder<Post, Post, QAfterSortBy> thenByPosterIDDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'poster', Sort.desc);
+      return query.addSortBy(r'posterID', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> thenByPosterName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> thenByPosterNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> thenByPosterPicture() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterPicture', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> thenByPosterPictureDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterPicture', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> thenByPosterUsername() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterUsername', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> thenByPosterUsernameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'posterUsername', Sort.desc);
     });
   }
 
@@ -1529,10 +2023,33 @@ extension PostQueryWhereDistinct on QueryBuilder<Post, Post, QDistinct> {
     });
   }
 
-  QueryBuilder<Post, Post, QDistinct> distinctByPoster(
+  QueryBuilder<Post, Post, QDistinct> distinctByPosterID(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'poster', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'posterID', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Post, Post, QDistinct> distinctByPosterName(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'posterName', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Post, Post, QDistinct> distinctByPosterPicture(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'posterPicture',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Post, Post, QDistinct> distinctByPosterUsername(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'posterUsername',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -1582,9 +2099,27 @@ extension PostQueryProperty on QueryBuilder<Post, Post, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Post, String, QQueryOperations> posterProperty() {
+  QueryBuilder<Post, String, QQueryOperations> posterIDProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'poster');
+      return query.addPropertyName(r'posterID');
+    });
+  }
+
+  QueryBuilder<Post, String, QQueryOperations> posterNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'posterName');
+    });
+  }
+
+  QueryBuilder<Post, String, QQueryOperations> posterPictureProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'posterPicture');
+    });
+  }
+
+  QueryBuilder<Post, String, QQueryOperations> posterUsernameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'posterUsername');
     });
   }
 

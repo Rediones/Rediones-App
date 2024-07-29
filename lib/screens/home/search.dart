@@ -4,8 +4,11 @@ import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get_it/get_it.dart';
+import 'package:isar/isar.dart';
 import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/community_data.dart';
+import 'package:rediones/components/search_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
@@ -28,7 +31,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   final FocusNode node = FocusNode();
 
-  bool hasSearch = false;
+  bool hasSearch = false, loading = false;
 
   @override
   void initState() {
@@ -85,7 +88,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       setState(() => hasSearch = false);
     }
 
-    if (!hasSearch) return;
+    if (!hasSearch) {
+      setState(() {
+        searchResults.clear();
+        hasSearch = false;
+      });
+      return;
+    }
+
+    setState(() => loading = true);
 
     searchForUsers(text).then(
       (result) {
@@ -93,15 +104,27 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
         Navigator.of(context).pop();
 
+        setState(() => loading = false);
+
         if (result.status == Status.failed) {
           showToast(result.message, context);
           return;
         }
 
         setState(() => searchResults = result.payload);
-        List<String> searches = ref.watch(recentSearchesProvider);
-        if (!searches.contains(text)) {
-          searches.add(text);
+        List<SearchData> searches = ref.watch(recentSearchesProvider);
+        SearchData searchData = SearchData(search: text);
+        bool contains = false;
+        for (SearchData data in searches) {
+          if (data.search == text) {
+            contains = true;
+            break;
+          }
+        }
+
+        if (!contains) {
+          searches.add(searchData);
+          saveToDatabase(searchData);
         }
       },
     );
@@ -114,12 +137,26 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     );
   }
 
+  Future<void> saveToDatabase(SearchData data) async {
+    Isar isar = GetIt.I.get();
+    await isar.writeTxn(() async {
+      await isar.searchDatas.put(data);
+    });
+  }
+
+  Future<void> removeFromDatabase(SearchData data) async {
+    Isar isar = GetIt.I.get();
+    await isar.writeTxn(() async {
+      await isar.searchDatas.delete(data.isarId);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<CommunityData> communities = ref.watch(communitiesProvider);
-    List<String> recentSearches = ref.watch(recentSearchesProvider);
-
+    // List<CommunityData> communities = ref.watch(communitiesProvider);
+    List<SearchData> recentSearches = ref.watch(recentSearchesProvider);
     bool darkTheme = context.isDark;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -206,7 +243,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 itemCount: searchResults.length,
               ),
             ),
-          if (hasSearch && searchResults.isEmpty)
+          if (!loading && hasSearch && searchResults.isEmpty)
             SliverFillRemaining(
               child: Center(
                 child: Column(
@@ -299,18 +336,21 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              searchController.text = recentSearches[index];
-                              onSearch(recentSearches[index]);
+                              searchController.text =
+                                  recentSearches[index].search;
+                              onSearch(recentSearches[index].search);
                             },
                             child: Text(
-                              recentSearches[index],
+                              recentSearches[index].search,
                               style: context.textTheme.bodyLarge,
                             ),
                           ),
                           GestureDetector(
-                            onTap: () => setState(
-                              () => recentSearches.removeAt(index),
-                            ),
+                            onTap: () {
+                              SearchData data = recentSearches.removeAt(index);
+                              removeFromDatabase(data);
+                              setState(() {});
+                            },
                             child: Icon(
                               Boxicons.bx_x,
                               size: 20.r,
@@ -484,7 +524,7 @@ class SuggestedContainer extends StatelessWidget {
   }
 }
 
-class ResultContainer extends StatelessWidget {
+class ResultContainer extends ConsumerWidget {
   final User user;
   final VoidCallback onAdd;
 
@@ -495,8 +535,10 @@ class ResultContainer extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     bool darkTheme = context.isDark;
+    bool shouldFollow = !user.followers.contains(ref.watch(userProvider));
+
     return Container(
       width: 120.w,
       height: 150.h,
@@ -552,20 +594,21 @@ class ResultContainer extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10.h),
-          GestureDetector(
-            onTap: onAdd,
-            child: Container(
-              height: 22.r,
-              width: 22.r,
-              decoration: BoxDecoration(
-                color: appRed,
-                borderRadius: BorderRadius.circular(4.r),
+          if (shouldFollow)
+            GestureDetector(
+              onTap: onAdd,
+              child: Container(
+                height: 22.r,
+                width: 22.r,
+                decoration: BoxDecoration(
+                  color: appRed,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Center(
+                  child: Icon(Icons.add_rounded, color: theme, size: 18.r),
+                ),
               ),
-              child: Center(
-                child: Icon(Icons.add_rounded, color: theme, size: 18.r),
-              ),
-            ),
-          )
+            )
         ],
       ),
     );

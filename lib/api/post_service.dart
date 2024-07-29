@@ -53,7 +53,6 @@ PostObject processPost(Map<String, dynamic> result, {User? user}) {
   if(user == null) {
     Map<String, dynamic> user = result["postedBy"] as Map<String, dynamic>;
     processUser(user);
-    // result["postedBy"] = user;
   } else {
     result["postedBy"] = user.toJson();
   }

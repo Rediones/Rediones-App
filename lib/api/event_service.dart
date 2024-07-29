@@ -15,6 +15,7 @@ Future<RedionesResponse<EventData?>> createEvent(
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      log(response.data.toString());
       Map<String, dynamic> result =
           response.data["payload"] as Map<String, dynamic>;
       EventData event = _processEvent(result);

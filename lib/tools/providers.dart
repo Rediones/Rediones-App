@@ -12,6 +12,7 @@ import 'package:rediones/components/pocket_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/project_data.dart';
+import 'package:rediones/components/search_data.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
@@ -180,7 +181,10 @@ final StateProvider<List<String>> communityCategoriesProvider = StateProvider(
 final List<Post> dummyPosts = List.generate(
   4,
   (index) => Post(
-    poster: dummyUser.uuid,
+    posterID: dummyUser.uuid,
+    posterName: dummyUser.firstName,
+    posterPicture: dummyUser.profilePicture,
+    posterUsername: dummyUser.nickname,
     uuid: "Dummy Post ID: $index",
     text: loremIpsum,
     timestamp: DateTime(1900),
@@ -188,7 +192,7 @@ final List<Post> dummyPosts = List.generate(
   ),
 );
 
-final StateProvider<List<String>> recentSearchesProvider = StateProvider(
+final StateProvider<List<SearchData>> recentSearchesProvider = StateProvider(
   (ref) => [],
 );
 

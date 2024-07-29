@@ -6,7 +6,7 @@ import 'package:rediones/components/community_data.dart';
 import 'package:rediones/components/group_data.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
-import 'package:rediones/components/user_data.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/screens/auth/create_profile.dart';
 import 'package:rediones/screens/auth/login.dart';
 import 'package:rediones/screens/auth/signup.dart';
@@ -26,6 +26,7 @@ import 'package:rediones/screens/home/create_post.dart';
 import 'package:rediones/screens/home/landing_page.dart';
 import 'package:rediones/screens/home/search.dart';
 import 'package:rediones/screens/home/splash.dart';
+import 'package:rediones/screens/home/view_post.dart';
 import 'package:rediones/screens/messaging/create_story.dart';
 import 'package:rediones/screens/messaging/create_task.dart';
 import 'package:rediones/screens/messaging/inbox.dart';
@@ -81,7 +82,7 @@ final List<GoRoute> routes = [
     onExit: (context, state) {
       ProviderContainer container = ProviderContainer();
       var controller = container.read(exitAttemptProvider.notifier);
-      if(controller.state == 0) {
+      if (controller.state == 0) {
         return true;
       } else {
         controller.state--;
@@ -163,7 +164,8 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.createStory.path,
     name: Pages.createStory,
-    builder: (_, state) => CreateStoryPage(media: state.extra as SingleFileResponse),
+    builder: (_, state) =>
+        CreateStoryPage(media: state.extra as SingleFileResponse),
   ),
   GoRoute(
     path: Pages.inbox.path,
@@ -242,5 +244,10 @@ final List<GoRoute> routes = [
     path: Pages.groupHome.path,
     name: Pages.groupHome,
     builder: (_, state) => GroupHome(data: state.extra as GroupData),
+  ),
+  GoRoute(
+    path: Pages.viewPost.path,
+    name: Pages.viewPost,
+    builder: (_, state) => ViewPostObjectPage(object: state.extra as PostObject),
   ),
 ];

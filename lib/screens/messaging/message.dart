@@ -11,7 +11,6 @@ import 'package:rediones/api/message_service.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/user_data.dart';
-import 'package:rediones/repositories/conversation_repository.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
@@ -99,15 +98,15 @@ class _MessagePageState extends ConsumerState<MessagePage>
   }
 
   Future<void> getLocalConversations() async {
-    final ConversationRepository repository = GetIt.I.get();
-    List<Conversation> c = await repository.getAll();
-    if (c.isEmpty) {
-      fetchConversations();
-    } else {
-      ref.watch(conversationsProvider.notifier).state.addAll(c);
-      fetchConversations();
-      setState(() => loadingConversations = false);
-    }
+    // final ConversationRepository repository = GetIt.I.get();
+    // List<Conversation> c = await repository.getAll();
+    // if (c.isEmpty) {
+    //   fetchConversations();
+    // } else {
+    //   ref.watch(conversationsProvider.notifier).state.addAll(c);
+    //   fetchConversations();
+    //   setState(() => loadingConversations = false);
+    // }
   }
 
   Future<void> refresh() async {

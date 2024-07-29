@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar/isar.dart';
+import 'package:rediones/components/search_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart' as c;
 import 'package:rediones/tools/constants.dart';
@@ -79,6 +80,11 @@ class _RedionesState extends ConsumerState<Rediones>
     List<PostObject> objects = [...sortedPosts, ...sortedPolls];
     objects.sort((b, a) => a.timestamp.compareTo(b.timestamp));
 
+    List<SearchData> searches = (await isar.searchDatas.where().findAll())
+        .whereType<SearchData>()
+        .toList();
+
+    ref.watch(recentSearchesProvider.notifier).state.addAll(searches);
     ref.watch(postsProvider.notifier).state.addAll(objects);
     ref.watch(loadingLocalPostsProvider.notifier).state = false;
 

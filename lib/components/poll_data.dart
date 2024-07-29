@@ -1,7 +1,6 @@
+import 'package:isar/isar.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/tools/functions.dart';
-
-import 'package:isar/isar.dart';
 
 part 'poll_data.g.dart';
 
@@ -10,7 +9,6 @@ class PollChoice {
   final String uuid;
   final String name;
   final List<String> voters;
-
 
   const PollChoice({
     this.uuid = "",
@@ -26,17 +24,18 @@ class PollChoice {
 
 @collection
 class Poll extends PostObject {
-
   final int totalVotes;
   final List<PollChoice> polls;
   final int durationInHours;
-
 
   const Poll({
     super.uuid,
     super.text,
     required super.timestamp,
-    required super.poster,
+    required super.posterID,
+    required super.posterUsername,
+    required super.posterName,
+    required super.posterPicture,
     super.likes,
     super.shares,
     this.polls = const [],
@@ -46,7 +45,7 @@ class Poll extends PostObject {
 
   @override
   String toString() {
-   return "Poll { totalVotes: $totalVotes, text: $text: polls: $polls }";
+    return "Poll { totalVotes: $totalVotes, text: $text: polls: $polls }";
   }
 
   Id get isarId => fastHash(uuid);
@@ -69,15 +68,19 @@ class Poll extends PostObject {
     }
 
     return Poll(
-        timestamp: DateTime.parse(poll["createdAt"]),
-        poster: map["postedBy"]["_id"],
-        uuid: poll["_id"],
-        likes: map["likes"],
-        polls: choices,
-        shares: 0,
-        text: poll["title"],
-        totalVotes: count,
-        durationInHours: poll["duration"],
+      timestamp: DateTime.parse(poll["createdAt"]),
+      posterID: map["postedBy"]["_id"],
+      posterName:
+          "${map["postedBy"]["firstName"]} ${map["postedBy"]["lastName"]}",
+      posterPicture: map["postedBy"]["profilePicture"],
+      posterUsername: map["postedBy"]["username"],
+      uuid: poll["_id"],
+      likes: map["likes"],
+      polls: choices,
+      shares: 0,
+      text: poll["title"],
+      totalVotes: count,
+      durationInHours: poll["duration"],
     );
   }
 }

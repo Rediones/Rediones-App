@@ -11,7 +11,6 @@ import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/widgets.dart';
-import 'package:rediones/repositories/messages_repository.dart';
 
 class Inbox extends ConsumerStatefulWidget {
   final Conversation details;
@@ -70,15 +69,15 @@ class _InboxState extends ConsumerState<Inbox> {
   }
 
   Future<void> getLocalMessages() async {
-    final MessageRepository messageRepository = GetIt.I.get();
-    List<MessageData> msgs =
-        await messageRepository.getMessagesWith(conversationID);
-    if (msgs.isEmpty) {
-      fetchMessages();
-    } else {
-      assignMessages(msgs);
-      fetchMessages();
-    }
+    // final MessageRepository messageRepository = GetIt.I.get();
+    // List<MessageData> msgs =
+    //     await messageRepository.getMessagesWith(conversationID);
+    // if (msgs.isEmpty) {
+    //   fetchMessages();
+    // } else {
+    //   assignMessages(msgs);
+    //   fetchMessages();
+    // }
   }
 
   void assignMessages(List<MessageData> messages,
@@ -121,12 +120,12 @@ class _InboxState extends ConsumerState<Inbox> {
     }
 
     bool consistent = true;
-    if (response.payload.length != chatController.numberOfMessages) {
-      final MessageRepository messageRepository = GetIt.I.get();
-      messageRepository.deleteAllWhere(where: "conversationID = ?", whereArgs: [conversationID]);
-      messageRepository.addAll(response.payload);
-      consistent = false;
-    }
+    // if (response.payload.length != chatController.numberOfMessages) {
+    //   final MessageRepository messageRepository = GetIt.I.get();
+    //   messageRepository.deleteAllWhere(where: "conversationID = ?", whereArgs: [conversationID]);
+    //   messageRepository.addAll(response.payload);
+    //   consistent = false;
+    // }
 
     assignMessages(response.payload, online: true, consistent: consistent);
   }
@@ -159,8 +158,8 @@ class _InboxState extends ConsumerState<Inbox> {
       ),
     ).then((resp) {
       if (resp.payload == null) return;
-      final MessageRepository messageRepository = GetIt.I.get();
-      messageRepository.add(resp.payload!);
+      // final MessageRepository messageRepository = GetIt.I.get();
+      // messageRepository.add(resp.payload!);
     });
   }
 

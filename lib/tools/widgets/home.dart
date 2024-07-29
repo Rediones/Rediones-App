@@ -662,7 +662,8 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     });
   }
 
-  Future<void> updateDatabaseForLikes(PostObject object, String id, bool add) async {
+  Future<void> updateDatabaseForLikes(
+      PostObject object, String id, bool add) async {
     Isar isar = GetIt.I.get();
     if (object is Post) {
       Post post = object;
@@ -691,7 +692,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     Isar isar = GetIt.I.get();
     int id = ref.watch(userProvider.select((value) => value.isarId));
     User? user = await isar.users.get(id);
-    if(user != null) {
+    if (user != null) {
       user.savedPosts.clear();
       user.savedPosts.addAll(saved);
       await isar.writeTxn(() async {
@@ -718,23 +719,22 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   }
 
   bool get shouldFollow {
-    // User currentUser = ref.watch(userProvider);
-    // if (widget.postObject.poster == currentUser.uuid) return false;
-    // if (widget.postObject.poster.followers.contains(currentUserID) ||
-    //     currentUser.following.contains(widget.postObject.poster)) {
-    //   return false;
-    // }
+    User currentUser = ref.watch(userProvider);
+    if (widget.postObject.posterID == currentUser.uuid) return false;
+    if (currentUser.following.contains(widget.postObject.posterID)) {
+      return false;
+    }
     return true;
   }
 
   void goToProfile() {
     User currentUser = ref.watch(userProvider);
-    if (widget.postObject.poster == currentUser.uuid) {
+    if (widget.postObject.posterID == currentUser.uuid) {
       context.router.pushNamed(Pages.profile);
     } else {
       context.router.pushNamed(
         Pages.otherProfile,
-        extra: widget.postObject.poster,
+        extra: widget.postObject.posterID,
       );
     }
   }
@@ -743,70 +743,79 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   Widget build(BuildContext context) {
     bool darkTheme = context.isDark;
 
-    return Container(
-      width: 390.w,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15.r),
-        border: Border.all(color: darkTheme ? neutral : border),
-        color: Colors.transparent,
+    return GestureDetector(
+      onTap: () => context.router.pushNamed(
+        Pages.viewPost,
+        extra: widget.postObject,
       ),
-      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _PostHeader(
-            object: widget.postObject,
-            goToProfile: goToProfile,
-            shouldFollow: shouldFollow,
-            showExtension: showExtension,
-          ),
-          SizedBox(height: 20.h),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text:
-                      "${widget.postObject.text.substring(0, expandText ? null : (widget.postObject.text.length >= 150 ? 150 : widget.postObject.text.length))}"
-                      "${widget.postObject.text.length >= 150 && !expandText ? "..." : ""}",
-                  style: context.textTheme.bodyMedium,
-                ),
-                if (widget.postObject.text.length > 150)
-                  TextSpan(
-                    text: expandText ? " Read Less" : " Read More",
-                    style:
-                        context.textTheme.bodyMedium!.copyWith(color: appRed),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () => setState(() => expandText = !expandText),
-                  ),
-              ],
+      child: Container(
+        width: 390.w,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15.r),
+          border: Border.all(color: darkTheme ? neutral : border),
+          color: Colors.transparent,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            PostHeader(
+              object: widget.postObject,
+              goToProfile: goToProfile,
+              shouldFollow: shouldFollow,
+              showExtension: showExtension,
             ),
-          ),
-          SizedBox(height: 10.h),
-          if (isPost && mediaAndText)
-            _PostContainer(post: widget.postObject as Post),
-          if (!isPost) _PollContainer(poll: widget.postObject as Poll),
-          _PostFooter(
-            object: widget.postObject,
-            liked: liked,
-            bookmarked: bookmarked,
-            onBookmark: onBookmark,
-            onLike: onLike,
-            commentsFuture: commentsFuture,
-            onCommentClicked: widget.onCommentClicked,
-          ),
-        ],
+            SizedBox(height: 20.h),
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text:
+                        "${widget.postObject.text.substring(0, expandText ? null : (widget.postObject.text.length >= 150 ? 150 : widget.postObject.text.length))}"
+                        "${widget.postObject.text.length >= 150 && !expandText ? "..." : ""}",
+                    style: context.textTheme.bodyMedium,
+                  ),
+                  if (widget.postObject.text.length > 150)
+                    TextSpan(
+                      text: expandText ? " Read Less" : " Read More",
+                      style:
+                          context.textTheme.bodyMedium!.copyWith(color: appRed),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap =
+                            () => setState(() => expandText = !expandText),
+                    ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10.h),
+            if (isPost && mediaAndText)
+              _PostContainer(post: widget.postObject as Post),
+            if (!isPost) _PollContainer(poll: widget.postObject as Poll),
+            _PostFooter(
+              object: widget.postObject,
+              liked: liked,
+              bookmarked: bookmarked,
+              onBookmark: onBookmark,
+              onLike: onLike,
+              commentsFuture: commentsFuture,
+              onCommentClicked: widget.onCommentClicked,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _PostHeader extends StatelessWidget {
+class PostHeader extends StatelessWidget {
   final PostObject object;
   final bool shouldFollow;
   final VoidCallback goToProfile, showExtension;
+  final bool hideMore;
 
-  const _PostHeader({
+  const PostHeader({
     super.key,
+    this.hideMore = false,
     required this.object,
     required this.shouldFollow,
     required this.goToProfile,
@@ -820,109 +829,117 @@ class _PostHeader extends StatelessWidget {
     return SizedBox(
       height: 40.r,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // CachedNetworkImage(
-          //   imageUrl: object.poster.profilePicture,
-          //   errorWidget: (context, url, error) => CircleAvatar(
-          //     backgroundColor: neutral2,
-          //     radius: 20.r,
-          //     child: Icon(
-          //       Icons.person_outline_rounded,
-          //       color: Colors.black,
-          //       size: 16.r,
-          //     ),
-          //   ),
-          //   progressIndicatorBuilder: (context, url, download) {
-          //     return Container(
-          //       width: 40.r,
-          //       height: 40.r,
-          //       decoration: const BoxDecoration(
-          //         shape: BoxShape.circle,
-          //         color: neutral2,
-          //       ),
-          //     );
-          //   },
-          //   imageBuilder: (context, provider) {
-          //     return GestureDetector(
-          //       onTap: goToProfile,
-          //       child: CircleAvatar(
-          //         backgroundImage: provider,
-          //         radius: 20.r,
-          //       ),
-          //     );
-          //   },
-          // ),
-          SizedBox(width: 10.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                height: 18.r,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // SizedBox(
-                    //   width: !shouldFollow ? 180.w : 140.w,
-                    //   child: GestureDetector(
-                    //     onTap: goToProfile,
-                    //     child: Text(
-                    //       object.poster.username,
-                    //       overflow: TextOverflow.ellipsis,
-                    //       style: context.textTheme.bodyLarge!
-                    //           .copyWith(fontWeight: FontWeight.w700),
-                    //     ),
-                    //   ),
-                    // ),
-                    if (shouldFollow)
-                      Skeleton.ignore(
-                        ignore: true,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(width: 10.w),
-                            SizedBox(
-                              height: 18.r,
-                              width: 1.2.w,
-                              child: ColoredBox(
-                                color: darkTheme ? neutral : primary1,
-                              ),
-                            ),
-                            SizedBox(width: 10.w),
-                            GestureDetector(
-                              onTap: () async {
-                                await followUser(object.poster);
-                              },
-                              child: Container(
-                                height: 18.r,
-                                width: 18.r,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: darkTheme ? appRed : primary,
-                                  borderRadius: BorderRadius.circular(6.r),
-                                ),
-                                child: Icon(
-                                  Icons.add_rounded,
-                                  color: theme,
-                                  size: 16.r,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
+              CachedNetworkImage(
+                imageUrl: object.posterPicture,
+                errorWidget: (context, url, error) => CircleAvatar(
+                  backgroundColor: neutral2,
+                  radius: 20.r,
+                  child: Icon(
+                    Icons.person_outline_rounded,
+                    color: Colors.black,
+                    size: 16.r,
+                  ),
                 ),
+                progressIndicatorBuilder: (context, url, download) {
+                  return Container(
+                    width: 40.r,
+                    height: 40.r,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: neutral2,
+                    ),
+                  );
+                },
+                imageBuilder: (context, provider) {
+                  return GestureDetector(
+                    onTap: goToProfile,
+                    child: CircleAvatar(
+                      backgroundImage: provider,
+                      radius: 20.r,
+                    ),
+                  );
+                },
               ),
-              // Text(
-              //   "@${object.poster.nickname}",
-              //   style: context.textTheme.labelMedium,
-              // ),
+              SizedBox(width: 10.w),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 18.r,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: !shouldFollow ? 180.w : 140.w,
+                          ),
+                          child: GestureDetector(
+                            onTap: goToProfile,
+                            child: Text(
+                              object.posterName,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.bodyLarge!
+                                  .copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ),
+                        if (shouldFollow)
+                          Skeleton.ignore(
+                            ignore: true,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(width: 10.w),
+                                SizedBox(
+                                  height: 15.r,
+                                  width: 1.5.w,
+                                  child: ColoredBox(
+                                    color: darkTheme ? neutral : primary1,
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                                GestureDetector(
+                                  onTap: () async {
+                                    await followUser(object.posterID);
+                                  },
+                                  child: Container(
+                                    height: 18.r,
+                                    width: 18.r,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: darkTheme ? appRed : primary,
+                                      borderRadius: BorderRadius.circular(6.r),
+                                    ),
+                                    child: Icon(
+                                      Icons.add_rounded,
+                                      color: theme,
+                                      size: 16.r,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    "@${object.posterUsername}",
+                    style: context.textTheme.labelMedium,
+                  ),
+                ],
+              ),
             ],
           ),
-          SizedBox(width: 20.w),
           SizedBox(
-            width: 80.w,
+            width: hideMore ? 40.w : 80.w,
             height: 18.r,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -932,14 +949,15 @@ class _PostHeader extends StatelessWidget {
                   time.format(object.timestamp),
                   style: context.textTheme.labelMedium!.copyWith(color: gray),
                 ),
-                GestureDetector(
-                  onTap: showExtension,
-                  child: Icon(
-                    Icons.more_horiz,
-                    color: Colors.grey,
-                    size: 26.r,
-                  ),
-                )
+                if (!hideMore)
+                  GestureDetector(
+                    onTap: showExtension,
+                    child: Icon(
+                      Icons.more_horiz,
+                      color: Colors.grey,
+                      size: 26.r,
+                    ),
+                  )
               ],
             ),
           ),

@@ -15,30 +15,30 @@ class Post extends PostObject {
     super.text,
     required super.timestamp,
     this.media = const [],
-    required super.poster,
+    required super.posterID,
+    required super.posterUsername,
+    required super.posterName,
+    required super.posterPicture,
     super.likes,
     super.shares,
   });
 
-  factory Post.fromJson(Map<String, dynamic> map) => Post(
-        text: map["content"],
-        uuid: map["_id"],
-        timestamp: DateTime.parse(map["createdAt"]),
-        likes: map["likes"],
-        shares: (map["shares"] as num).toInt(),
-        media: map["media"],
-        poster: map["postedBy"]["_id"],
-      );
 
-  Map<String, dynamic> toJson() => {
-        'content': text,
-        '_id': uuid,
-        'shares': shares,
-        'createdAt': timestamp.toIso8601String(),
-        'likes': likes,
-        'postedBy': poster,
-        'media': media
-      };
+
+  factory Post.fromJson(Map<String, dynamic> map) {
+    return Post(
+      text: map["content"],
+      uuid: map["_id"],
+      timestamp: DateTime.parse(map["createdAt"]),
+      likes: map["likes"],
+      shares: (map["shares"] as num).toInt(),
+      media: map["media"],
+      posterID: map["postedBy"]["_id"],
+      posterName: "${map["postedBy"]["firstName"]} ${map["postedBy"]["lastName"]}",
+      posterPicture: map["postedBy"]["profilePicture"],
+      posterUsername: map["postedBy"]["username"],
+    );
+  }
 
   @ignore
   bool get has => media.isNotEmpty;

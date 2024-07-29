@@ -7,7 +7,11 @@ abstract class PostObject{
   final String text;
 
   @Index()
-  final String poster;
+  final String posterID;
+
+  final String posterPicture;
+  final String posterName;
+  final String posterUsername;
 
   final List<String> likes;
   final int shares;
@@ -18,7 +22,10 @@ abstract class PostObject{
   const PostObject({
     this.uuid = "",
     this.text = "",
-    this.poster = "",
+    this.posterID = "",
+    this.posterName = "",
+    this.posterPicture = "",
+    this.posterUsername = "",
     this.likes = const [],
     this.shares = 0,
     required this.timestamp,

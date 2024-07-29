@@ -74,12 +74,6 @@ class _LoginState extends ConsumerState<Login> {
     authenticate(_authDetails, Pages.login).then((result) {
       if (!mounted) return;
 
-      f.showToast(
-          result.status == Status.failed
-              ? result.message
-              : "Welcome, ${result.payload!.username}",
-          context);
-
       if (result.status == Status.success) {
         navigate(result);
       } else {

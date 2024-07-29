@@ -74,132 +74,164 @@ class _ViewStoryPageState extends ConsumerState<ViewStoryPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(left: 10.w, right: 0.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CachedNetworkImage(
-                          imageUrl: widget.story.postedBy.profilePicture,
-                          errorWidget: (_, __, val) => CircleAvatar(
-                            radius: 18.r,
-                            backgroundColor: appRed,
-                          ),
-                          progressIndicatorBuilder: (_, __, val) =>
-                              CircleAvatar(
-                            radius: 18.r,
-                            backgroundColor: appRed.withOpacity(0.6),
-                          ),
-                          imageBuilder: (_, provider) => CircleAvatar(
-                            radius: 18.r,
-                            backgroundImage: provider,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 10.w,
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          children: [
+            SizedBox(
+              height: 820.h,
+              width: 390.w,
+              child: StoryView(
+                color: Colors.black,
+                storyItems: storyItems,
+                controller: storyController,
+                indicatorColor: neutral2,
+                indicatorForegroundColor: appRed,
+                progressPosition: ProgressPosition.top,
+                onComplete: () => context.router.pop(),
+                onStoryShow: (item, storyIndex) {
+                  Future.delayed(Duration.zero, () {
+                    if (widget.story.postedBy.id != currentID) {
+                      viewStory(widget.story.stories[storyIndex].id);
+                    }
+                    setState(() => index = storyIndex);
+                  });
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                left: 10.w,
+                right: 0.w,
+                bottom: 10.h,
+                top: 20.h,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          bool isCurrent =
+                              currentID == widget.story.postedBy.id;
+                          storyController.pause();
+                          context.router.pushNamed(
+                            isCurrent ? Pages.profile : Pages.otherProfile,
+                            extra: !isCurrent ? widget.story.postedBy.id : null,
+                          ).then((resp) {
+                            storyController.play();
+                          });
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              widget.story.postedBy.username,
-                              style: context.textTheme.titleSmall!.copyWith(
-                                color: Colors.white,
+                            CachedNetworkImage(
+                              imageUrl: widget.story.postedBy.profilePicture,
+                              errorWidget: (_, __, val) => CircleAvatar(
+                                radius: 18.r,
+                                backgroundColor: appRed,
+                              ),
+                              progressIndicatorBuilder: (_, __, val) =>
+                                  CircleAvatar(
+                                radius: 18.r,
+                                backgroundColor: appRed.withOpacity(0.6),
+                              ),
+                              imageBuilder: (_, provider) => CircleAvatar(
+                                radius: 18.r,
+                                backgroundImage: provider,
                               ),
                             ),
-                            SizedBox(height: 4.h),
-                            Wrap(
-                              spacing: 5.w,
-                              crossAxisAlignment: WrapCrossAlignment.center,
+                            SizedBox(
+                              width: 10.w,
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "@${widget.story.postedBy.username}",
-                                  style: context.textTheme.bodyMedium!.copyWith(
-                                    color: theme.withOpacity(0.7),
+                                  widget.story.postedBy.username,
+                                  style: context.textTheme.titleSmall!.copyWith(
+                                    color: Colors.white,
                                   ),
                                 ),
-                                Container(
-                                  color: appRed,
-                                  width: 2.w,
-                                  height: 10.h,
+                                SizedBox(height: 4.h),
+                                Wrap(
+                                  spacing: 5.w,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Text(
+                                      "@${widget.story.postedBy.username}",
+                                      style: context.textTheme.bodyMedium!
+                                          .copyWith(
+                                        color: theme.withOpacity(0.7),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 2.5.r,
+                                      height: 2.5.r,
+                                      decoration: const BoxDecoration(
+                                        color: theme,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    Text(
+                                      format(widget
+                                          .story.stories[index].timestamp),
+                                      style: context.textTheme.bodyMedium!
+                                          .copyWith(
+                                        color: theme.withOpacity(0.7),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                                Text(
-                                  format(widget.story.stories[index].timestamp),
-                                  style: context.textTheme.bodyMedium!.copyWith(
-                                    color: theme.withOpacity(0.7),
-                                  ),
-                                )
                               ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                    IconButton(
-                      padding: const EdgeInsets.all(0),
-                      icon: Icon(Icons.more_horiz_rounded, size: 26.r),
-                      onPressed: () {},
-                      splashRadius: 0.01,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 5.h),
-              SizedBox(
-                height: 685.h,
-                width: 390.w,
-                child: StoryView(
-                  color: Colors.black,
-                  storyItems: storyItems,
-                  controller: storyController,
-                  indicatorColor: appRed,
-                  progressPosition: ProgressPosition.none,
-                  onComplete: () => context.router.pop(),
-                  onStoryShow: (item, storyIndex) {
-                    Future.delayed(Duration.zero, () {
-                      if (widget.story.postedBy.id != currentID) {
-                        viewStory(widget.story.stories[storyIndex].id);
-                      }
-                      setState(() => index = storyIndex);
-                    });
-                  },
-                ),
-              ),
-              SizedBox(height: 5.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  SpecialForm(
-                    controller: comment,
-                    action: TextInputAction.send,
-                    width: 318.w,
-                    hint: "Reply...",
-                    height: 40.h,
-                    style: context.textTheme.bodyLarge!.copyWith(
-                      color: Colors.white,
-                    ),
-                    hintStyle: context.textTheme.bodyLarge!.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w300,
-                    ),
+                      ),
+                      IconButton(
+                        padding: const EdgeInsets.all(0),
+                        icon: Icon(
+                          Icons.more_vert_rounded,
+                          size: 26.r,
+                          color: theme,
+                        ),
+                        onPressed: () {},
+                        splashRadius: 0.01,
+                      ),
+                    ],
                   ),
-                  Icon(
-                    Icons.send_rounded,
-                    size: 26.r,
-                    color: appRed,
-                  ),
-                  //Text("Send", style: context.textTheme.bodyMedium)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SpecialForm(
+                        controller: comment,
+                        action: TextInputAction.send,
+                        width: 318.w,
+                        hint: "Reply...",
+                        height: 40.h,
+                        style: context.textTheme.bodyLarge!.copyWith(
+                          color: Colors.white,
+                        ),
+                        fillColor: Colors.transparent,
+                        borderColor: theme,
+                        hintStyle: context.textTheme.bodyLarge!.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      Icon(
+                        Icons.send_rounded,
+                        size: 26.r,
+                        color: appRed,
+                      ),
+                      //Text("Send", style: context.textTheme.bodyMedium)
+                    ],
+                  )
                 ],
-              )
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
