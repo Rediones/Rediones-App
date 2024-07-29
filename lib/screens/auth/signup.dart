@@ -112,6 +112,8 @@ class _SignupState extends ConsumerState<Signup> {
               SizedBox(
                 height: 63.h,
               ),
+              Image.asset("assets/Rediones Logo.png", ),
+              SizedBox(height: 10.h),
               Text("Sign Up", style: context.textTheme.titleLarge),
               Text(
                 "Welcome to Rediones",

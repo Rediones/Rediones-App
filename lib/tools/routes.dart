@@ -134,7 +134,7 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.otherProfile.path,
     name: Pages.otherProfile,
-    builder: (_, state) => OtherProfilePage(id: state.extra as String),
+    builder: (_, state) => OtherProfilePage(id: state.pathParameters["id"] as String),
   ),
   GoRoute(
     path: Pages.createSpotlight.path,

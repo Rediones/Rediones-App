@@ -732,7 +732,9 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     } else {
       context.router.pushNamed(
         Pages.otherProfile,
-        extra: widget.postObject.posterID,
+        pathParameters: {
+          "id": widget.postObject.posterID,
+        }
       );
     }
   }

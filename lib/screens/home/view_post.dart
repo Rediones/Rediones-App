@@ -101,18 +101,14 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
   }
 
   void showExtension() {
-    bool darkTheme = context.isDark;
     showModalBottomSheet(
       context: context,
+      showDragHandle: true,
       builder: (context) => SizedBox(
-        height: 360.h,
+        height: 310.h,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 20.h),
-            SvgPicture.asset("assets/Modal Line.svg",
-                color: darkTheme ? Colors.white : null),
-            SizedBox(height: 30.h),
             ListTile(
               leading: SvgPicture.asset("assets/Link Red.svg"),
               title: Text(
@@ -255,13 +251,16 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     } else {
       context.router.pushNamed(
         Pages.otherProfile,
-        extra: object!.posterID,
+        pathParameters: {
+          "id": object!.posterID,
+        }
       );
     }
   }
 
   void onSend(String text) async {
     controller.clear();
+    unFocus();
 
     RedionesResponse<CommentData?> resp =
         await createComment(object!.uuid, text);
@@ -279,39 +278,37 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
           children: [
             CustomScrollView(
               slivers: [
-                if(loading)
+                if (loading)
                   const SliverFillRemaining(
                     child: Center(child: loader),
                   ),
-
-                if(!loading)
-                SliverAppBar(
-                  pinned: true,
-                  leading: IconButton(
-                    iconSize: 26.r,
-                    splashRadius: 0.01,
-                    icon: const Icon(Icons.chevron_left),
-                    onPressed: () => context.router.pop(),
+                if (!loading)
+                  SliverAppBar(
+                    pinned: true,
+                    leading: IconButton(
+                      iconSize: 26.r,
+                      splashRadius: 0.01,
+                      icon: const Icon(Icons.chevron_left),
+                      onPressed: () => context.router.pop(),
+                    ),
+                    elevation: 0.0,
+                    leadingWidth: 30.w,
+                    title: Text(
+                      "Post",
+                      style: context.textTheme.titleLarge,
+                    ),
+                    actions: [
+                      Padding(
+                        padding: EdgeInsets.only(right: 0.w),
+                        child: IconButton(
+                          onPressed: showExtension,
+                          icon: const Icon(Icons.more_vert_rounded),
+                          iconSize: 26.r,
+                        ),
+                      )
+                    ],
                   ),
-                  elevation: 0.0,
-                  leadingWidth: 30.w,
-                  title: Text(
-                    "Post",
-                    style: context.textTheme.titleLarge,
-                  ),
-                  actions: [
-                    Padding(
-                      padding: EdgeInsets.only(right: 15.w),
-                      child: IconButton(
-                        onPressed: showExtension,
-                        icon: const Icon(Icons.more_vert_rounded),
-                        iconSize: 26.r,
-                      ),
-                    )
-                  ],
-                ),
-
-                if(!loading && object == null)
+                if (!loading && object == null)
                   SliverFillRemaining(
                     child: Center(
                       child: Column(
@@ -325,14 +322,17 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                           ),
                           SizedBox(height: 20.h),
                           Text(
-                            "There are no events available",
+                            "Oops. Something went wrong somewhere.",
                             style: context.textTheme.titleSmall!.copyWith(
                               fontWeight: FontWeight.w400,
                             ),
                           ),
                           SizedBox(height: 10.h),
                           GestureDetector(
-                            onTap: getPost,
+                            onTap: () {
+                              setState(() => loading = true);
+                              getPost();
+                            },
                             child: Text(
                               "Retry",
                               style: context.textTheme.titleSmall!.copyWith(
@@ -345,97 +345,115 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                       ),
                     ),
                   ),
-
-                if(!loading && object != null)
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  sliver: SliverToBoxAdapter(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 10.h),
-                          PostHeader(
-                            object: object!,
-                            shouldFollow: shouldFollow,
-                            goToProfile: goToProfile,
-                            showExtension: showExtension,
-                            hideMore: true,
-                          ),
-                          SizedBox(height: 20.h),
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text:
-                                  "${object!.text.substring(0, expandText ? null : (object!.text.length >= 150 ? 150 : object!.text.length))}"
-                                      "${object!.text.length >= 150 && !expandText ? "..." : ""}",
-                                  style: context.textTheme.bodyMedium,
-                                ),
-                                if (object!.text.length > 150)
-                                  TextSpan(
-                                    text: expandText
-                                        ? " Read Less"
-                                        : " Read More",
-                                    style: context.textTheme.bodyMedium!
-                                        .copyWith(color: appRed),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () => setState(
-                                              () => expandText = !expandText),
-                                  ),
-                              ],
+                if (!loading && object != null)
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    sliver: SliverToBoxAdapter(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 10.h),
+                            PostHeader(
+                              object: object!,
+                              shouldFollow: shouldFollow,
+                              goToProfile: goToProfile,
+                              showExtension: showExtension,
+                              hideMore: true,
                             ),
-                          ),
-                          SizedBox(height: 10.h),
-                          if (isPost && mediaAndText)
-                            PostContainer(post: object! as Post),
-                          if (!isPost) PollContainer(poll: object! as Poll),
-                          ViewPostFooter(
-                            object: object!,
-                            liked: liked,
-                            bookmarked: bookmarked,
-                            onBookmark: onBookmark,
-                            onLike: onLike,
-                            length: comments.length,
-                          ),
-                          SizedBox(height: 20.h),
-                          Column(
-                            children: List.generate(
-                              comments.length,
-                                  (index) => CommentDataContainer(
-                                  data: comments[index]
+                            SizedBox(height: 20.h),
+                            RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text:
+                                        "${object!.text.substring(0, expandText ? null : (object!.text.length >= 150 ? 150 : object!.text.length))}"
+                                        "${object!.text.length >= 150 && !expandText ? "..." : ""}",
+                                    style: context.textTheme.bodyMedium,
+                                  ),
+                                  if (object!.text.length > 150)
+                                    TextSpan(
+                                      text: expandText
+                                          ? " Read Less"
+                                          : " Read More",
+                                      style: context.textTheme.bodyMedium!
+                                          .copyWith(color: appRed),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () => setState(
+                                            () => expandText = !expandText),
+                                    ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 10.h),
+                            if (isPost && mediaAndText)
+                              PostContainer(post: object! as Post),
+                            if (!isPost) PollContainer(poll: object! as Poll),
+                            ViewPostFooter(
+                              object: object!,
+                              liked: liked,
+                              bookmarked: bookmarked,
+                              onBookmark: onBookmark,
+                              onLike: onLike,
+                              length: comments.length,
+                            ),
+                            SizedBox(height: 20.h),
+                            if (comments.isNotEmpty)
+                              Column(
+                                children: [
+                                  Text(
+                                    "${comments.length} comment${comments.length == 1 ? "" : "s"}",
+                                    style: context.textTheme.titleSmall!
+                                        .copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                  SizedBox(height: 20.h),
+                                ],
+                              )
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
+                if (!loading && object != null && comments.isNotEmpty)
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    sliver: SliverList.separated(
+                      itemCount: comments.length + 1,
+                      itemBuilder: (_, index) {
+                        if (index == comments.length) {
+                          return SizedBox(height: 80.h);
+                        }
+                        return CommentDataContainer(data: comments[index]);
+                      },
+                      separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                    ),
+                  ),
               ],
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.w),
-                child: SizedBox(
+            if (!loading && object != null)
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
                   height: 60.h,
+                  padding: EdgeInsets.symmetric(horizontal: 5.w),
+                  color: !context.isDark ? Colors.white : primary,
                   child: SpecialForm(
                     controller: controller,
                     suffix: IconButton(
-                      icon: Icon(Icons.send_rounded, size: 18.r, color: appRed),
+                      icon:
+                          Icon(Icons.send_rounded, size: 18.r, color: appRed),
                       onPressed: () => onSend(controller.text),
                       splashRadius: 0.01,
                     ),
                     action: TextInputAction.send,
-                    width: 370.w,
+                    borderColor: Colors.transparent,
+                    width: 380.w,
                     height: 40.h,
                     hint: "Type your comment here",
                     onActionPressed: onSend,
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

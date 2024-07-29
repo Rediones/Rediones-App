@@ -103,6 +103,8 @@ class _LoginState extends ConsumerState<Login> {
               SizedBox(
                 height: 63.h,
               ),
+              Image.asset("assets/Rediones Logo.png", ),
+              SizedBox(height: 10.h),
               Text("Log In", style: context.textTheme.titleLarge),
               Text(
                 "Hi, Welcome back.",

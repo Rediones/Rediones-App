@@ -50,7 +50,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
   TimeOfDay? pickedTime;
 
   void navigate(RedionesResponse<EventData?> result) {
-    ref.watch(eventsProvider).add(result.payload!);
+    ref.watch(eventsProvider.notifier).state.add(result.payload!);
     context.router.pop();
   }
 
@@ -89,7 +89,10 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
         ),
         elevation: 0.0,
         centerTitle: true,
-        title: Text("Create An Event", style: context.textTheme.titleLarge),
+        title: Text(
+          "Create An Event",
+          style: context.textTheme.titleLarge,
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -178,7 +181,8 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     hint: "e.g My Event",
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showToast("Please enter the name of the event", context);
+                        showToast(
+                            "Please enter the name of the event", context);
                         return '';
                       }
                       return null;
@@ -222,7 +226,8 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                           (index) => Chip(
                             label: Text(
                               chosenCategories[index],
-                              style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                              style: context.textTheme.bodyLarge!
+                                  .copyWith(color: theme),
                             ),
                             elevation: 1.0,
                             shape: RoundedRectangleBorder(
@@ -264,7 +269,8 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                           child: Chip(
                             label: Text(
                               categories[index],
-                              style: context.textTheme.bodyLarge!.copyWith(color: contained ? theme : null),
+                              style: context.textTheme.bodyLarge!
+                                  .copyWith(color: contained ? theme : null),
                             ),
                             elevation: 0.0,
                             backgroundColor: contained ? neutral3 : null,
@@ -314,7 +320,8 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     ),
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showToast("Please enter the location of the event", context);
+                        showToast(
+                            "Please enter the location of the event", context);
                         return '';
                       }
                       return null;
@@ -448,7 +455,8 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     width: 390.w,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
-                        showToast("Please enter the description of the event", context);
+                        showToast("Please enter the description of the event",
+                            context);
                         return '';
                       }
                       return null;
@@ -475,11 +483,9 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                         currentState.save();
 
                         details["categories"] = chosenCategories;
-                        details["cover"] = {
-                          "file": {"name": ""},
-                          "base64":
-                              "$imgPrefix${FileHandler.convertTo64(eventCover!)}"
-                        };
+                        details["startDate"] = pickedDate!.toIso8601String();
+                        details["cover"] =
+                            "$imgPrefix${FileHandler.convertTo64(eventCover!)}";
 
                         create();
                       }

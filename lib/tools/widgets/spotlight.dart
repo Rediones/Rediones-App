@@ -205,9 +205,10 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
           current == widget.spotlight.postedBy
               ? Pages.profile
               : Pages.otherProfile,
-          extra: current != widget.spotlight.postedBy
-              ? widget.spotlight.postedBy
-              : null,
+          pathParameters: {
+            "id": current.uuid != widget.spotlight.postedBy.uuid
+                ? widget.spotlight.postedBy.uuid : "",
+          }
         )
         .then((res) =>
             ref.watch(spotlightsPlayStatusProvider.notifier).state = true);
