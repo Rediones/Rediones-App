@@ -179,6 +179,8 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                     width: 390.w,
                     height: 40.h,
                     hint: "e.g My Event",
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
                         showToast(
@@ -226,8 +228,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                           (index) => Chip(
                             label: Text(
                               chosenCategories[index],
-                              style: context.textTheme.bodyLarge!
-                                  .copyWith(color: theme),
+                              style: context.textTheme.bodyLarge,
                             ),
                             elevation: 1.0,
                             shape: RoundedRectangleBorder(
@@ -253,8 +254,9 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                       height: 4.h,
                     ),
                   Wrap(
-                    spacing: 8.w,
-                    runSpacing: 8.h,
+                    spacing: 5.w,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    runSpacing: 0,
                     children: List.generate(
                       categories.length,
                       (index) {
@@ -269,16 +271,17 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                           child: Chip(
                             label: Text(
                               categories[index],
-                              style: context.textTheme.bodyLarge!
-                                  .copyWith(color: contained ? theme : null),
+                              style: context.textTheme.bodyLarge,
                             ),
                             elevation: 0.0,
-                            backgroundColor: contained ? neutral3 : null,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25.r),
                             ),
+                            backgroundColor: contained ? neutral3 : null,
                             side: BorderSide(
-                              color: contained ? Colors.transparent : neutral3,
+                              color: contained
+                                  ? Colors.transparent
+                                  : (darkTheme ? neutral3 : fadedPrimary),
                             ),
                           ),
                         );
@@ -305,9 +308,11 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                   SizedBox(height: 4.h),
                   SpecialForm(
                     controller: eventLocation,
-                    hint: "e.g Somewhere in the world",
+                    hint: "e.g Ikeja, Lagos, Nigeria",
                     width: 390.w,
                     height: 40.h,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     prefix: SizedBox(
                       height: 40.h,
                       width: 40.h,
@@ -348,22 +353,16 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                   SizedBox(height: 4.h),
                   Container(
                     height: 40.h,
-                    width: 220.w,
+                    width: 250.w,
                     padding: EdgeInsets.only(left: 10.w),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20.h),
-                      border: Border.all(
-                          color: darkTheme ? neutral3 : fadedPrimary),
+                      color: darkTheme ? neutral2 : authFieldBackground,
                     ),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.calendar_month_rounded,
-                          color: appRed,
-                          size: 16.r,
-                        ),
-                        SizedBox(width: 10.w),
                         GestureDetector(
                           onTap: () async {
                             pickedDate = await showDatePicker(
@@ -374,24 +373,34 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                             );
                             if (pickedDate != null) {
                               setState(
-                                () => formattedDate = formatDate(
+                                    () => formattedDate = formatDate(
                                     DateFormat("dd/MM/yyyy")
                                         .format(pickedDate!),
                                     shorten: true),
                               );
                             }
                           },
-                          child: SizedBox(
-                            width: 100.w,
-                            child: Text(
-                              pickedDate == null
-                                  ? "Jan 1, 2023"
-                                  : formattedDate,
-                              style: context.textTheme.bodyLarge!.copyWith(
-                                  fontWeight: pickedDate == null
-                                      ? FontWeight.w200
-                                      : FontWeight.normal),
-                            ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_month_rounded,
+                                color: appRed,
+                                size: 16.r,
+                              ),
+                              SizedBox(width: 10.w),
+                              SizedBox(
+                                width: 80.w,
+                                child: Text(
+                                  pickedDate == null
+                                      ? "Jan 1, 2023"
+                                      : formattedDate,
+                                  style: context.textTheme.bodyLarge!.copyWith(
+                                      fontWeight: pickedDate == null
+                                          ? FontWeight.w200
+                                          : FontWeight.normal),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Container(
@@ -399,7 +408,6 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                           width: 1.5.w,
                           height: 15.h,
                         ),
-                        SizedBox(width: 5.w),
                         GestureDetector(
                           onTap: () {
                             showTimePicker(
@@ -415,15 +423,26 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                               },
                             );
                           },
-                          child: SizedBox(
-                            width: 60.w,
-                            child: Text(
-                              pickedDate == null ? "12:00 AM" : formattedTime,
-                              style: context.textTheme.bodyLarge!.copyWith(
-                                  fontWeight: pickedDate == null
-                                      ? FontWeight.w200
-                                      : FontWeight.normal),
-                            ),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 70.w,
+                                child: Text(
+                                  pickedDate == null ? "12:00 AM" : formattedTime,
+                                  style: context.textTheme.bodyLarge!.copyWith(
+                                      fontWeight: pickedDate == null
+                                          ? FontWeight.w200
+                                          : FontWeight.normal),
+                                ),
+                              ),
+                              SizedBox(width: 10.w),
+                              Icon(
+                                Icons.timelapse,
+                                color: appRed,
+                                size: 16.r,
+                              ),
+                              SizedBox(width: 10.w),
+                            ],
                           ),
                         ),
                       ],
@@ -450,9 +469,11 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                   SpecialForm(
                     controller: eventDescription,
                     hint: "e.g This is a sample description",
-                    maxLines: 5,
-                    height: 100.h,
+                    maxLines: 10,
+                    height: 150.h,
                     width: 390.w,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
                         showToast("Please enter the description of the event",

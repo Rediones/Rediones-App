@@ -103,15 +103,14 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        height: 20.h,
-                      ),
                       SpecialForm(
                         controller: controller,
-                        maxLines: 6,
-                        height: 120.h,
+                        maxLines: 10,
+                        height: 150.h,
                         width: 390.w,
                         hint: "What would you like to ask?",
+                        fillColor: context.isDark ? neutral2 : authFieldBackground,
+                        borderColor: Colors.transparent,
                         onValidate: (value) {
                           if (value!.isEmpty) {
                             showToast(
@@ -221,7 +220,7 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 50.h),
+                SizedBox(height: 100.h),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     fixedSize: Size(390.w, 40.h),
@@ -305,11 +304,14 @@ class _ChoiceContainerState extends State<_ChoiceContainer> {
 
   @override
   Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
     return SpecialForm(
       controller: controller,
       width: 390.w,
       height: 40.h,
       hint: "Choice",
+      fillColor: darkTheme ? neutral2 : authFieldBackground,
+      borderColor: Colors.transparent,
       onChange: (val) => widget.choice.value = val,
       onValidate: (value) {
         if (value!.isEmpty) {

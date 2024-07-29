@@ -575,18 +575,14 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   }
 
   void showExtension() {
-    bool darkTheme = context.isDark;
     showModalBottomSheet(
       context: context,
+      showDragHandle: true,
       builder: (context) => SizedBox(
-        height: 360.h,
+        height: 310.h,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 20.h),
-            SvgPicture.asset("assets/Modal Line.svg",
-                color: darkTheme ? Colors.white : null),
-            SizedBox(height: 30.h),
             ListTile(
               leading: SvgPicture.asset("assets/Link Red.svg"),
               title: Text(
@@ -635,51 +631,51 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   }
 
   void onLike() {
-    setState(() => liked = !liked);
+    List<String> likes = widget.postObject.likes;
+    bool hasPostAsLiked = likes.contains(currentUserID);
+
+    setState(() {
+      liked = !liked;
+      if (liked && !hasPostAsLiked) {
+        likes.add(currentUserID);
+      } else if (!liked && hasPostAsLiked) {
+        likes.remove(currentUserID);
+      }
+    });
+
     likePost(widget.postObject.uuid).then((response) {
       if (response.status == Status.success) {
-        showToast(response.message, context);
-        bool add = false;
-        if (response.payload.contains(currentUserID) &&
-            !widget.postObject.likes.contains(currentUserID)) {
-          widget.postObject.likes.add(currentUserID);
-          add = true;
-        } else if (!response.payload.contains(currentUserID) &&
-            widget.postObject.likes.contains(currentUserID)) {
-          widget.postObject.likes.remove(currentUserID);
-        }
-        updateDatabaseForLikes(widget.postObject, currentUserID, add);
+        updateDatabaseForLikes(widget.postObject);
+        if (!mounted) return;
         setState(() {});
       } else {
-        setState(() => liked = !liked);
-        showToast("Something went wrong liking your post", context);
+        liked = !liked;
+        hasPostAsLiked = likes.contains(currentUserID);
+
+        if (liked && !hasPostAsLiked) {
+          likes.add(currentUserID);
+        } else if (!liked && hasPostAsLiked) {
+          likes.remove(currentUserID);
+        }
+
+        if(!mounted) return;
+        setState(() {});
+        showToast("Unable to ${liked ? "like" : "unlike"} your post", context);
       }
     });
   }
 
   Future<void> updateDatabaseForLikes(
-    PostObject object,
-    String id,
-    bool add,
+    PostObject object
   ) async {
     Isar isar = GetIt.I.get();
     if (object is Post) {
       Post post = object;
-      if (add) {
-        post.likes.add(id);
-      } else {
-        post.likes.remove(id);
-      }
       await isar.writeTxn(() async {
         await isar.posts.put(post);
       });
     } else if (object is Poll) {
       Poll poll = object;
-      if (add) {
-        poll.likes.add(id);
-      } else {
-        poll.likes.remove(id);
-      }
       await isar.writeTxn(() async {
         await isar.polls.put(poll);
       });
@@ -730,12 +726,9 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     if (widget.postObject.posterID == currentUser.uuid) {
       context.router.pushNamed(Pages.profile);
     } else {
-      context.router.pushNamed(
-        Pages.otherProfile,
-        pathParameters: {
-          "id": widget.postObject.posterID,
-        }
-      );
+      context.router.pushNamed(Pages.otherProfile, pathParameters: {
+        "id": widget.postObject.posterID,
+      });
     }
   }
 

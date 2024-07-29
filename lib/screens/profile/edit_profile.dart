@@ -1,15 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
 import 'package:isar/isar.dart';
-import 'package:rediones/components/user_data.dart';
-import 'package:rediones/tools/providers.dart';
+import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/user_service.dart';
+import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
@@ -46,6 +48,8 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
     "level": "100"
   };
   final GlobalKey<FormState> formKey = GlobalKey();
+
+  Uint8List? pickedImage;
 
   @override
   void initState() {
@@ -112,6 +116,8 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
 
   @override
   Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -137,40 +143,56 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                   Center(
                     child: Stack(
                       children: [
-                        GestureDetector(
-                          onTap: () {},
-                          child: CachedNetworkImage(
-                            imageUrl: user.profilePicture,
-                            errorWidget: (context, url, error) => CircleAvatar(
-                              backgroundColor: neutral2,
-                              radius: 64.r,
-                              child: Icon(Icons.person_outline_rounded,
-                                  color: Colors.black, size: 48.r),
-                            ),
-                            progressIndicatorBuilder:
-                                (context, url, download) => Center(
-                              child: CircularProgressIndicator(
-                                  color: appRed, value: download.progress),
-                            ),
-                            imageBuilder: (context, provider) => CircleAvatar(
-                              backgroundImage: provider,
-                              radius: 64.r,
-                            ),
-                          ),
-                        ),
+                        pickedImage == null
+                            ? CachedNetworkImage(
+                                imageUrl: user.profilePicture,
+                                errorWidget: (context, url, error) =>
+                                    CircleAvatar(
+                                  backgroundColor: neutral2,
+                                  radius: 64.r,
+                                  child: Icon(
+                                    Icons.person_outline_rounded,
+                                    color: Colors.black,
+                                    size: 48.r,
+                                  ),
+                                ),
+                                progressIndicatorBuilder:
+                                    (context, url, download) => CircleAvatar(
+                                  backgroundColor: neutral2,
+                                  radius: 64.r,
+                                ),
+                                imageBuilder: (context, provider) =>
+                                    CircleAvatar(
+                                  backgroundImage: provider,
+                                  radius: 64.r,
+                                ),
+                              )
+                            : CircleAvatar(
+                                backgroundImage: MemoryImage(pickedImage!),
+                                radius: 64.r,
+                              ),
                         Positioned(
                           bottom: 0.h,
                           right: 10.w,
                           child: GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              FileHandler.single(type: FileType.image)
+                                  .then((resp) {
+                                if (resp == null) return;
+                                setState(() => pickedImage = resp.data);
+                              });
+                            },
                             child: Container(
                               height: 25.r,
                               width: 25.r,
                               alignment: Alignment.center,
                               decoration: const BoxDecoration(
                                   shape: BoxShape.circle, color: appRed),
-                              child: Icon(Icons.edit_rounded,
-                                  size: 14.r, color: theme),
+                              child: Icon(
+                                Icons.edit_rounded,
+                                size: 14.r,
+                                color: theme,
+                              ),
                             ),
                           ),
                         )
@@ -185,6 +207,8 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     hint: "e.g John",
                     width: 390.w,
                     height: 40.h,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
                         showToast("Please enter your first name", context);
@@ -202,6 +226,8 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     hint: "e.g Doe",
                     width: 390.w,
                     height: 40.h,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
                         showToast("Please enter your last name", context);
@@ -219,6 +245,8 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     hint: "e.g Smith",
                     width: 390.w,
                     height: 40.h,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
                         showToast("Please enter your other name", context);
@@ -236,6 +264,8 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     hint: "e.g john_doe",
                     width: 390.w,
                     height: 40.h,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
                         showToast("Please enter your username", context);
@@ -250,10 +280,14 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                   SizedBox(height: 4.h),
                   ComboBox(
                     hint: "Select gender",
-                    buttonWidth: 170.w,
+                    buttonWidth: 390.w,
                     dropdownItems: const ["Male", "Female", "Other"],
                     value: gender,
                     onChanged: (g) => setState(() => gender = g),
+                    buttonDecoration: BoxDecoration(
+                      color: darkTheme ? neutral2 : authFieldBackground,
+                      borderRadius: BorderRadius.circular(20.h),
+                    ),
                   ),
                   SizedBox(height: 20.h),
                   Text("School", style: context.textTheme.labelLarge),
@@ -262,6 +296,8 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     controller: schoolController,
                     hint: "e.g University of Ibadan",
                     width: 390.w,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     height: 40.h,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
@@ -280,6 +316,8 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     hint: "e.g Lagos, Nigeria",
                     width: 390.w,
                     height: 40.h,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
                         showToast("Please enter your address", context);
@@ -296,7 +334,9 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     controller: bioController,
                     hint: "Say a few words about yourself",
                     width: 390.w,
-                    height: 120.h,
+                    height: 150.h,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     maxLines: 10,
                     onValidate: (value) {
                       if (value!.trim().isEmpty) {
@@ -329,8 +369,10 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                         },
                         child: Text(
                           "Save",
-                          style: context.textTheme.bodyLarge!.copyWith(
-                              color: theme, fontWeight: FontWeight.w500),
+                          style: context.textTheme.titleSmall!.copyWith(
+                            color: theme,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),

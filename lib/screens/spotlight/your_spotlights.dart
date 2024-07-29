@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:rediones/components/media_data.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/widgets/common.dart';
 
 class YourSpotlightsPage extends StatefulWidget {
-  final List<MediaData> saved;
-
   const YourSpotlightsPage({
     super.key,
-    this.saved = const [],
   });
 
   @override
@@ -19,24 +15,21 @@ class YourSpotlightsPage extends StatefulWidget {
 class _YourSpotlightsPageState extends State<YourSpotlightsPage>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
-  // List<MediaCollection> allVideos = [];
-  // late MediaPage videoPage;
 
-  bool loadedDeviceVideos = false;
+  final List<String> savedSpotlights = [], mySpotlights = [];
+
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
     tabController = TabController(length: 2, vsync: this);
-    getDeviceVideos();
+    getData();
   }
 
-  Future<void> getDeviceVideos() async {
-    // allVideos =
-    //     await MediaGallery.listMediaCollections(mediaTypes: [MediaType.video])
-    //         as List<MediaCollection>;
-    // videoPage = await allVideos[0].getMedias(mediaType: MediaType.video);
-    setState(() => loadedDeviceVideos = true);
+  Future<void> getData() async {
+    await Future.delayed(const Duration(seconds: 4));
+    setState(() => loading = true);
   }
 
   @override
@@ -50,7 +43,11 @@ class _YourSpotlightsPageState extends State<YourSpotlightsPage>
           icon: const Icon(Icons.chevron_left),
           onPressed: () => context.router.pop(),
         ),
-        title: Text("Your Spotlight", style: context.textTheme.titleMedium),
+        leadingWidth: 30.w,
+        title: Text(
+          "My Spotlights",
+          style: context.textTheme.titleLarge,
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -61,59 +58,137 @@ class _YourSpotlightsPageState extends State<YourSpotlightsPage>
               TabBar(
                 controller: tabController,
                 indicatorColor: appRed,
-                tabs: [
-                  Tab(
-                    child: Text("Your Videos",
-                        style: context.textTheme.bodyMedium),
-                  ),
-                  Tab(
-                    child: Text("Saved Videos",
-                        style: context.textTheme.bodyMedium),
-                  ),
+                dividerColor: Colors.transparent,
+                labelColor: appRed,
+                labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
+                labelStyle: context.textTheme.titleSmall!
+                    .copyWith(fontWeight: FontWeight.w600),
+                unselectedLabelStyle: context.textTheme.titleSmall!
+                    .copyWith(fontWeight: FontWeight.w500),
+                tabs: const [
+                  Tab(text: "My Spotlights"),
+                  Tab(text: "Saved Spotlights"),
                 ],
               ),
               SizedBox(height: 10.h),
-              Expanded(
-                child: TabBarView(
-                  controller: tabController,
-                  children: [
-                    !loadedDeviceVideos
-                        ? Center(
-                            child: SpinKitCubeGrid(color: appRed, size: 50.r))
-                        : GridView.builder(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              mainAxisSpacing: 10.h,
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 10,
-                            ),
-                            //itemCount: videoPage.items.length,
-                      itemCount: 5,
-                            itemBuilder: (context, index) => const Text("")
-                            //     _SpotlightContainer(
-                            //   header: "some plays",
-                            //   data: videoPage.items[index],
-                            //   onClick: () {},
-                            // ),
-                          ),
-                    GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        mainAxisSpacing: 10.h,
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10.h,
-                      ),
-                      itemCount: widget.saved.length,
-                      itemBuilder: (context, index) =>
-                      //     _SpotlightContainer(
-                      //   header: "play",
-                      //   data: videoPage.items[index],
-                      //   onClick: () {},
-                      // ),
-                      const Text("")
-                    )
-                  ],
+              if (loading)
+                const Expanded(
+                  child: Center(
+                    child: loader,
+                  ),
                 ),
-              ),
+              if (!loading)
+                Expanded(
+                  child: TabBarView(
+                    controller: tabController,
+                    children: [
+                      mySpotlights.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    "assets/No Data.png",
+                                    width: 150.r,
+                                    height: 150.r,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  SizedBox(height: 20.h),
+                                  Text(
+                                    "There are no spotlights available",
+                                    style:
+                                        context.textTheme.titleSmall!.copyWith(
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() => loading = true);
+                                      getData();
+                                    },
+                                    child: Text(
+                                      "Refresh",
+                                      style: context.textTheme.titleSmall!
+                                          .copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: appRed,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : GridView.builder(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                mainAxisSpacing: 10.h,
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10,
+                              ),
+                              itemCount: mySpotlights.length,
+                              itemBuilder: (context, index) =>
+                                  _SpotlightContainer(
+                                header: "some plays",
+                                data: mySpotlights[index],
+                                onClick: () {},
+                              ),
+                            ),
+                      savedSpotlights.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    "assets/No Data.png",
+                                    width: 150.r,
+                                    height: 150.r,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  SizedBox(height: 20.h),
+                                  Text(
+                                    "There are no saved spotlights available",
+                                    style:
+                                        context.textTheme.titleSmall!.copyWith(
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() => loading = true);
+                                      getData();
+                                    },
+                                    child: Text(
+                                      "Refresh",
+                                      style: context.textTheme.titleSmall!
+                                          .copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: appRed,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : GridView.builder(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                mainAxisSpacing: 10.h,
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10.h,
+                              ),
+                              itemCount: savedSpotlights.length,
+                              itemBuilder: (context, index) =>
+                                  _SpotlightContainer(
+                                header: "play",
+                                data: savedSpotlights[index],
+                                onClick: () {},
+                              ),
+                            )
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
@@ -122,61 +197,61 @@ class _YourSpotlightsPageState extends State<YourSpotlightsPage>
   }
 }
 
-// class _SpotlightContainer extends StatefulWidget {
-//   final String header;
-//   final Media data;
-//   final VoidCallback onClick;
-//
-//   const _SpotlightContainer({
-//     Key? key,
-//     required this.header,
-//     required this.data,
-//     required this.onClick,
-//   }) : super(key: key);
-//
-//   @override
-//   State<_SpotlightContainer> createState() => _SpotlightContainerState();
-// }
-//
-// class _SpotlightContainerState extends State<_SpotlightContainer> {
-//   @override
-//   Widget build(BuildContext context) {
-//     bool darkTheme =
-//         MediaQuery.of(context).platformBrightness == Brightness.dark;
-//
-//     return GestureDetector(
-//       onTap: widget.onClick,
-//       child: Container(
-//         width: 180.w,
-//         height: 220.h,
-//         decoration: BoxDecoration(
-//             borderRadius: BorderRadius.circular(8.r),
-//             border: Border.all(color: darkTheme ? neutral3 : fadedPrimary)),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Padding(
-//               padding: EdgeInsets.only(left: 5.w),
-//               child: Text(widget.header, style: context.textTheme.bodyMedium),
-//             ),
-//             ClipRRect(
-//               borderRadius: BorderRadius.only(
-//                 bottomLeft: Radius.circular(8.r),
-//                 bottomRight: Radius.circular(8.r),
-//               ),
-//               child: FadeInImage(
-//                 height: 155.h,
-//                 width: 180.w,
-//                 fit: BoxFit.cover,
-//                 placeholder: MemoryImage(kTransparentImage),
-//                 image: MediaThumbnailProvider(
-//                   media: widget.data,
-//                 ),
-//               ),
-//             )
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+class _SpotlightContainer extends StatefulWidget {
+  final String header;
+  final String data;
+  final VoidCallback onClick;
+
+  const _SpotlightContainer({
+    super.key,
+    required this.header,
+    required this.data,
+    required this.onClick,
+  });
+
+  @override
+  State<_SpotlightContainer> createState() => _SpotlightContainerState();
+}
+
+class _SpotlightContainerState extends State<_SpotlightContainer> {
+  @override
+  Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
+
+    return GestureDetector(
+      onTap: widget.onClick,
+      child: Container(
+        width: 180.w,
+        height: 220.h,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: darkTheme ? neutral3 : fadedPrimary),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: 5.w),
+              child: Text(widget.header, style: context.textTheme.bodyMedium),
+            ),
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(8.r),
+                bottomRight: Radius.circular(8.r),
+              ),
+              // child: FadeInImage(
+              //   height: 155.h,
+              //   width: 180.w,
+              //   fit: BoxFit.cover,
+              //   placeholder: MemoryImage(kTransparentImage),
+              //   image: MediaThumbnailProvider(
+              //     media: widget.data,
+              //   ),
+              // ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}

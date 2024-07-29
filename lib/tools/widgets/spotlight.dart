@@ -17,7 +17,7 @@ import 'package:rediones/tools/providers.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:timeago/timeago.dart' as time;
 
-class SpotlightToolbar extends StatefulWidget {
+class SpotlightToolbar extends ConsumerStatefulWidget {
   final SpotlightData spotlight;
 
   const SpotlightToolbar({
@@ -26,19 +26,22 @@ class SpotlightToolbar extends StatefulWidget {
   });
 
   @override
-  State<SpotlightToolbar> createState() => _SpotlightToolbarState();
+  ConsumerState<SpotlightToolbar> createState() => _SpotlightToolbarState();
 }
 
-class _SpotlightToolbarState extends State<SpotlightToolbar> {
-  bool liked = false;
+class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
+  late bool liked;
   bool bookmarked = false;
 
   late Future commentsFuture;
 
+  late String currentUserID;
+
   @override
   void initState() {
     super.initState();
-
+    currentUserID = ref.read(userProvider.select((u) => u.uuid));
+    liked = widget.spotlight.likes.contains(currentUserID);
     commentsFuture = getComments();
   }
 
@@ -48,21 +51,35 @@ class _SpotlightToolbarState extends State<SpotlightToolbar> {
   }
 
   void onLike() {
-    setState(() => liked = !liked);
+    List<String> likes = widget.spotlight.likes;
+    bool hasSpotlightAsLiked = likes.contains(currentUserID);
+
+    setState(() {
+      liked = !liked;
+      if (liked && !hasSpotlightAsLiked) {
+        likes.add(currentUserID);
+      } else if (!liked && hasSpotlightAsLiked) {
+        likes.remove(currentUserID);
+      }
+    });
+
     likeSpotlight(widget.spotlight.id).then((response) {
       if (response.status == Status.success) {
-        showToast(response.message, context);
-        if (response.payload.contains(currentUserID) &&
-            !widget.spotlight.likes.contains(currentUserID)) {
-          widget.spotlight.likes.add(currentUserID);
-        } else if (!response.payload.contains(currentUserID) &&
-            widget.spotlight.likes.contains(currentUserID)) {
-          widget.spotlight.likes.remove(currentUserID);
-        }
+        if (!mounted) return;
         setState(() {});
       } else {
-        setState(() => liked = !liked);
-        showToast("Something went wrong liking your spotlight", context);
+        liked = !liked;
+        hasSpotlightAsLiked = likes.contains(currentUserID);
+
+        if (liked && !hasSpotlightAsLiked) {
+          likes.add(currentUserID);
+        } else if (!liked && hasSpotlightAsLiked) {
+          likes.remove(currentUserID);
+        }
+
+        if(!mounted) return;
+        setState(() {});
+        showToast("Unable to ${liked ? "like" : "unlike"} your spotlight", context);
       }
     });
   }
@@ -194,7 +211,6 @@ class SpotlightUserData extends ConsumerStatefulWidget {
 
 class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
   bool expandText = false;
-  late bool follow;
   late String _time;
 
   void goToProfile() {
@@ -215,10 +231,9 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
   }
 
   bool get shouldFollow {
-    User currentUser = ref.read(userProvider);
-    if (widget.spotlight.postedBy == currentUser) return false;
-    if (widget.spotlight.postedBy.followers.contains(currentUserID) ||
-        currentUser.following.contains(widget.spotlight.postedBy.uuid)) {
+    User currentUser = ref.watch(userProvider);
+    if (widget.spotlight.postedBy.uuid == currentUser.uuid) return false;
+    if (currentUser.following.contains(widget.spotlight.postedBy.uuid)) {
       return false;
     }
     return true;
@@ -227,7 +242,6 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
   @override
   void initState() {
     super.initState();
-    follow = shouldFollow;
     _time = time.format(widget.spotlight.createdAt);
   }
 
@@ -307,7 +321,7 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white),
                           ),
-                          if (follow)
+                          if (shouldFollow)
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

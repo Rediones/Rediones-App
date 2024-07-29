@@ -61,7 +61,10 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
         ),
         elevation: 0.0,
         centerTitle: true,
-        title: Text("Create Post", style: context.textTheme.titleLarge),
+        title: Text(
+          "Create Post",
+          style: context.textTheme.titleLarge,
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -70,23 +73,20 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: 20.h,
-                ),
-                // ComboBox(hint: "", value: visibility, dropdownItems: const ["Public"], onChanged: (val) => setState(() => visibility = val)),
-                // SizedBox(height: 4.h),
                 SpecialForm(
                   controller: controller,
                   hint: "What would you like to share?",
-                  maxLines: 6,
-                  height: 120.h,
+                  maxLines: 10,
+                  height: 150.h,
                   width: 390.w,
+                  fillColor: context.isDark ? neutral2 : authFieldBackground,
+                  borderColor: Colors.transparent,
                 ),
                 SizedBox(
-                  height: 100.h,
+                  height: 50.h,
                 ),
                 SizedBox(
-                  height: 380.h,
+                  height: 500.h,
                   child: Column(
                     children: [
                       ImageSlide(
@@ -128,7 +128,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                       //   ),
                       //   onTap: () {},
                       // ),
-                      SizedBox(height: 70.h),
+                      SizedBox(height: 250.h),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(390.w, 40.h),

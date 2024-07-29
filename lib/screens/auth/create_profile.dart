@@ -37,12 +37,11 @@ class _CreateProfilePageState extends ConsumerState<CreateProfilePage> {
 
   void navigate(RedionesResponse<User?> result) {
     saveToDatabase(result.payload!);
-
+    initSocket();
     ref.watch(userProvider.notifier).state = result.payload!;
     ref.watch(isNewUserProvider.notifier).state = false;
     ref.watch(createdProfileProvider.notifier).state = true;
     context.router.pushReplacementNamed(Pages.home);
-
   }
 
   Future<void> saveToDatabase(User user) async {

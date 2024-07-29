@@ -157,48 +157,52 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
   }
 
   void onLike() {
-    setState(() => liked = !liked);
+    List<String> likes = object!.likes;
+    bool hasPostAsLiked = likes.contains(currentUserID);
+
+    setState(() {
+      liked = !liked;
+      if (liked && !hasPostAsLiked) {
+        likes.add(currentUserID);
+      } else if (!liked && hasPostAsLiked) {
+        likes.remove(currentUserID);
+      }
+    });
+
     likePost(object!.uuid).then((response) {
       if (response.status == Status.success) {
-        showToast(response.message, context);
-        bool add = false;
-        if (response.payload.contains(currentUserID) &&
-            !object!.likes.contains(currentUserID)) {
-          object!.likes.add(currentUserID);
-          add = true;
-        } else if (!response.payload.contains(currentUserID) &&
-            object!.likes.contains(currentUserID)) {
-          object!.likes.remove(currentUserID);
-        }
-        updateDatabaseForLikes(object!, currentUserID, add);
+        updateDatabaseForLikes(object!);
+        if (!mounted) return;
         setState(() {});
       } else {
-        setState(() => liked = !liked);
-        showToast("Something went wrong liking your post", context);
+        liked = !liked;
+        hasPostAsLiked = likes.contains(currentUserID);
+
+        if (liked && !hasPostAsLiked) {
+          likes.add(currentUserID);
+        } else if (!liked && hasPostAsLiked) {
+          likes.remove(currentUserID);
+        }
+
+        if(!mounted) return;
+        setState(() {});
+        showToast("Unable to ${liked ? "like" : "unlike"} your post", context);
       }
     });
   }
 
   Future<void> updateDatabaseForLikes(
-      PostObject object, String id, bool add) async {
+      PostObject object) async {
     Isar isar = GetIt.I.get();
     if (object is Post) {
       Post post = object;
-      if (add) {
-        post.likes.add(id);
-      } else {
-        post.likes.remove(id);
-      }
+
       await isar.writeTxn(() async {
         await isar.posts.put(post);
       });
     } else if (object is Poll) {
       Poll poll = object;
-      if (add) {
-        poll.likes.add(id);
-      } else {
-        poll.likes.remove(id);
-      }
+
       await isar.writeTxn(() async {
         await isar.polls.put(poll);
       });
@@ -249,12 +253,9 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     if (object!.posterID == currentUser.uuid) {
       context.router.pushNamed(Pages.profile);
     } else {
-      context.router.pushNamed(
-        Pages.otherProfile,
-        pathParameters: {
-          "id": object!.posterID,
-        }
-      );
+      context.router.pushNamed(Pages.otherProfile, pathParameters: {
+        "id": object!.posterID,
+      });
     }
   }
 
@@ -436,12 +437,12 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                 child: Container(
                   height: 60.h,
                   padding: EdgeInsets.symmetric(horizontal: 5.w),
-                  color: !context.isDark ? Colors.white : primary,
+                  color:
+                      !context.isDark ? Colors.white : const Color(0xFF121212),
                   child: SpecialForm(
                     controller: controller,
                     suffix: IconButton(
-                      icon:
-                          Icon(Icons.send_rounded, size: 18.r, color: appRed),
+                      icon: Icon(Icons.send_rounded, size: 18.r, color: appRed),
                       onPressed: () => onSend(controller.text),
                       splashRadius: 0.01,
                     ),

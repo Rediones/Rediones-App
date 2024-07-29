@@ -165,6 +165,8 @@ class _CreateCommunityPageState extends ConsumerState<CreateCommunityPage> {
                       return null;
                     },
                     onSave: (value) => details["title"] = value!,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                   ),
                   SizedBox(height: 15.h),
                   Wrap(
@@ -191,7 +193,8 @@ class _CreateCommunityPageState extends ConsumerState<CreateCommunityPage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(25.r),
                         border: Border.all(
-                            color: darkTheme ? neutral3 : fadedPrimary),
+                          color: darkTheme ? neutral3 : fadedPrimary,
+                        ),
                       ),
                       child: Wrap(
                         spacing: 5.w,
@@ -233,32 +236,33 @@ class _CreateCommunityPageState extends ConsumerState<CreateCommunityPage> {
                     runSpacing: 0,
                     children: List.generate(
                       categories.length,
-                      (index) => GestureDetector(
-                        onTap: () => setState(() {
-                          if (!chosenCategories.contains(categories[index])) {
-                            chosenCategories.add(categories[index]);
-                          }
-                        }),
-                        child: Chip(
-                          label: Text(
-                            categories[index],
-                            style: context.textTheme.bodyLarge,
+                      (index) {
+                        String category = categories[index];
+                        bool contained = chosenCategories.contains(category);
+
+                        return GestureDetector(
+                          onTap: () {
+                            if (contained) return;
+                            setState(() => chosenCategories.add(category));
+                          },
+                          child: Chip(
+                            label: Text(
+                              categories[index],
+                              style: context.textTheme.bodyLarge,
+                            ),
+                            elevation: 0.0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25.r),
+                            ),
+                            backgroundColor: contained ? neutral3 : null,
+                            side: BorderSide(
+                              color: contained
+                                  ? Colors.transparent
+                                  : (darkTheme ? neutral3 : fadedPrimary),
+                            ),
                           ),
-                          elevation: 0.0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.r),
-                          ),
-                          backgroundColor:
-                              chosenCategories.contains(categories[index])
-                                  ? neutral3
-                                  : null,
-                          side: BorderSide(
-                            color: chosenCategories.contains(categories[index])
-                                ? Colors.transparent
-                                : (darkTheme ? neutral3 : fadedPrimary),
-                          ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                   SizedBox(height: 15.h),
@@ -285,6 +289,8 @@ class _CreateCommunityPageState extends ConsumerState<CreateCommunityPage> {
                     maxLines: 10,
                     height: 150.h,
                     width: 358.w,
+                    fillColor: darkTheme ? neutral2 : authFieldBackground,
+                    borderColor: Colors.transparent,
                     onValidate: (value) {
                       if (value!.isEmpty) {
                         showToast("Invalid Community Description", context);
@@ -344,8 +350,10 @@ class _CreateCommunityPageState extends ConsumerState<CreateCommunityPage> {
                       },
                       child: Text(
                         "Continue",
-                        style:
-                            context.textTheme.bodyLarge!.copyWith(color: theme),
+                        style: context.textTheme.titleSmall!.copyWith(
+                          color: theme,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),

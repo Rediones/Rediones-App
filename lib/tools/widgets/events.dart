@@ -70,7 +70,6 @@ class _EventContainerState extends ConsumerState<EventContainer> {
             widget.data.header,
             style: context.textTheme.titleSmall!.copyWith(
               fontWeight: FontWeight.w700,
-              color: midPrimary,
             ),
           ),
           SizedBox(height: 10.h),

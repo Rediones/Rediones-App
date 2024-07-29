@@ -57,6 +57,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
       _showError("Unable to log you in. Retrying");
       _authenticate(level - 1);
     } else {
+      initSocket();
       saveToDatabase(resp.payload!);
       saveAuthDetails(authDetails, ref);
       ref.watch(userProvider.notifier).state = resp.payload!;

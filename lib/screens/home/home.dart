@@ -97,6 +97,7 @@ class _HomeState extends ConsumerState<Home> {
   void onCommentClicked(String postID, Future future) {
     showModalBottomSheet(
       isScrollControlled: true,
+      showDragHandle: true,
       context: context,
       builder: (context) => PostComments(
         future: future,

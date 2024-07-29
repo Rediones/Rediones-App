@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
+import 'package:rediones/api/base.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/user_data.dart';
@@ -48,6 +49,7 @@ class _LoginState extends ConsumerState<Login> {
     saveToDatabase(result.payload!);
     saveAuthDetails(_authDetails, ref);
     ref.watch(userProvider.notifier).state = result.payload!;
+    initSocket();
     context.router.pushReplacementNamed(Pages.home);
   }
 

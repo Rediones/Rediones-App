@@ -1,11 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:photo_gallery/photo_gallery.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/spotlight_service.dart';
@@ -33,6 +31,8 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
   late AnimationController animationController;
   late Animation<double> animation;
 
+  final TextEditingController textEditingController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +54,7 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
 
   @override
   void dispose() {
+    textEditingController.dispose();
     animationController.dispose();
     videoController?.dispose();
     super.dispose();
@@ -69,11 +70,19 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
   void popSuccess() => context.router.pop(true);
 
   void _create(String videoData) {
-    createSpotlight(data: videoData).then((resp) {
-      showToast(resp.message, context);
+    String text = textEditingController.text.trim();
+
+    createSpotlight(
+      data: videoData,
+      caption: text.isEmpty ? null : text,
+    ).then((resp) {
+      if (resp.status == Status.failed) {
+        showToast(resp.message, context);
+      }
+
       Navigator.of(context).pop();
 
-      if(resp.status == Status.success) {
+      if (resp.status == Status.success) {
         popSuccess();
       }
     });
@@ -253,15 +262,15 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: appRed,
                         elevation: 1.0,
-                        minimumSize: Size(90.w, 35.h),
-                        fixedSize: Size(90.w, 35.h),
+                        minimumSize: Size(110.w, 35.h),
+                        fixedSize: Size(110.w, 35.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5.r),
                         ),
                       ),
                       onPressed: onCreate,
                       child: Text(
-                        "Next",
+                        "Create",
                         style: context.textTheme.titleSmall!.copyWith(
                           color: theme,
                           fontWeight: FontWeight.w600,
@@ -269,19 +278,35 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
                       ),
                     ),
                   ),
+                  // Positioned(
+                  //   bottom: 0,
+                  //   child: SizedBox(
+                  //     child: ClipRRect(
+                  //       child: BackdropFilter(
+                  //         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  //         child: Container(
+                  //           height: 80.h,
+                  //           width: 390.w,
+                  //           padding: EdgeInsets.symmetric(horizontal: 10.w),
+                  //           child: getBottomContent,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Positioned(
                     bottom: 0,
-                    child: SizedBox(
-                      child: ClipRRect(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                          child: Container(
-                            height: 80.h,
-                            width: 390.w,
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                            child: getBottomContent,
-                          ),
-                        ),
+                    child: Container(
+                      height: 60.h,
+                      padding: EdgeInsets.symmetric(horizontal: 5.w),
+                      color: primary,
+                      child: SpecialForm(
+                        controller: textEditingController,
+                        action: TextInputAction.send,
+                        borderColor: Colors.transparent,
+                        width: 390.w,
+                        height: 40.h,
+                        hint: "Type your caption here",
                       ),
                     ),
                   ),

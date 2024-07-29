@@ -50,6 +50,7 @@ class _PostCommentsState extends State<PostComments> {
 
   @override
   Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
     return AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets,
       duration: const Duration(milliseconds: 100),
@@ -75,10 +76,16 @@ class _PostCommentsState extends State<PostComments> {
               SpecialForm commentSection = SpecialForm(
                 controller: controller,
                 suffix: IconButton(
-                  icon: Icon(Icons.send_rounded, size: 18.r, color: appRed),
+                  icon: const Icon(
+                    Icons.send_rounded,
+                    color: appRed,
+                  ),
+                  iconSize: 26.r,
                   onPressed: () => onSend(response, controller.text),
                   splashRadius: 0.01,
                 ),
+                fillColor: darkTheme ? neutral2 : authFieldBackground,
+                borderColor: Colors.transparent,
                 action: TextInputAction.send,
                 width: 370.w,
                 height: 40.h,
@@ -113,15 +120,15 @@ class _PostCommentsState extends State<PostComments> {
 
               return Column(
                 children: [
-                  SizedBox(height: 20.h),
                   Align(
                     alignment: Alignment.centerRight,
                     child: Padding(
                       padding: EdgeInsets.only(right: 15.w),
                       child: Text(
                         "${response.length} comment${response.length == 1 ? "" : "s"}",
-                        style: context.textTheme.bodyLarge!
-                            .copyWith(fontWeight: FontWeight.w600),
+                        style: context.textTheme.titleSmall!.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -261,7 +268,8 @@ class CommentDataContainer extends StatelessWidget {
                     ),
                     Text(
                       time.format(data.created),
-                      style: context.textTheme.bodySmall!.copyWith(color: appRed),
+                      style:
+                          context.textTheme.bodySmall!.copyWith(color: appRed),
                     ),
                   ],
                 ),

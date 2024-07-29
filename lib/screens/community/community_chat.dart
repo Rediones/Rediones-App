@@ -158,7 +158,7 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
               child: Container(
                 width: 390.w,
                 height: 800.h,
-                color: darkTheme ? Colors.black : Colors.white,
+                color: darkTheme ? const Color(0xFF121212) : Colors.white,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [

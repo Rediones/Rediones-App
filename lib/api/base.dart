@@ -16,6 +16,7 @@ final Map<String, List<Function>> _socketManager = {};
 Socket? _socket;
 
 const String messageSignal = "on-message";
+const String newPostSignal = 'newPost';
 
 final Dio dio = Dio(
   BaseOptions(
@@ -61,26 +62,28 @@ class RedionesResponse<T> {
   });
 }
 
-void init(String userID) {
+void initSocket() {
   _socket = io(
-    'ws://king-david-elites.onrender.com',
-    //'ws://192.168.43.169:9099',
+    'ws://rediones.onrender.com',
     OptionBuilder().setTransports(['websocket']).build(),
   );
 
   _socket?.onConnect((e) {
     log("Connected To WebSocket");
-    _socket?.emit("addUser", {"_id" : userID});
+    setupSignalHandlers(newPostSignal);
   });
   _socket?.onConnectError((e) => log("Socket Connection Error: $e"));
   _socket?.onDisconnect((e) => log('Disconnected From WebSocket'));
   _socket?.onError((e) => log("WebSocket Error: $e"));
 
-  _socketManager[messageSignal] = [];
 
-  _socket?.on(messageSignal, (data) {
+}
+
+void setupSignalHandlers(String signal) {
+  _socketManager[signal] = [];
+  _socket?.on(signal, (data) {
     if(data == null) return;
-    List<Function> handlers = _socketManager[messageSignal]!;
+    List<Function> handlers = _socketManager[signal]!;
     for(Function handler in handlers) {
       handler(data);
     }

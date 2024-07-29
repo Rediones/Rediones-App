@@ -19,7 +19,10 @@ import 'package:skeletonizer/skeletonizer.dart';
 class OtherProfilePage extends StatefulWidget {
   final String id;
 
-  const OtherProfilePage({super.key, required this.id});
+  const OtherProfilePage({
+    super.key,
+    required this.id,
+  });
 
   @override
   State<OtherProfilePage> createState() => _OtherProfilePageState();
@@ -250,13 +253,16 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                           Container(
                             alignment: Alignment.center,
                             padding: EdgeInsets.symmetric(
-                                horizontal: 10.w, vertical: 10.h),
+                              horizontal: 10.w,
+                              vertical: 10.h,
+                            ),
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15.r),
-                                color: darkTheme ? midPrimary : neutral),
+                              borderRadius: BorderRadius.circular(15.r),
+                              color: darkTheme ? midPrimary : neutral,
+                            ),
                             child: Text(
                               user.description,
-                              style: context.textTheme.bodyMedium,
+                              style: context.textTheme.bodyLarge,
                             ),
                           ),
                           SizedBox(height: 25.h),
@@ -272,8 +278,10 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                 ),
                                 child: Text(
                                   "Follow",
-                                  style: context.textTheme.bodyMedium!
-                                      .copyWith(color: theme),
+                                  style: context.textTheme.titleSmall!.copyWith(
+                                    color: theme,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                               ElevatedButton(
@@ -324,11 +332,15 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                   fixedSize: Size(168.w, 40.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20.h),
-                                    side: const BorderSide(color: neutral2),
+                                    side: BorderSide(color: darkTheme ? neutral : neutral2),
                                   ),
                                 ),
-                                child: Text("Send Message",
-                                    style: context.textTheme.bodyMedium),
+                                child: Text(
+                                  "Send Message",
+                                  style: context.textTheme.titleSmall!.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ],
                           ),

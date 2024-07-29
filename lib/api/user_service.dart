@@ -2,7 +2,7 @@ import 'package:rediones/api/base.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 
-export 'package:rediones/api/base.dart' show RedionesResponse, Status;
+export 'package:rediones/api/base.dart' show RedionesResponse, Status, initSocket;
 //ignore_for_file: empty_catches
 
 String? accessToken;

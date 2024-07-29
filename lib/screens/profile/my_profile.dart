@@ -8,9 +8,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -237,35 +237,35 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                       Container(
                         alignment: Alignment.center,
                         padding: EdgeInsets.symmetric(
-                            horizontal: 10.w, vertical: 10.h),
+                          horizontal: 10.w,
+                          vertical: 10.h,
+                        ),
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15.r),
-                            color: darkTheme ? midPrimary : neutral),
+                          borderRadius: BorderRadius.circular(15.r),
+                          color: darkTheme ? midPrimary : neutral,
+                        ),
                         child: Text(
                           user.description,
-                          style: context.textTheme.bodyMedium,
+                          style: context.textTheme.bodyLarge,
                         ),
                       ),
                       SizedBox(height: 25.h),
                       GestureDetector(
-                        onTap: () => Permission.storage.request().then((resp) {
-                          if (resp.isGranted) {
-                            context.router.pushNamed(Pages.yourSpotlight);
-                          }
-                        }),
+                        onTap: () => context.router.pushNamed(Pages.yourSpotlight),
                         child: Container(
                           width: 390.w,
                           height: 35.h,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             border: Border.all(
-                                color: darkTheme ? neutral3 : fadedPrimary),
+                              color: darkTheme ? neutral3 : fadedPrimary,
+                            ),
                             borderRadius: BorderRadius.circular(6.r),
                             color: Colors.transparent,
                           ),
                           child: Text(
-                            "Your Spotlights",
-                            style: context.textTheme.bodyMedium,
+                            "My Spotlights",
+                            style: context.textTheme.bodyLarge,
                           ),
                         ),
                       ),
@@ -280,6 +280,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                 tabBar: TabBar(
                   controller: controller,
                   indicatorColor: appRed,
+                  dividerColor: Colors.transparent,
                   labelColor: appRed,
                   labelStyle: context.textTheme.bodyLarge!
                       .copyWith(fontWeight: FontWeight.w600),
@@ -397,11 +398,10 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                     child: SlideAnimation(
                                       verticalOffset: 25.h,
                                       child: FadeInAnimation(
-                                        child: PostObjectContainer(
-                                          postObject: post,
-                                          onCommentClicked: () {},
-                                        )
-                                      ),
+                                          child: PostObjectContainer(
+                                        postObject: post,
+                                        onCommentClicked: () {},
+                                      )),
                                     ),
                                   );
                                 },

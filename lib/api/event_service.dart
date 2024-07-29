@@ -65,7 +65,6 @@ Future<RedionesResponse<List<EventData>>> getEvents() async {
       List<dynamic> eventList = response.data["payload"] as List<dynamic>;
       List<EventData> events = [];
       for (var element in eventList) {
-        log(element.toString());
         events.add(_processEvent(element as Map<String, dynamic>));
       }
 
