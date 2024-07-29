@@ -358,6 +358,39 @@ Future<RedionesResponse> createStory(Map<String, dynamic> data) async {
   );
 }
 
+Future<RedionesResponse> viewStory(String id) async {
+  String errorHeader = "View Story:";
+  try {
+    Response response = await dio.post(
+      "/stories/$id/view",
+      options: configuration(accessToken!),
+    );
+    if (response.statusCode! >= 200 && response.statusCode! <= 201) {
+      return const RedionesResponse(
+        message: "Successful",
+        payload: null,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("View Story Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An error occurred. Please try again",
+    payload: null,
+    status: Status.failed,
+  );
+}
+
+
+
 class JointStoryData {
   StoryData currentUserStory;
   final List<StoryData> otherStories;

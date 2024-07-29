@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rediones/api/message_service.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/tools/constants.dart';
@@ -164,6 +164,9 @@ class _ViewStoryPageState extends ConsumerState<ViewStoryPage> {
                   onComplete: () => context.router.pop(),
                   onStoryShow: (item, storyIndex) {
                     Future.delayed(Duration.zero, () {
+                      if (widget.story.postedBy.id != currentID) {
+                        viewStory(widget.story.stories[storyIndex].id);
+                      }
                       setState(() => index = storyIndex);
                     });
                   },

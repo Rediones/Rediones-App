@@ -51,7 +51,8 @@ final StateProvider<List<StoryData>> storiesProvider = StateProvider(
   (ref) => [],
 );
 
-final StateProvider<StoryData> currentUserStory = StateProvider((ref) => const StoryData());
+final StateProvider<StoryData> currentUserStory =
+    StateProvider((ref) => const StoryData());
 
 final StateProvider<List<ProjectData>> projectsProvider =
     StateProvider((ref) => []);
@@ -188,13 +189,7 @@ final List<Post> dummyPosts = List.generate(
 );
 
 final StateProvider<List<String>> recentSearchesProvider = StateProvider(
-  (ref) => [
-    "Sholape Williams",
-    "Idris Badejo",
-    "Dev Emmy",
-    "Fola The Ripper",
-    "What's My Name"
-  ],
+  (ref) => [],
 );
 
 final StateProvider<bool> isNewUserProvider = StateProvider((ref) => false);

@@ -154,6 +154,48 @@ Future<RedionesResponse<User?>> getUser(String id) async {
   );
 }
 
+Future<RedionesResponse<List<User>>> searchForUsers(String query) async {
+
+  String errorHeader = "Search Users:";
+
+  try {
+    Response response = await dio.get(
+      "/auth/$query",
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      List<dynamic> postList = response.data["payload"] as List<dynamic>;
+      List<User> users = [];
+      for (var element in postList) {
+        processUser(element);
+        users.add(User.fromJson(element));
+      }
+
+      return RedionesResponse(
+        message: "Users Fetched",
+        payload: users,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Search Users Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
+    payload: [],
+    status: Status.failed,
+  );
+}
+
+
 List<String> fromArrayString(List<dynamic> data) {
   List<String> response = [];
   for (var element in data) {
