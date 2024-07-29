@@ -23,6 +23,9 @@ import 'repositories/database_manager.dart';
 import 'tools/routes.dart';
 import 'tools/styles.dart';
 
+import 'package:app_links/app_links.dart';
+
+
 void main() async {
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
 

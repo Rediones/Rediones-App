@@ -246,8 +246,11 @@ final List<GoRoute> routes = [
     builder: (_, state) => GroupHome(data: state.extra as GroupData),
   ),
   GoRoute(
-    path: Pages.viewPost.path,
+    path: "${Pages.viewPost.path}/:id",
     name: Pages.viewPost,
-    builder: (_, state) => ViewPostObjectPage(object: state.extra as PostObject),
+    builder: (_, state) {
+      String id = state.pathParameters["id"] as String;
+      return ViewPostObjectPage(id: id);
+    },
   ),
 ];

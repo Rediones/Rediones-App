@@ -27,6 +27,7 @@ class Poll extends PostObject {
   final int totalVotes;
   final List<PollChoice> polls;
   final int durationInHours;
+  final String pollID;
 
   const Poll({
     super.uuid,
@@ -38,6 +39,7 @@ class Poll extends PostObject {
     required super.posterPicture,
     super.likes,
     super.shares,
+    this.pollID = "",
     this.polls = const [],
     this.totalVotes = 0,
     this.durationInHours = 0,
@@ -74,9 +76,10 @@ class Poll extends PostObject {
           "${map["postedBy"]["firstName"]} ${map["postedBy"]["lastName"]}",
       posterPicture: map["postedBy"]["profilePicture"],
       posterUsername: map["postedBy"]["username"],
-      uuid: poll["_id"],
+      uuid: map["_id"],
       likes: map["likes"],
       polls: choices,
+      pollID: poll["_id"],
       shares: 0,
       text: poll["title"],
       totalVotes: count,

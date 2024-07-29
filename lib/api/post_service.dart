@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:rediones/api/base.dart';
 import 'package:rediones/api/user_service.dart';
@@ -50,7 +49,7 @@ Future<RedionesResponse<PostObject?>> createPost(
 }
 
 PostObject processPost(Map<String, dynamic> result, {User? user}) {
-  if(user == null) {
+  if (user == null) {
     Map<String, dynamic> user = result["postedBy"] as Map<String, dynamic>;
     processUser(user);
   } else {
@@ -116,17 +115,55 @@ Future<RedionesResponse<List<PostObject>>> getPosts() async {
   );
 }
 
-Future<RedionesResponse<List<PostObject>>> getUsersPosts({String? id, User? currentUser}) async {
+Future<RedionesResponse<PostObject?>> getPostById(String id) async {
+  String errorHeader = "Get Post By ID:";
+
+  try {
+    Response response = await dio.get(
+      "/post/$id",
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      PostObject p =
+          processPost(response.data["payload"] as Map<String, dynamic>);
+
+      return RedionesResponse(
+        message: "Post Fetched",
+        payload: p,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Get Post by ID Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
+    payload: null,
+    status: Status.failed,
+  );
+}
+
+Future<RedionesResponse<List<PostObject>>> getUsersPosts(
+    {String? id, User? currentUser}) async {
   String errorHeader = "Get Users Posts:";
 
-  if((id == null && currentUser == null) || (id != null && currentUser != null)) {
+  if ((id == null && currentUser == null) ||
+      (id != null && currentUser != null)) {
     return RedionesResponse(
-      message: "$errorHeader You can only provide either the ID or the User object but not both nor neither.",
+      message:
+          "$errorHeader You can only provide either the ID or the User object but not both nor neither.",
       payload: [],
       status: Status.failed,
     );
   }
-
 
   try {
     Response response = await dio.post(
@@ -139,7 +176,8 @@ Future<RedionesResponse<List<PostObject>>> getUsersPosts({String? id, User? curr
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
       List<PostObject> posts = [];
       for (var element in postList) {
-        posts.add(processPost(element as Map<String, dynamic>, user: currentUser));
+        posts.add(
+            processPost(element as Map<String, dynamic>, user: currentUser));
       }
 
       return RedionesResponse(
@@ -210,14 +248,11 @@ CommentData _processComment(Map<String, dynamic> result) {
   return CommentData.fromJson(result);
 }
 
-Future<RedionesResponse<List<CommentData>>> getComments(String postID) async {
+Future<List<CommentData>> getComments(String postID) async {
   if (accessToken == null || postID.contains("Dummy")) {
-    return const RedionesResponse(
-      message: "",
-      payload: [],
-      status: Status.success,
-    );
+    return [];
   }
+
   String errorHeader = "Get Comments";
   try {
     Response response = await dio.get(
@@ -233,26 +268,14 @@ Future<RedionesResponse<List<CommentData>>> getComments(String postID) async {
         comments.add(comment);
       }
 
-      return RedionesResponse(
-        message: "Comments Fetched",
-        payload: comments,
-        status: Status.success,
-      );
+      return comments;
     }
   } on DioException catch (e) {
-    return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
-      payload: [],
-      status: Status.failed,
-    );
+    return [];
   } catch (e) {
     log("Get Comments Error: $e");
   }
-  return const RedionesResponse<List<CommentData>>(
-    message: "An unknown error occurred. Please try again!",
-    payload: [],
-    status: Status.failed,
-  );
+  return [];
 }
 
 Future<RedionesResponse<CommentData?>> createComment(

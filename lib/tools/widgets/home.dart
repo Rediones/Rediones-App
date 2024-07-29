@@ -550,7 +550,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   bool bookmarked = false;
   bool expandText = false;
   late String currentUserID;
-  late Future<int> commentsFuture;
+  late Future<List<dynamic>> commentsFuture;
 
   late bool isPost, mediaAndText;
 
@@ -571,12 +571,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     currentUserID = user.uuid;
     liked = widget.postObject.likes.contains(currentUserID);
     bookmarked = user.savedPosts.contains(widget.postObject.uuid);
-    commentsFuture = _getCommentsCount();
-  }
-
-  Future<int> _getCommentsCount() async {
-    int value = (await getComments(widget.postObject.uuid)).payload.length;
-    return value;
+    commentsFuture = getComments(widget.postObject.uuid);
   }
 
   void showExtension() {
@@ -663,7 +658,10 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   }
 
   Future<void> updateDatabaseForLikes(
-      PostObject object, String id, bool add) async {
+    PostObject object,
+    String id,
+    bool add,
+  ) async {
     Isar isar = GetIt.I.get();
     if (object is Post) {
       Post post = object;
@@ -746,7 +744,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     return GestureDetector(
       onTap: () => context.router.pushNamed(
         Pages.viewPost,
-        extra: widget.postObject,
+        pathParameters: {"id": widget.postObject.uuid},
       ),
       child: Container(
         width: 390.w,
@@ -789,9 +787,9 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
             ),
             SizedBox(height: 10.h),
             if (isPost && mediaAndText)
-              _PostContainer(post: widget.postObject as Post),
-            if (!isPost) _PollContainer(poll: widget.postObject as Poll),
-            _PostFooter(
+              PostContainer(post: widget.postObject as Post),
+            if (!isPost) PollContainer(poll: widget.postObject as Poll),
+            PostFooter(
               object: widget.postObject,
               liked: liked,
               bookmarked: bookmarked,
@@ -967,13 +965,13 @@ class PostHeader extends StatelessWidget {
   }
 }
 
-class _PostFooter extends StatelessWidget {
+class PostFooter extends StatelessWidget {
   final PostObject object;
   final bool liked, bookmarked;
   final VoidCallback onLike, onBookmark, onCommentClicked;
   final Future commentsFuture;
 
-  const _PostFooter({
+  const PostFooter({
     super.key,
     required this.object,
     required this.liked,
@@ -1039,7 +1037,7 @@ class _PostFooter extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   text = "...";
                 } else if (snapshot.connectionState == ConnectionState.done) {
-                  text = "${snapshot.data as int}";
+                  text = "${snapshot.data.length}";
                 }
                 return Text(
                   text,
@@ -1091,10 +1089,10 @@ class _PostFooter extends StatelessWidget {
   }
 }
 
-class _PostContainer extends StatelessWidget {
+class PostContainer extends StatelessWidget {
   final Post post;
 
-  const _PostContainer({super.key, required this.post});
+  const PostContainer({super.key, required this.post});
 
   @override
   Widget build(BuildContext context) {
@@ -1178,19 +1176,19 @@ class _PostContainer extends StatelessWidget {
   }
 }
 
-class _PollContainer extends ConsumerStatefulWidget {
+class PollContainer extends ConsumerStatefulWidget {
   final Poll poll;
 
-  const _PollContainer({
+  const PollContainer({
     super.key,
     required this.poll,
   });
 
   @override
-  ConsumerState<_PollContainer> createState() => _PollContainerState();
+  ConsumerState<PollContainer> createState() => _PollContainerState();
 }
 
-class _PollContainerState extends ConsumerState<_PollContainer> {
+class _PollContainerState extends ConsumerState<PollContainer> {
   int pollIndex = -1;
   bool hasVoted = false;
 

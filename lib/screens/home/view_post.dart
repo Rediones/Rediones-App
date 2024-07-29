@@ -1,3 +1,5 @@
+import 'package:animated_switcher_plus/animated_switcher_plus.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,14 +15,17 @@ import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
-import 'package:rediones/tools/widgets/home.dart';
+import 'package:rediones/tools/widgets.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+
+import 'comments.dart';
 
 class ViewPostObjectPage extends ConsumerStatefulWidget {
-  final PostObject object;
+  final String id;
 
   const ViewPostObjectPage({
     super.key,
-    required this.object,
+    required this.id,
   });
 
   @override
@@ -28,36 +33,72 @@ class ViewPostObjectPage extends ConsumerStatefulWidget {
 }
 
 class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
-
   int length = 0;
   bool liked = false;
   bool bookmarked = false;
   bool expandText = false;
   late String currentUserID;
-  late Future<RedionesResponse<List<CommentData>>> commentsFuture;
-
+  final List<CommentData> comments = [];
   late bool isPost, mediaAndText;
+
+  final TextEditingController controller = TextEditingController();
+
+  PostObject? object;
+  bool loading = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.object is Post) {
-      Post post = widget.object as Post;
-      length = post.media.length;
-      isPost = true;
-      mediaAndText = post.type == MediaType.imageAndText;
-    } else {
-      isPost = false;
-      mediaAndText = false;
-    }
-
-    User user = ref.read(userProvider);
-    currentUserID = user.uuid;
-    liked = widget.object.likes.contains(currentUserID);
-    bookmarked = user.savedPosts.contains(widget.object.uuid);
-    commentsFuture = getComments(widget.object.uuid);
+    loading = true;
+    getPost();
   }
 
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  void getPost() {
+    getPostById(widget.id).then((resp) {
+      if (!mounted) return;
+
+      if (resp.status == Status.failed) {
+        showToast(resp.message, context);
+        return;
+      }
+
+      object = resp.payload;
+      loading = false;
+
+      setState(() {});
+
+      if (object == null) return;
+
+      if (object! is Post) {
+        Post post = object! as Post;
+        length = post.media.length;
+        isPost = true;
+        mediaAndText = post.type == MediaType.imageAndText;
+      } else {
+        isPost = false;
+        mediaAndText = false;
+      }
+
+      User user = ref.read(userProvider);
+      currentUserID = user.uuid;
+      liked = object!.likes.contains(currentUserID);
+      bookmarked = user.savedPosts.contains(object!.uuid);
+      getPostComments(object!.uuid);
+    });
+  }
+
+  Future<void> getPostComments(String id) async {
+    var response = await getComments(id);
+    comments.clear();
+    comments.addAll(response);
+    setState(() {});
+  }
 
   void showExtension() {
     bool darkTheme = context.isDark;
@@ -121,19 +162,19 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
   void onLike() {
     setState(() => liked = !liked);
-    likePost(widget.object.uuid).then((response) {
+    likePost(object!.uuid).then((response) {
       if (response.status == Status.success) {
         showToast(response.message, context);
         bool add = false;
         if (response.payload.contains(currentUserID) &&
-            !widget.object.likes.contains(currentUserID)) {
-          widget.object.likes.add(currentUserID);
+            !object!.likes.contains(currentUserID)) {
+          object!.likes.add(currentUserID);
           add = true;
         } else if (!response.payload.contains(currentUserID) &&
-            widget.object.likes.contains(currentUserID)) {
-          widget.object.likes.remove(currentUserID);
+            object!.likes.contains(currentUserID)) {
+          object!.likes.remove(currentUserID);
         }
-        updateDatabaseForLikes(widget.object, currentUserID, add);
+        updateDatabaseForLikes(object!, currentUserID, add);
         setState(() {});
       } else {
         setState(() => liked = !liked);
@@ -183,11 +224,11 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
   void onBookmark() {
     setState(() => bookmarked = !bookmarked);
-    savePost(widget.object.uuid).then((value) {
+    savePost(object!.uuid).then((value) {
       if (value.status == Status.success) {
         showToast(value.message, context);
         List<String> postsID =
-        ref.watch(userProvider.select((value) => value.savedPosts));
+            ref.watch(userProvider.select((value) => value.savedPosts));
         postsID.clear();
         postsID.addAll(value.payload);
         updateDatabaseForSaved(value.payload);
@@ -200,8 +241,8 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
   bool get shouldFollow {
     User currentUser = ref.watch(userProvider);
-    if (widget.object.posterID == currentUser.uuid) return false;
-    if (currentUser.following.contains(widget.object.posterID)) {
+    if (object!.posterID == currentUser.uuid) return false;
+    if (currentUser.following.contains(object!.posterID)) {
       return false;
     }
     return true;
@@ -209,63 +250,307 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
   void goToProfile() {
     User currentUser = ref.watch(userProvider);
-    if (widget.object.posterID == currentUser.uuid) {
+    if (object!.posterID == currentUser.uuid) {
       context.router.pushNamed(Pages.profile);
     } else {
       context.router.pushNamed(
         Pages.otherProfile,
-        extra: widget.object.posterID,
+        extra: object!.posterID,
       );
     }
   }
 
+  void onSend(String text) async {
+    controller.clear();
+
+    RedionesResponse<CommentData?> resp =
+        await createComment(object!.uuid, text);
+    if (resp.status == Status.success) {
+      comments.add(resp.payload!);
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          iconSize: 26.r,
-          splashRadius: 0.01,
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () => context.router.pop(),
-        ),
-        elevation: 0.0,
-        leadingWidth: 30.w,
-        title: Text(
-          "Post",
-          style: context.textTheme.titleLarge,
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 15.w),
-            child: IconButton(
-              onPressed: showExtension,
-              icon: const Icon(Icons.more_vert_rounded),
-              iconSize: 26.r,
-            ),
-          )
-        ],
-      ),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: 10.h),
-                PostHeader(
-                  object: widget.object,
-                  shouldFollow: shouldFollow,
-                  goToProfile: goToProfile,
-                  showExtension: showExtension,
-                  hideMore: true,
-                )
+        child: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                if(loading)
+                  const SliverFillRemaining(
+                    child: Center(child: loader),
+                  ),
+
+                if(!loading)
+                SliverAppBar(
+                  pinned: true,
+                  leading: IconButton(
+                    iconSize: 26.r,
+                    splashRadius: 0.01,
+                    icon: const Icon(Icons.chevron_left),
+                    onPressed: () => context.router.pop(),
+                  ),
+                  elevation: 0.0,
+                  leadingWidth: 30.w,
+                  title: Text(
+                    "Post",
+                    style: context.textTheme.titleLarge,
+                  ),
+                  actions: [
+                    Padding(
+                      padding: EdgeInsets.only(right: 15.w),
+                      child: IconButton(
+                        onPressed: showExtension,
+                        icon: const Icon(Icons.more_vert_rounded),
+                        iconSize: 26.r,
+                      ),
+                    )
+                  ],
+                ),
+
+                if(!loading && object == null)
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            "assets/No Data.png",
+                            width: 150.r,
+                            height: 150.r,
+                            fit: BoxFit.cover,
+                          ),
+                          SizedBox(height: 20.h),
+                          Text(
+                            "There are no events available",
+                            style: context.textTheme.titleSmall!.copyWith(
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+                          GestureDetector(
+                            onTap: getPost,
+                            child: Text(
+                              "Retry",
+                              style: context.textTheme.titleSmall!.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: appRed,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                if(!loading && object != null)
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  sliver: SliverToBoxAdapter(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 10.h),
+                          PostHeader(
+                            object: object!,
+                            shouldFollow: shouldFollow,
+                            goToProfile: goToProfile,
+                            showExtension: showExtension,
+                            hideMore: true,
+                          ),
+                          SizedBox(height: 20.h),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text:
+                                  "${object!.text.substring(0, expandText ? null : (object!.text.length >= 150 ? 150 : object!.text.length))}"
+                                      "${object!.text.length >= 150 && !expandText ? "..." : ""}",
+                                  style: context.textTheme.bodyMedium,
+                                ),
+                                if (object!.text.length > 150)
+                                  TextSpan(
+                                    text: expandText
+                                        ? " Read Less"
+                                        : " Read More",
+                                    style: context.textTheme.bodyMedium!
+                                        .copyWith(color: appRed),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => setState(
+                                              () => expandText = !expandText),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+                          if (isPost && mediaAndText)
+                            PostContainer(post: object! as Post),
+                          if (!isPost) PollContainer(poll: object! as Poll),
+                          ViewPostFooter(
+                            object: object!,
+                            liked: liked,
+                            bookmarked: bookmarked,
+                            onBookmark: onBookmark,
+                            onLike: onLike,
+                            length: comments.length,
+                          ),
+                          SizedBox(height: 20.h),
+                          Column(
+                            children: List.generate(
+                              comments.length,
+                                  (index) => CommentDataContainer(
+                                  data: comments[index]
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                child: SizedBox(
+                  height: 60.h,
+                  child: SpecialForm(
+                    controller: controller,
+                    suffix: IconButton(
+                      icon: Icon(Icons.send_rounded, size: 18.r, color: appRed),
+                      onPressed: () => onSend(controller.text),
+                      splashRadius: 0.01,
+                    ),
+                    action: TextInputAction.send,
+                    width: 370.w,
+                    height: 40.h,
+                    hint: "Type your comment here",
+                    onActionPressed: onSend,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ViewPostFooter extends StatelessWidget {
+  final PostObject object;
+  final bool liked, bookmarked;
+  final VoidCallback onLike, onBookmark;
+  final int length;
+
+  const ViewPostFooter({
+    super.key,
+    required this.object,
+    required this.liked,
+    required this.length,
+    required this.bookmarked,
+    required this.onLike,
+    required this.onBookmark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    bool darkTheme = context.isDark;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Skeleton.ignore(
+              ignore: true,
+              child: AnimatedSwitcherZoom.zoomIn(
+                duration: const Duration(milliseconds: 200),
+                child: IconButton(
+                  key: ValueKey<bool>(liked),
+                  splashRadius: 0.01,
+                  onPressed: onLike,
+                  icon: SvgPicture.asset(
+                    "assets/Like ${liked ? "F" : "Unf"}illed.svg",
+                    color: darkTheme && !liked ? Colors.white : null,
+                    width: 22.r,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 5.w),
+            Text(
+              "${object.likes.length}",
+              style: context.textTheme.bodyLarge,
+            )
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Skeleton.ignore(
+              ignore: true,
+              child: IconButton(
+                icon: SvgPicture.asset(
+                  "assets/Comment Post.svg",
+                  color: darkTheme ? Colors.white : null,
+                  width: 22.r,
+                ),
+                onPressed: () {},
+              ),
+            ),
+            SizedBox(width: 5.w),
+            Text(
+              "$length",
+              style: context.textTheme.bodyLarge,
+            )
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Skeleton.ignore(
+              ignore: true,
+              child: IconButton(
+                icon: SvgPicture.asset(
+                  "assets/Reply.svg",
+                  color: darkTheme ? Colors.white : null,
+                  width: 22.r,
+                ),
+                onPressed: () {},
+                splashRadius: 0.01,
+              ),
+            ),
+            SizedBox(width: 5.w),
+            Text(
+              "${object.shares}",
+              style: context.textTheme.bodyLarge,
+            )
+          ],
+        ),
+        Skeleton.ignore(
+          ignore: true,
+          child: AnimatedSwitcherZoom.zoomIn(
+            duration: const Duration(milliseconds: 200),
+            child: IconButton(
+              key: ValueKey<bool>(bookmarked),
+              icon: SvgPicture.asset(
+                "assets/Bookmark${bookmarked ? " Filled" : ""}.svg",
+                color: darkTheme && !bookmarked ? Colors.white : null,
+                width: bookmarked ? 24.r : 18.r,
+              ),
+              onPressed: onBookmark,
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

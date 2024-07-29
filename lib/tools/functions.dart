@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/tools/constants.dart';
 
 void showToast(String message, BuildContext context) {
-  if (message.isEmpty) return;
+  if (message.isEmpty || !context.mounted) return;
 
   HapticFeedback.vibrate();
   AnimatedSnackBar snackBar = AnimatedSnackBar(

@@ -546,11 +546,11 @@ class _AddStoryState extends ConsumerState<_AddStory> {
                   imageUrl: image,
                   errorWidget: (_, __, val) => CircleAvatar(
                     radius: 13.5.r,
-                    backgroundColor: appRed,
+                    backgroundColor: neutral2,
                   ),
                   progressIndicatorBuilder: (_, __, val) => CircleAvatar(
                     radius: 13.5.r,
-                    backgroundColor: appRed.withOpacity(0.6),
+                    backgroundColor: neutral2,
                   ),
                   imageBuilder: (_, provider) => CircleAvatar(
                     radius: 13.5.r,
