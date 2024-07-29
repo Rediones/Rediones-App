@@ -83,7 +83,7 @@ class _RedionesState extends ConsumerState<Rediones>
     ref.watch(loadingLocalPostsProvider.notifier).state = false;
 
     String? id = await FileHandler.loadString(userIsarId);
-    if (id != null) {
+    if (id != null && id.isNotEmpty) {
       User? user = await isar.users.filter().uuidEqualTo(id).findFirst();
       if (user != null) {
         ref.watch(userProvider.notifier).state = user;

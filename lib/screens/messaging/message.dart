@@ -31,7 +31,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
   late TabController controller;
   bool isSearchOpen = false;
   final TextEditingController search = TextEditingController();
-  bool loadingConversations = true;
+  bool loadingConversations = true, loadingStories = true;
 
   late List<Conversation> dummyConversations;
   late String userID;
@@ -52,6 +52,9 @@ class _MessagePageState extends ConsumerState<MessagePage>
     userID = ref.read(userProvider).uuid;
 
     // getLocalConversations();
+    Future.delayed(Duration.zero, () {
+      fetchStories();
+    });
   }
 
   Future<void> fetchConversations() async {
@@ -73,6 +76,26 @@ class _MessagePageState extends ConsumerState<MessagePage>
     // repository.clearAllAndAddAll(p);
 
     setState(() => loadingConversations = false);
+  }
+
+  void showMessage(String msg) => showToast(msg, context);
+
+  Future<void> fetchStories() async {
+    var resp = await getStories(ref.watch(userProvider).uuid);
+    if (!mounted) return;
+
+    if (resp.status == Status.failed) {
+      showMessage(resp.message);
+      return;
+    }
+
+    List<StoryData> stories = ref.watch(storiesProvider);
+    stories.clear();
+    stories.addAll(resp.payload.otherStories);
+
+    ref.watch(currentUserStory.notifier).state = resp.payload.currentUserStory;
+
+    setState(() => loadingStories = false);
   }
 
   Future<void> getLocalConversations() async {
@@ -145,18 +168,53 @@ class _MessagePageState extends ConsumerState<MessagePage>
                 padding: EdgeInsets.symmetric(horizontal: 15.w),
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  itemBuilder: (_, index) => index == 0
-                      ? const _AddStory()
-                      : StoryContainer(
-                          data: stories[index - 1],
-                          onClick: () {
-                            unFocus();
-                            context.router.pushNamed(Pages.viewStory,
-                                extra: stories[index - 1]);
-                          },
+                  itemBuilder: (_, index) {
+                    if (index == 0) {
+                      return const _AddStory();
+                    }
+
+                    if (loadingStories) {
+                      return Skeletonizer(
+                        enabled: true,
+                        child: StoryContainer(
+                          data: StoryData(
+                            postedBy: const UserSubData(),
+                            stories: [
+                              MediaData(
+                                mediaUrl: "mediaUrl",
+                                type: MediaType.videoAndText,
+                                views: 12,
+                                timestamp: DateTime.now(),
+                              ),
+                            ],
+                          ),
+                          onClick: () {},
                         ),
+                      );
+                    }
+
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: const Duration(milliseconds: 750),
+                      child: SlideAnimation(
+                        horizontalOffset: 25.w,
+                        child: FadeInAnimation(
+                          child: StoryContainer(
+                            data: stories[index - 1],
+                            onClick: () {
+                              unFocus();
+                              context.router.pushNamed(
+                                Pages.viewStory,
+                                extra: stories[index - 1],
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                   separatorBuilder: (_, __) => SizedBox(width: 15.w),
-                  itemCount: stories.length + 1,
+                  itemCount: loadingStories ? 5 : stories.length + 1,
                 ),
               ),
             ),
@@ -322,59 +380,96 @@ class StoryContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onClick,
-      child: Container(
-        width: 90.r,
-        height: 120.r,
-        padding: EdgeInsets.symmetric(horizontal: 5.r),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.r),
-          image: DecorationImage(
-            image: AssetImage(data.stories.last.mediaUrl),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.3),
-              BlendMode.darken,
+      child: CachedNetworkImage(
+        imageUrl: data.stories.last.mediaUrl,
+        errorWidget: (_, __, ___) {
+          return Container(
+            width: 90.r,
+            height: 120.r,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.r),
+              color: neutral2,
             ),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            CircleAvatar(
-              radius: 15.r,
-              backgroundColor: appRed,
-              child: CachedNetworkImage(
-                imageUrl: data.postedBy.profilePicture,
-                errorWidget: (_, __, val) => CircleAvatar(
-                  radius: 13.5.r,
-                  backgroundColor: appRed,
-                ),
-                progressIndicatorBuilder: (_, __, val) => CircleAvatar(
-                  radius: 13.5.r,
-                  backgroundColor: appRed.withOpacity(0.6),
-                ),
-                imageBuilder: (_, provider) => CircleAvatar(
-                  radius: 13.5.r,
-                  backgroundImage: provider,
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.broken_image_outlined,
+              color: appRed,
+              size: 26.r,
+            ),
+          );
+        },
+        progressIndicatorBuilder: (_, __, ___) {
+          return Container(
+            width: 90.r,
+            height: 120.r,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.r),
+              color: neutral2,
+            ),
+          );
+        },
+        imageBuilder: (_, provider) {
+          return Container(
+            width: 90.r,
+            height: 120.r,
+            padding: EdgeInsets.symmetric(horizontal: 5.r),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.r),
+              image: DecorationImage(
+                image: provider,
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.3),
+                  BlendMode.darken,
                 ),
               ),
             ),
-            SizedBox(height: 5.r),
-            SizedBox(
-              height: 20.r,
-              child: Text(
-                data.postedBy.username,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodyMedium!.copyWith(
-                  color: theme,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
+            child: Skeleton.ignore(
+              ignore: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Skeleton.ignore(
+                    ignore: true,
+                    child: CircleAvatar(
+                      radius: 15.r,
+                      backgroundColor: appRed,
+                      child: CachedNetworkImage(
+                        imageUrl: data.postedBy.profilePicture,
+                        errorWidget: (_, __, val) => CircleAvatar(
+                          radius: 13.5.r,
+                          backgroundColor: appRed,
+                        ),
+                        progressIndicatorBuilder: (_, __, val) => CircleAvatar(
+                          radius: 13.5.r,
+                          backgroundColor: appRed.withOpacity(0.6),
+                        ),
+                        imageBuilder: (_, provider) => CircleAvatar(
+                          radius: 13.5.r,
+                          backgroundImage: provider,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 5.r),
+                  SizedBox(
+                    height: 20.r,
+                    child: Text(
+                      data.postedBy.username,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.bodyMedium!.copyWith(
+                        color: theme,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -391,101 +486,153 @@ class _AddStoryState extends ConsumerState<_AddStory> {
   @override
   Widget build(BuildContext context) {
     String image = ref.read(userProvider).profilePicture;
+    StoryData currentStory = ref.watch(currentUserStory);
+    bool hasStory = currentStory.stories.isNotEmpty;
 
-    return GestureDetector(
-      onTap: () {
-        FileHandler.multiple(type: FileType.media).then((resp) {
-          if (resp == null || resp.isEmpty) return;
-          context.router.pushNamed(Pages.createStory, extra: resp);
-        });
-      },
-      child: Container(
-        width: 90.r,
-        height: 120.r,
-        decoration: BoxDecoration(
-          border: Border.all(color: context.isDark ? neutral3 : fadedPrimary),
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-        child: Stack(
+    Stack content = Stack(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  height: 20.r,
-                  width: 20.r,
-                  decoration: BoxDecoration(
-                    color: primary,
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.add_rounded,
-                    color: theme,
-                    size: 16.r,
-                  ),
+            GestureDetector(
+              onTap: () {
+                FileHandler.single(type: FileType.media).then((resp) {
+                  if (resp == null) return;
+                  context.router.pushNamed(Pages.createStory, extra: resp);
+                });
+              },
+              child: Container(
+                height: 20.r,
+                width: 20.r,
+                decoration: BoxDecoration(
+                  color: primary,
+                  borderRadius: BorderRadius.circular(6.r),
                 ),
-                SizedBox(height: 25.r),
-                ClipPath(
-                  clipper: StoryClipper(
-                    borderRadius: 3.r,
-                    cutoutRadius: 17.r,
-                    containerRadius: 10.r,
-                  ),
-                  child: SizedBox(
-                    width: 90.r,
-                    height: 40.r,
-                    child: const ColoredBox(
-                      color: appRed,
-                    ),
-                  ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.add_rounded,
+                  color: theme,
+                  size: 16.r,
                 ),
-              ],
+              ),
             ),
-            SizedBox(
-              width: 90.r,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  CircleAvatar(
-                    radius: 15.r,
-                    backgroundColor: appRed,
-                    child: CachedNetworkImage(
-                      imageUrl: image,
-                      errorWidget: (_, __, val) => CircleAvatar(
-                        radius: 13.5.r,
-                        backgroundColor: appRed,
-                      ),
-                      progressIndicatorBuilder: (_, __, val) => CircleAvatar(
-                        radius: 13.5.r,
-                        backgroundColor: appRed.withOpacity(0.6),
-                      ),
-                      imageBuilder: (_, provider) => CircleAvatar(
-                        radius: 13.5.r,
-                        backgroundImage: provider,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 5.r),
-                  SizedBox(
-                    height: 20.r,
-                    child: Text(
-                      "Add Story",
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textTheme.bodyMedium!.copyWith(
-                        color: theme,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
+            SizedBox(height: 25.r),
+            ClipPath(
+              clipper: StoryClipper(
+                borderRadius: 3.r,
+                cutoutRadius: 17.r,
+                containerRadius: 10.r,
+              ),
+              child: SizedBox(
+                width: 90.r,
+                height: 40.r,
+                child: const ColoredBox(
+                  color: appRed,
+                ),
               ),
             ),
           ],
         ),
+        SizedBox(
+          width: 90.r,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              CircleAvatar(
+                radius: 15.r,
+                backgroundColor: appRed,
+                child: CachedNetworkImage(
+                  imageUrl: image,
+                  errorWidget: (_, __, val) => CircleAvatar(
+                    radius: 13.5.r,
+                    backgroundColor: appRed,
+                  ),
+                  progressIndicatorBuilder: (_, __, val) => CircleAvatar(
+                    radius: 13.5.r,
+                    backgroundColor: appRed.withOpacity(0.6),
+                  ),
+                  imageBuilder: (_, provider) => CircleAvatar(
+                    radius: 13.5.r,
+                    backgroundImage: provider,
+                  ),
+                ),
+              ),
+              SizedBox(height: 5.r),
+              SizedBox(
+                height: 20.r,
+                child: Text(
+                  "Add Story",
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodyMedium!.copyWith(
+                    color: theme,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    return GestureDetector(
+      onTap: () {
+        context.router.pushNamed(
+          Pages.viewStory,
+          extra: currentStory,
+        );
+      },
+      child: CachedNetworkImage(
+        imageUrl: hasStory ? currentStory.stories.last.mediaUrl : "",
+        errorWidget: (_, __, ___) {
+          return Container(
+            width: 90.r,
+            height: 120.r,
+            decoration: BoxDecoration(
+              border:
+                  Border.all(color: context.isDark ? neutral3 : fadedPrimary),
+              borderRadius: BorderRadius.circular(10.r),
+              color: appRed,
+            ),
+            alignment: Alignment.center,
+            child: hasStory
+                ? Icon(
+                    Icons.broken_image_outlined,
+                    color: theme,
+                    size: 26.r,
+                  )
+                : null,
+          );
+        },
+        progressIndicatorBuilder: (_, __, ___) {
+          return Container(
+            width: 90.r,
+            height: 120.r,
+            decoration: BoxDecoration(
+              color: neutral2,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+          );
+        },
+        imageBuilder: (_, provider) {
+          return Container(
+            width: 90.r,
+            height: 120.r,
+            decoration: BoxDecoration(
+              border:
+                  Border.all(color: context.isDark ? neutral3 : fadedPrimary),
+              borderRadius: BorderRadius.circular(10.r),
+              image: DecorationImage(
+                image: provider,
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: content,
+          );
+        },
       ),
     );
   }

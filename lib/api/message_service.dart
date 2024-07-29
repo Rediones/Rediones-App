@@ -1,3 +1,4 @@
+import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/pocket_data.dart';
 import 'package:rediones/components/user_data.dart';
@@ -321,6 +322,129 @@ Future<RedionesResponse<StickyData?>> makeSticky(String id) async {
     message: "$errorHeader An error occurred. Please try again",
     payload: null,
     status: Status.failed,
+  );
+}
+
+Future<RedionesResponse> createStory(Map<String, dynamic> data) async {
+  String errorHeader = "Create Story:";
+  try {
+    Response response = await dio.post(
+      "/stories",
+      data: data,
+      options: configuration(accessToken!),
+    );
+    if (response.statusCode! >= 200 && response.statusCode! <= 201) {
+      return const RedionesResponse(
+        message: "Successful",
+        payload: null,
+        // payload: PocketMessageData.fromJson(response.data["payload"]),
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Create Story Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An error occurred. Please try again",
+    payload: null,
+    status: Status.failed,
+  );
+}
+
+class JointStoryData {
+  StoryData currentUserStory;
+  final List<StoryData> otherStories;
+
+  JointStoryData({
+    this.currentUserStory = const StoryData(),
+    this.otherStories = const [],
+  });
+}
+
+Future<RedionesResponse<JointStoryData>> getStories(
+    String currentUserID) async {
+  String errorHeader = "Get Stories:";
+  try {
+    Response response = await dio.get(
+      "/stories",
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      List<dynamic> data = response.data as List<dynamic>;
+      List<StoryData> stories = [];
+      JointStoryData jointStoryData = JointStoryData(otherStories: stories);
+
+      for (var element in data) {
+        List<dynamic> storyData = element["stories"];
+        List<MediaData> mediaData = [];
+        for (var sd in storyData) {
+          MediaData md = MediaData(
+            id: sd["_id"],
+            mediaUrl: sd["media"],
+            caption: (sd["caption"] ?? ""),
+            timestamp: DateTime.parse(sd["timestamp"]),
+            views: sd["views"].length,
+            type: (sd["type"] as num).toInt() == 1
+                ? MediaType.imageAndText
+                : MediaType.videoAndText,
+          );
+
+          mediaData.add(md);
+        }
+
+        StoryData parsedData = StoryData(
+          postedBy: processUserSubData(element["user"]),
+          stories: mediaData,
+        );
+
+        if (parsedData.postedBy.id == currentUserID) {
+          jointStoryData.currentUserStory = parsedData;
+        } else {
+          stories.add(parsedData);
+        }
+      }
+
+      return RedionesResponse(
+        message: "Success",
+        payload: jointStoryData,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: JointStoryData(),
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Get Stories Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
+    payload: JointStoryData(),
+    status: Status.failed,
+  );
+}
+
+UserSubData processUserSubData(Map<String, dynamic> map) {
+  String profile = map["profilePicture"] ??
+      "https://gravatar.com/avatar/${map["_id"].hashCode.toString()}?s=400&d=robohash&r=x";
+
+  return UserSubData(
+    id: map["_id"],
+    firstName: map["firstName"],
+    lastName: map["lastName"],
+    username: map["username"],
+    profilePicture: profile,
   );
 }
 

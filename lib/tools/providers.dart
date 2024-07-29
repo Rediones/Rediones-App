@@ -39,7 +39,7 @@ final StateProvider<List<EventData>> eventsProvider =
 final StateProvider<List<GroupData>> myGroupsProvider =
     StateProvider((ref) => []);
 final StateProvider<List<GroupData>> forYouGroupsProvider =
-StateProvider((ref) => []);
+    StateProvider((ref) => []);
 
 final StateProvider<List<Conversation>> conversationsProvider =
     StateProvider((ref) => []);
@@ -48,86 +48,10 @@ final StateProvider<List<PocketData>> pocketProvider =
     StateProvider((ref) => []);
 
 final StateProvider<List<StoryData>> storiesProvider = StateProvider(
-  (ref) => [
-    StoryData(
-      postedBy: ref.read(userProvider),
-      stories: [
-        MediaData(
-          mediaUrl: "assets/watch man.jpg",
-          type: MediaType.imageAndText,
-          views: 0,
-          timestamp: DateTime.now(),
-        ),
-      ],
-    ),
-    StoryData(
-      postedBy: ref.read(userProvider),
-      stories: [
-        MediaData(
-          mediaUrl: "assets/watch man.jpg",
-          type: MediaType.imageAndText,
-          views: 0,
-          timestamp: DateTime.now(),
-        ),
-      ],
-    ),
-    StoryData(
-      postedBy: ref.read(userProvider),
-      stories: [
-        MediaData(
-          mediaUrl: "assets/watch man.jpg",
-          type: MediaType.imageAndText,
-          views: 0,
-          timestamp: DateTime.now(),
-        ),
-      ],
-    ),
-    StoryData(
-      postedBy: ref.read(userProvider),
-      stories: [
-        MediaData(
-          mediaUrl: "assets/watch man.jpg",
-          type: MediaType.imageAndText,
-          views: 0,
-          timestamp: DateTime.now(),
-        ),
-      ],
-    ),
-    StoryData(
-      postedBy: ref.read(userProvider),
-      stories: [
-        MediaData(
-          mediaUrl: "assets/watch man.jpg",
-          type: MediaType.imageAndText,
-          views: 0,
-          timestamp: DateTime.now(),
-        ),
-      ],
-    ),
-    StoryData(
-      postedBy: ref.read(userProvider),
-      stories: [
-        MediaData(
-          mediaUrl: "assets/watch man.jpg",
-          type: MediaType.imageAndText,
-          views: 0,
-          timestamp: DateTime.now(),
-        ),
-      ],
-    ),
-    StoryData(
-      postedBy: ref.read(userProvider),
-      stories: [
-        MediaData(
-          mediaUrl: "assets/watch man.jpg",
-          type: MediaType.imageAndText,
-          views: 0,
-          timestamp: DateTime.now(),
-        ),
-      ],
-    ),
-  ],
+  (ref) => [],
 );
+
+final StateProvider<StoryData> currentUserStory = StateProvider((ref) => const StoryData());
 
 final StateProvider<List<ProjectData>> projectsProvider =
     StateProvider((ref) => []);
@@ -283,12 +207,18 @@ final StateProvider<int> dashboardIndexProvider = StateProvider((ref) => 0);
 final StateProvider<bool> spotlightsPlayStatusProvider =
     StateProvider((ref) => false);
 
+final StateProvider<List<Map<String, dynamic>>> outgoingStatus =
+    StateProvider((ref) => []);
+
 final StateProvider<bool> loadingLocalPostsProvider =
-StateProvider((ref) => true);
+    StateProvider((ref) => true);
 
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);
+  FileHandler.saveString(userIsarId, "");
   ref.invalidate(loadingLocalPostsProvider);
+  ref.invalidate(currentUserStory);
+  ref.invalidate(outgoingStatus);
   ref.invalidate(exitAttemptProvider);
   ref.invalidate(spotlightsPlayStatusProvider);
   ref.invalidate(createdProfileProvider);

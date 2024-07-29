@@ -70,6 +70,7 @@ dependencies:
   zero_story_editor:
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
+  mime:
 #  device_preview:
 
 

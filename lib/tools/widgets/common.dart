@@ -108,6 +108,7 @@ class SpecialForm extends StatelessWidget {
   final TextEditingController controller;
   final TextInputType type;
   final TextInputAction action;
+  final TextStyle? style;
   final TextStyle? hintStyle;
   final bool readOnly;
   final int maxLines;
@@ -122,6 +123,7 @@ class SpecialForm extends StatelessWidget {
     this.fillColor,
     this.borderColor,
     this.padding,
+    this.style,
     this.hintStyle,
     this.focus,
     this.autoFocus = false,
@@ -163,7 +165,7 @@ class SpecialForm extends StatelessWidget {
           }
         },
         cursorColor: appRed,
-        style: context.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),
+        style: style ?? context.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           errorMaxLines: 1,
           errorStyle: const TextStyle(height: 0, fontSize: 0),

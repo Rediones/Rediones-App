@@ -1,8 +1,8 @@
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/user_data.dart';
 
-
 class MediaData {
+  final String id;
   final String mediaUrl;
   final String caption;
   final MediaType type;
@@ -10,37 +10,45 @@ class MediaData {
   final int views;
 
   const MediaData({
-    required this.mediaUrl,
+    this.mediaUrl = "",
     this.caption = "",
-    required this.type,
-    required this.views,
+    this.id = "",
+    this.type = MediaType.textOnly,
+    this.views = 0,
     required this.timestamp,
   });
 
-  MediaData.fromJson(Map<String, dynamic> data)
-      : mediaUrl = data['mediaUrl'],
-        caption = data['caption'],
-        type = data['type'],
-        timestamp = data['createdAt'],
-        views = data['views'];
+}
 
-  Map<String, dynamic> toJson() => {
-    'mediaUrl': mediaUrl,
-    'caption': caption,
-    'type': type,
-    'createdAt': timestamp,
-    'views': views,
-  };
+class UserSubData {
+  final String id;
+  final String username;
+  final String lastName;
+  final String firstName;
+  final String profilePicture;
+
+  const UserSubData({
+    this.id = "",
+    this.profilePicture = "",
+    this.username = "",
+    this.lastName = "",
+    this.firstName = ""
+  });
 }
 
 class StoryData {
-  final User postedBy;
+  final String id;
+  final UserSubData postedBy;
   final List<MediaData> stories;
 
-  const StoryData({required this.postedBy, this.stories = const []});
+  const StoryData({
+    this.id = "",
+    this.postedBy = const UserSubData(),
+    this.stories = const [],
+  });
 
   StoryData.fromJson(Map<String, dynamic> map)
-      : postedBy = User.fromJson(map['postedBy']),
+      : id = map["_id"],
+        postedBy = map['postedBy'],
         stories = map['stories'];
-
 }

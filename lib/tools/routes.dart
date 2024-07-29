@@ -163,7 +163,7 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.createStory.path,
     name: Pages.createStory,
-    builder: (_, state) => CreateStoryPage(media: state.extra as List<SingleFileResponse>),
+    builder: (_, state) => CreateStoryPage(media: state.extra as SingleFileResponse),
   ),
   GoRoute(
     path: Pages.inbox.path,
