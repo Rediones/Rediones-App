@@ -7,6 +7,7 @@ import 'package:rediones/components/group_data.dart';
 import 'package:rediones/components/media_data.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/postable.dart';
+import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/screens/auth/create_profile.dart';
 import 'package:rediones/screens/auth/login.dart';
 import 'package:rediones/screens/auth/signup.dart';
@@ -41,6 +42,7 @@ import 'package:rediones/screens/profile/other_profile.dart';
 import 'package:rediones/screens/project/create_project.dart';
 import 'package:rediones/screens/spotlight/create_spotlight.dart';
 import 'package:rediones/screens/spotlight/edit_spotlight.dart';
+import 'package:rediones/screens/spotlight/view_spotlight.dart';
 import 'package:rediones/screens/spotlight/your_spotlights.dart';
 import 'package:rediones/tools/providers.dart';
 
@@ -255,5 +257,10 @@ final List<GoRoute> routes = [
       String id = state.pathParameters["id"] as String;
       return ViewPostObjectPage(id: id);
     },
+  ),
+  GoRoute(
+    path: Pages.viewSpotlight.path,
+    name: Pages.viewSpotlight,
+    builder: (_, state) => ViewSpotlightPage(options: state.extra as ViewSpotlightOptions),
   ),
 ];

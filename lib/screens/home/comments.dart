@@ -14,9 +14,11 @@ class PostComments extends StatefulWidget {
   final Future future;
   final String postID;
   final BuildContext parentContext;
+  final Function? updateCommentsCount;
 
   const PostComments({
     super.key,
+    this.updateCommentsCount,
     required this.future,
     required this.postID,
     required this.parentContext,
@@ -45,6 +47,9 @@ class _PostCommentsState extends State<PostComments> {
     if (resp.status == Status.success) {
       response.add(resp.payload!);
       setState(() {});
+      if(widget.updateCommentsCount != null) {
+        widget.updateCommentsCount!(response.length);
+      }
     }
   }
 

@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 import 'package:rediones/api/post_service.dart';
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/comment_data.dart';
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
@@ -238,6 +239,21 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     });
   }
 
+  void onFollow() {
+    List<String> following = ref.watch(userProvider.select((u) => u.following));
+    following.add(object!.posterID);
+    setState(() {});
+
+    followUser(object!.posterID).then((resp) {
+      if (resp.status == Status.failed) {
+        following.remove(object!.posterID);
+        showToast(resp.message, context);
+      }
+
+      setState(() {});
+    });
+  }
+
   bool get shouldFollow {
     User currentUser = ref.watch(userProvider);
     if (object!.posterID == currentUser.uuid) return false;
@@ -356,6 +372,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                             SizedBox(height: 10.h),
                             PostHeader(
                               object: object!,
+                              onFollow: onFollow,
                               shouldFollow: shouldFollow,
                               goToProfile: goToProfile,
                               showExtension: showExtension,

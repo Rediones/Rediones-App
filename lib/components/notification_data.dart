@@ -4,7 +4,7 @@ import 'user_data.dart';
 
 enum Type { task, information }
 
-class NotificationData extends Equatable {
+class NotificationData {
   final String id;
   final String header;
   final String content;
@@ -23,9 +23,6 @@ class NotificationData extends Equatable {
     this.opened = false,
   });
 
-  @override
-  List<Object?> get props => [id];
-
   factory NotificationData.fromJson(Map<String, dynamic> map)
       => NotificationData(
           id: map["_id"],
@@ -33,7 +30,7 @@ class NotificationData extends Equatable {
           content: map["message"],
           postedBy: User.fromJson(map["sentBy"]),
           date: DateTime.parse(map["createdAt"]),
-          opened: false
+          opened: map["read"]
       );
 
 }

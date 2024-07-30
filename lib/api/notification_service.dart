@@ -1,9 +1,10 @@
+import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/notification_data.dart';
 
 import 'base.dart';
 import 'user_service.dart' as ps;
 
-//ignore_for_file: empty_catches
+export 'base.dart';
 
 Future<RedionesResponse<List<NotificationData>>> getNotifications() async {
   if (ps.accessToken == null) {
@@ -47,6 +48,40 @@ Future<RedionesResponse<List<NotificationData>>> getNotifications() async {
   return RedionesResponse(
     message: "$errorHeader An unknown error occurred. Please try again!",
     payload: [],
+    status: Status.failed,
+  );
+}
+
+Future<RedionesResponse> readNotification(String id) async {
+  String errorHeader = "Read Notification:";
+  try {
+    Response response = await dio.get(
+      "/notifications/read/$id",
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      log(response.data.toString());
+
+      return const RedionesResponse(
+        message: "Notification Read",
+        payload: null,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Read Notification Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again later.",
+    payload: null,
     status: Status.failed,
   );
 }

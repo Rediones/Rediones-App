@@ -660,16 +660,14 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
           likes.remove(currentUserID);
         }
 
-        if(!mounted) return;
+        if (!mounted) return;
         setState(() {});
         showToast("Unable to ${liked ? "like" : "unlike"} your post", context);
       }
     });
   }
 
-  Future<void> updateDatabaseForLikes(
-    PostObject object
-  ) async {
+  Future<void> updateDatabaseForLikes(PostObject object) async {
     Isar isar = GetIt.I.get();
     if (object is Post) {
       Post post = object;
@@ -723,6 +721,21 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     return true;
   }
 
+  void onFollow() {
+    List<String> following = ref.watch(userProvider.select((u) => u.following));
+    following.add(widget.postObject.posterID);
+    setState(() {});
+
+    followUser(widget.postObject.posterID).then((resp) {
+      if (resp.status == Status.failed) {
+        following.remove(widget.postObject.posterID);
+        showToast(resp.message, context);
+      }
+
+      setState(() {});
+    });
+  }
+
   void goToProfile() {
     User currentUser = ref.watch(userProvider);
     if (widget.postObject.posterID == currentUser.uuid) {
@@ -758,6 +771,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
               object: widget.postObject,
               goToProfile: goToProfile,
               shouldFollow: shouldFollow,
+              onFollow: onFollow,
               showExtension: showExtension,
             ),
             SizedBox(height: 20.h),
@@ -805,13 +819,14 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
 class PostHeader extends StatelessWidget {
   final PostObject object;
   final bool shouldFollow;
-  final VoidCallback goToProfile, showExtension;
+  final VoidCallback goToProfile, showExtension, onFollow;
   final bool hideMore;
 
   const PostHeader({
     super.key,
     this.hideMore = false,
     required this.object,
+    required this.onFollow,
     required this.shouldFollow,
     required this.goToProfile,
     required this.showExtension,
@@ -901,9 +916,7 @@ class PostHeader extends StatelessWidget {
                                 ),
                                 SizedBox(width: 10.w),
                                 GestureDetector(
-                                  onTap: () async {
-                                    await followUser(object.posterID);
-                                  },
+                                  onTap: onFollow,
                                   child: Container(
                                     height: 18.r,
                                     width: 18.r,

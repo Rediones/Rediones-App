@@ -51,7 +51,7 @@ Future<RedionesResponse> followUser(String userID) async {
   try {
     Response response = await dio.post("/auth/follow-user",
         data: {
-          "userId": userID,
+          "otherUser": userID,
         },
         options: configuration(accessToken!));
 
@@ -59,7 +59,7 @@ Future<RedionesResponse> followUser(String userID) async {
       log(response.data.toString());
 
       return const RedionesResponse(
-        message: "Posts Fetched",
+        message: "User Followed/Unfollowed",
         payload: null,
         status: Status.success,
       );
@@ -194,7 +194,6 @@ Future<RedionesResponse<List<User>>> searchForUsers(String query) async {
     status: Status.failed,
   );
 }
-
 
 List<String> fromArrayString(List<dynamic> data) {
   List<String> response = [];

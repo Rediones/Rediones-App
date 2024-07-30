@@ -8,9 +8,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:photo_gallery/photo_gallery.dart';
+import 'package:rediones/api/post_service.dart';
 import 'package:rediones/api/spotlight_service.dart';
+import 'package:rediones/api/user_service.dart';
+import 'package:rediones/components/comment_data.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/components/user_data.dart';
+import 'package:rediones/screens/home/comments.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
@@ -33,7 +37,9 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
   late bool liked;
   bool bookmarked = false;
 
-  late Future commentsFuture;
+  late Future<List<CommentData>> commentsFuture;
+
+  int totalComments = -1;
 
   late String currentUserID;
 
@@ -42,12 +48,7 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
     super.initState();
     currentUserID = ref.read(userProvider.select((u) => u.uuid));
     liked = widget.spotlight.likes.contains(currentUserID);
-    commentsFuture = getComments();
-  }
-
-  Future<int> getComments() async {
-    await Future.delayed(const Duration(seconds: 2));
-    return 0;
+    commentsFuture = getComments(widget.spotlight.id);
   }
 
   void onLike() {
@@ -98,7 +99,23 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
     });
   }
 
-  void onCommentClicked() {}
+  void onCommentClicked() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      showDragHandle: true,
+      context: context,
+      builder: (context) => PostComments(
+        future: commentsFuture,
+        postID: widget.spotlight.id,
+        parentContext: context,
+        updateCommentsCount: (int val) {
+          setState(() => totalComments = val);
+        },
+      ),
+    );
+  }
+
+  void updateCount(int val) => Future.delayed(Duration.zero, () => setState(() => totalComments = val));
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +178,8 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
                       text = "...";
                     } else if (snapshot.connectionState ==
                         ConnectionState.done) {
-                      text = "${snapshot.data as int}";
+                      text = "${snapshot.data?.length}";
+                      updateCount(snapshot.data?.length ?? totalComments);
                     }
                     return Text(
                       text,
@@ -239,6 +257,21 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
       return false;
     }
     return true;
+  }
+
+  void onFollow() {
+    List<String> following = ref.watch(userProvider.select((u) => u.following));
+    following.add(widget.spotlight.postedBy.uuid);
+    setState(() {});
+
+    followUser(widget.spotlight.postedBy.uuid).then((resp) {
+      if (resp.status == Status.failed) {
+        following.remove(widget.spotlight.postedBy.uuid);
+        showToast(resp.message, context);
+      }
+
+      setState(() {});
+    });
   }
 
   @override
@@ -337,9 +370,7 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
                                 ),
                                 SizedBox(width: 10.w),
                                 GestureDetector(
-                                  onTap: () async {
-                                    //await followUser(object.poster.id);
-                                  },
+                                  onTap: onFollow,
                                   child: Container(
                                     height: 18.r,
                                     width: 18.r,

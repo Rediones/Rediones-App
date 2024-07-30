@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/api/spotlight_service.dart';
 import 'package:rediones/components/spotlight_data.dart';
+import 'package:rediones/screens/spotlight/view_spotlight.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
@@ -33,17 +34,21 @@ class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
       getMySpotlights();
       getSavedSpotlights();
     });
+  }
 
+  @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
   }
 
   void showMessage(String msg) => showToast(msg, context);
-
 
   Future<void> getMySpotlights() async {
     String id = ref.watch(userProvider.select((u) => u.uuid));
     var response = await getUserSpotlights(id);
 
-    if(response.status == Status.failed) {
+    if (response.status == Status.failed) {
       showMessage(response.message);
       setState(() => loadingMine = false);
       return;
@@ -58,7 +63,7 @@ class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
   Future<void> getSavedSpotlights() async {
     var response = await getCurrentSavedSpotlights();
 
-    if(response.status == Status.failed) {
+    if (response.status == Status.failed) {
       showMessage(response.message);
       setState(() => loadingSaved = false);
       return;
@@ -166,65 +171,76 @@ class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
                                     _SpotlightContainer(
                                   header: "some plays",
                                   data: mySpotlights[index],
-                                  onClick: () {},
-                                ),
-                              ),
-
-                    loadingSaved ? const Center(
-                      child: loader,
-                    )
-                        :
-                    savedSpotlights.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  "assets/No Data.png",
-                                  width: 150.r,
-                                  height: 150.r,
-                                  fit: BoxFit.cover,
-                                ),
-                                SizedBox(height: 20.h),
-                                Text(
-                                  "There are no saved spotlights available",
-                                  style: context.textTheme.titleSmall!.copyWith(
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                SizedBox(height: 10.h),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() => loadingSaved = true);
-                                    getSavedSpotlights();
-                                  },
-                                  child: Text(
-                                    "Refresh",
-                                    style:
-                                        context.textTheme.titleSmall!.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: appRed,
+                                  onClick: () => context.router.pushNamed(
+                                    Pages.viewSpotlight,
+                                    extra: ViewSpotlightOptions(
+                                      data: mySpotlights[index],
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                    loadingSaved
+                        ? const Center(
+                            child: loader,
                           )
-                        : GridView.builder(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              mainAxisSpacing: 10.h,
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 10.h,
-                            ),
-                            itemCount: savedSpotlights.length,
-                            itemBuilder: (context, index) =>
-                                _SpotlightContainer(
-                              header: "play",
-                              data: savedSpotlights[index],
-                              onClick: () {},
-                            ),
-                          )
+                        : savedSpotlights.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      "assets/No Data.png",
+                                      width: 150.r,
+                                      height: 150.r,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    SizedBox(height: 20.h),
+                                    Text(
+                                      "There are no saved spotlights available",
+                                      style: context.textTheme.titleSmall!
+                                          .copyWith(
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    SizedBox(height: 10.h),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() => loadingSaved = true);
+                                        getSavedSpotlights();
+                                      },
+                                      child: Text(
+                                        "Refresh",
+                                        style: context.textTheme.titleSmall!
+                                            .copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: appRed,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : GridView.builder(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  mainAxisSpacing: 10.h,
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 10.h,
+                                ),
+                                itemCount: savedSpotlights.length,
+                                itemBuilder: (context, index) =>
+                                    _SpotlightContainer(
+                                  header: "play",
+                                  data: savedSpotlights[index],
+                                  onClick: () => context.router.pushNamed(
+                                    Pages.viewSpotlight,
+                                    extra: ViewSpotlightOptions(
+                                      data: mySpotlights[index],
+                                      showUserData: true,
+                                    ),
+                                  ),
+                                ),
+                              )
                   ],
                 ),
               ),

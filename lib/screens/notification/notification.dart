@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:rediones/api/notification_service.dart';
 import 'package:rediones/components/notification_data.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:timeago/timeago.dart' as time;
@@ -324,10 +325,23 @@ class _NotificationHeaderState extends State<NotificationHeader> {
         ),
       );
 
+  void read() {
+    bool currentState = widget.notification.opened;
+    if (currentState) return;
+
+    setState(() => widget.notification.opened = !currentState);
+    readNotification(widget.notification.id).then((resp) {
+      if (resp.status == Status.failed) {
+        setState(() => widget.notification.opened = currentState);
+        showToast(resp.message, context);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => setState(() => widget.notification.opened = true),
+      onTap: read,
       child: SizedBox(
         width: 390.w,
         child: Row(

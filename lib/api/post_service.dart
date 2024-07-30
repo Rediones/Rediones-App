@@ -208,7 +208,8 @@ Future<RedionesResponse<List<PostObject>>> getUserSavedPosts() async {
       List<PostObject> posts = [];
       for (var element in postList) {
         element["itemId"]["postedBy"] = element["user"];
-        PostObject post = processPost(element["itemId"] as Map<String, dynamic>);
+        PostObject post =
+            processPost(element["itemId"] as Map<String, dynamic>);
         posts.add(post);
       }
 
@@ -273,13 +274,16 @@ Future<List<CommentData>> getComments(String postID) async {
 }
 
 Future<RedionesResponse<CommentData?>> createComment(
-  String postID,
+  String id,
   String content,
 ) async {
   String errorHeader = "Create Comment:";
   try {
     Response response = await dio.post("/comments/",
-        data: {"relatedContent": postID, "content": content},
+        data: {
+          "relatedContent": id,
+          "content": content,
+        },
         options: configuration(accessToken!));
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       Map<String, dynamic> map = response.data["payload"];

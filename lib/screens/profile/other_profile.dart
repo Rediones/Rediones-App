@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rediones/api/message_service.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/api/user_service.dart';
@@ -16,7 +16,7 @@ import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class OtherProfilePage extends StatefulWidget {
+class OtherProfilePage extends ConsumerStatefulWidget {
   final String id;
 
   const OtherProfilePage({
@@ -25,10 +25,10 @@ class OtherProfilePage extends StatefulWidget {
   });
 
   @override
-  State<OtherProfilePage> createState() => _OtherProfilePageState();
+  ConsumerState<OtherProfilePage> createState() => _OtherProfilePageState();
 }
 
-class _OtherProfilePageState extends State<OtherProfilePage>
+class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
     with SingleTickerProviderStateMixin {
   late TabController controller;
 
@@ -51,6 +51,40 @@ class _OtherProfilePageState extends State<OtherProfilePage>
     }
     setState(() => refreshDetails = false);
     return response.payload;
+  }
+
+  void onFollow(String id) {
+    List<String> following = ref.watch(userProvider.select((u) => u.following));
+    bool followedInitially = !shouldFollow(id);
+
+    if (followedInitially) {
+      following.remove(id);
+    } else {
+      following.add(id);
+    }
+
+    setState(() {});
+
+    followUser(id).then((resp) {
+      if (resp.status == Status.failed) {
+        if (followedInitially) {
+          following.add(id);
+        } else {
+          following.remove(id);
+        }
+        showToast(resp.message, context);
+      }
+
+      setState(() {});
+    });
+  }
+
+  bool shouldFollow(String id) {
+    User currentUser = ref.watch(userProvider);
+    if (currentUser.following.contains(id)) {
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -270,14 +304,16 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () => onFollow(user.uuid),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: appRed,
                                   elevation: 1.0,
                                   fixedSize: Size(168.w, 32.h),
                                 ),
                                 child: Text(
-                                  "Follow",
+                                  shouldFollow(user.uuid)
+                                      ? "Follow"
+                                      : "Unfollow",
                                   style: context.textTheme.titleSmall!.copyWith(
                                     color: theme,
                                     fontWeight: FontWeight.w600,
@@ -332,7 +368,8 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                                   fixedSize: Size(168.w, 40.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20.h),
-                                    side: BorderSide(color: darkTheme ? neutral : neutral2),
+                                    side: BorderSide(
+                                        color: darkTheme ? neutral : neutral2),
                                   ),
                                 ),
                                 child: Text(
@@ -354,7 +391,8 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                       tabBar: TabBar(
                         controller: controller,
                         indicatorColor: appRed,
-                        dividerColor: context.isDark ? Colors.white12 : Colors.black12,
+                        dividerColor:
+                            context.isDark ? Colors.white12 : Colors.black12,
                         labelColor: appRed,
                         labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
                         labelStyle: context.textTheme.titleSmall!

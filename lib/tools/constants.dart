@@ -85,6 +85,7 @@ class Pages
   static const String communitySearch = 'community-search';
   static const String groupHome = 'group-home';
   static const String viewPost = 'view-post';
+  static const String viewSpotlight = 'view-spotlight';
  }
 
 const String helpMeID = "65454b4db0916c7a0990af7f";
