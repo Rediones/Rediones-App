@@ -354,10 +354,12 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                       tabBar: TabBar(
                         controller: controller,
                         indicatorColor: appRed,
+                        dividerColor: context.isDark ? Colors.white12 : Colors.black12,
                         labelColor: appRed,
-                        labelStyle: context.textTheme.bodyLarge!
+                        labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
+                        labelStyle: context.textTheme.titleSmall!
                             .copyWith(fontWeight: FontWeight.w600),
-                        unselectedLabelStyle: context.textTheme.bodyLarge!
+                        unselectedLabelStyle: context.textTheme.titleSmall!
                             .copyWith(fontWeight: FontWeight.w500),
                         tabs: const [
                           Tab(text: "Posts"),
@@ -375,12 +377,7 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                         children: [
                           SizedBox(height: 10.h),
                           GestureDetector(
-                            onTap: () =>
-                                Permission.storage.request().then((resp) {
-                              if (resp.isGranted) {
-                                context.router.pushNamed(Pages.yourSpotlight);
-                              }
-                            }),
+                            onTap: () {},
                             child: Container(
                               width: 390.w,
                               height: 35.h,
@@ -410,7 +407,7 @@ class _OtherProfilePageState extends State<OtherProfilePage>
                       padding:
                           EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                       child: FutureBuilder<RedionesResponse<List<PostObject>>>(
-                        future: getUsersPosts(id: user.uuid),
+                        future: getUserPosts(user.uuid),
                         builder: (_, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {

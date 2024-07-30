@@ -187,9 +187,11 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                           if (spotlightStates[index]) {
                             spotlightPlayers[index].pause();
                             spotlightStates[index] = false;
+                            ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
                           } else {
                             spotlightPlayers[index].start();
                             spotlightStates[index] = true;
+                            ref.watch(spotlightsPlayStatusProvider.notifier).state = true;
                           }
                         });
                       },
@@ -269,9 +271,11 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                               spotlight: spotlights[index],
                             ),
                           ),
-                          Positioned(
+                          AnimatedPositioned(
+                            curve: Curves.easeOut,
+                            duration: const Duration(milliseconds: 500),
                             left: 10.w,
-                            bottom: 100.h,
+                            bottom: ref.watch(spotlightsPlayStatusProvider) ? 20.h : 100.h,
                             child: SpotlightUserData(
                               spotlight: spotlights[index],
                             ),

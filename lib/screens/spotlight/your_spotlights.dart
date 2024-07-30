@@ -1,35 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rediones/api/spotlight_service.dart';
+import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets/common.dart';
 
-class YourSpotlightsPage extends StatefulWidget {
+class YourSpotlightsPage extends ConsumerStatefulWidget {
   const YourSpotlightsPage({
     super.key,
   });
 
   @override
-  State<YourSpotlightsPage> createState() => _YourSpotlightsPageState();
+  ConsumerState<YourSpotlightsPage> createState() => _YourSpotlightsPageState();
 }
 
-class _YourSpotlightsPageState extends State<YourSpotlightsPage>
+class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
 
-  final List<String> savedSpotlights = [], mySpotlights = [];
+  final List<SpotlightData> savedSpotlights = [], mySpotlights = [];
 
-  bool loading = true;
+  bool loadingSaved = true, loadingMine = true;
 
   @override
   void initState() {
     super.initState();
     tabController = TabController(length: 2, vsync: this);
-    getData();
+    Future.delayed(Duration.zero, () {
+      getMySpotlights();
+      getSavedSpotlights();
+    });
+
   }
 
-  Future<void> getData() async {
-    await Future.delayed(const Duration(seconds: 4));
-    setState(() => loading = true);
+  void showMessage(String msg) => showToast(msg, context);
+
+
+  Future<void> getMySpotlights() async {
+    String id = ref.watch(userProvider.select((u) => u.uuid));
+    var response = await getUserSpotlights(id);
+
+    if(response.status == Status.failed) {
+      showMessage(response.message);
+      setState(() => loadingMine = false);
+      return;
+    }
+
+    loadingMine = false;
+    mySpotlights.clear();
+    mySpotlights.addAll(response.payload);
+    setState(() {});
+  }
+
+  Future<void> getSavedSpotlights() async {
+    var response = await getCurrentSavedSpotlights();
+
+    if(response.status == Status.failed) {
+      showMessage(response.message);
+      setState(() => loadingSaved = false);
+      return;
+    }
+
+    loadingSaved = false;
+    savedSpotlights.clear();
+    savedSpotlights.addAll(response.payload);
+    setState(() {});
   }
 
   @override
@@ -45,7 +83,7 @@ class _YourSpotlightsPageState extends State<YourSpotlightsPage>
         ),
         leadingWidth: 30.w,
         title: Text(
-          "My Spotlights",
+          "Spotlights",
           style: context.textTheme.titleLarge,
         ),
       ),
@@ -58,7 +96,7 @@ class _YourSpotlightsPageState extends State<YourSpotlightsPage>
               TabBar(
                 controller: tabController,
                 indicatorColor: appRed,
-                dividerColor: Colors.transparent,
+                dividerColor: context.isDark ? Colors.white12 : Colors.black12,
                 labelColor: appRed,
                 labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
                 labelStyle: context.textTheme.titleSmall!
@@ -71,124 +109,125 @@ class _YourSpotlightsPageState extends State<YourSpotlightsPage>
                 ],
               ),
               SizedBox(height: 10.h),
-              if (loading)
-                const Expanded(
-                  child: Center(
-                    child: loader,
-                  ),
-                ),
-              if (!loading)
-                Expanded(
-                  child: TabBarView(
-                    controller: tabController,
-                    children: [
-                      mySpotlights.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    "assets/No Data.png",
-                                    width: 150.r,
-                                    height: 150.r,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  Text(
-                                    "There are no spotlights available",
-                                    style:
-                                        context.textTheme.titleSmall!.copyWith(
-                                      fontWeight: FontWeight.w400,
+              Expanded(
+                child: TabBarView(
+                  controller: tabController,
+                  children: [
+                    loadingMine
+                        ? const Center(
+                            child: loader,
+                          )
+                        : mySpotlights.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      "assets/No Data.png",
+                                      width: 150.r,
+                                      height: 150.r,
+                                      fit: BoxFit.cover,
                                     ),
-                                  ),
-                                  SizedBox(height: 10.h),
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() => loading = true);
-                                      getData();
-                                    },
-                                    child: Text(
-                                      "Refresh",
+                                    SizedBox(height: 20.h),
+                                    Text(
+                                      "There are no spotlights available",
                                       style: context.textTheme.titleSmall!
                                           .copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: appRed,
+                                        fontWeight: FontWeight.w400,
                                       ),
                                     ),
+                                    SizedBox(height: 10.h),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() => loadingMine = true);
+                                        getMySpotlights();
+                                      },
+                                      child: Text(
+                                        "Refresh",
+                                        style: context.textTheme.titleSmall!
+                                            .copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: appRed,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : GridView.builder(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  mainAxisSpacing: 10.h,
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 10,
+                                ),
+                                itemCount: mySpotlights.length,
+                                itemBuilder: (context, index) =>
+                                    _SpotlightContainer(
+                                  header: "some plays",
+                                  data: mySpotlights[index],
+                                  onClick: () {},
+                                ),
+                              ),
+
+                    loadingSaved ? const Center(
+                      child: loader,
+                    )
+                        :
+                    savedSpotlights.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  "assets/No Data.png",
+                                  width: 150.r,
+                                  height: 150.r,
+                                  fit: BoxFit.cover,
+                                ),
+                                SizedBox(height: 20.h),
+                                Text(
+                                  "There are no saved spotlights available",
+                                  style: context.textTheme.titleSmall!.copyWith(
+                                    fontWeight: FontWeight.w400,
                                   ),
-                                ],
-                              ),
-                            )
-                          : GridView.builder(
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                mainAxisSpacing: 10.h,
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 10,
-                              ),
-                              itemCount: mySpotlights.length,
-                              itemBuilder: (context, index) =>
-                                  _SpotlightContainer(
-                                header: "some plays",
-                                data: mySpotlights[index],
-                                onClick: () {},
-                              ),
+                                ),
+                                SizedBox(height: 10.h),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() => loadingSaved = true);
+                                    getSavedSpotlights();
+                                  },
+                                  child: Text(
+                                    "Refresh",
+                                    style:
+                                        context.textTheme.titleSmall!.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: appRed,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                      savedSpotlights.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    "assets/No Data.png",
-                                    width: 150.r,
-                                    height: 150.r,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  Text(
-                                    "There are no saved spotlights available",
-                                    style:
-                                        context.textTheme.titleSmall!.copyWith(
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  SizedBox(height: 10.h),
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() => loading = true);
-                                      getData();
-                                    },
-                                    child: Text(
-                                      "Refresh",
-                                      style: context.textTheme.titleSmall!
-                                          .copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: appRed,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : GridView.builder(
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                mainAxisSpacing: 10.h,
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 10.h,
-                              ),
-                              itemCount: savedSpotlights.length,
-                              itemBuilder: (context, index) =>
-                                  _SpotlightContainer(
-                                header: "play",
-                                data: savedSpotlights[index],
-                                onClick: () {},
-                              ),
-                            )
-                    ],
-                  ),
+                          )
+                        : GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              mainAxisSpacing: 10.h,
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 10.h,
+                            ),
+                            itemCount: savedSpotlights.length,
+                            itemBuilder: (context, index) =>
+                                _SpotlightContainer(
+                              header: "play",
+                              data: savedSpotlights[index],
+                              onClick: () {},
+                            ),
+                          )
+                  ],
                 ),
+              ),
             ],
           ),
         ),
@@ -199,7 +238,7 @@ class _YourSpotlightsPageState extends State<YourSpotlightsPage>
 
 class _SpotlightContainer extends StatefulWidget {
   final String header;
-  final String data;
+  final SpotlightData data;
   final VoidCallback onClick;
 
   const _SpotlightContainer({

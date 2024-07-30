@@ -123,3 +123,117 @@ Future<RedionesResponse<List<String>>> likeSpotlight(String spotlightID) async {
     status: Status.failed,
   );
 }
+
+Future<RedionesResponse<List<SpotlightData>>> getUserSpotlights(String userID) async {
+  String errorHeader = "Get User Spotlights:";
+  try {
+    Response response = await dio.get(
+      "/spotlights/all/$userID",
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      List<dynamic> data = response.data["payload"] as List<dynamic>;
+      List<SpotlightData> spotlights = [];
+      for (var element in data) {
+        processUser(element["postedBy"]);
+        element["likes"] = fromArrayString(element["likes"]);
+        SpotlightData spotlight = SpotlightData.fromJson(element);
+        spotlights.add(spotlight);
+      }
+      return RedionesResponse(
+        message: "Successful",
+        payload: spotlights,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Get User Spotlights Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again later.",
+    payload: [],
+    status: Status.failed,
+  );
+}
+
+Future<RedionesResponse<List<SpotlightData>>> getCurrentSavedSpotlights() async {
+  String errorHeader = "Get Saved Spotlights:";
+  try {
+    Response response = await dio.get(
+      "/saved/spotlights",
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      List<dynamic> data = response.data["payload"] as List<dynamic>;
+      List<SpotlightData> spotlights = [];
+      for (var element in data) {
+        processUser(element["user"]);
+        element["itemId"]["likes"] = fromArrayString(element["itemId"]["likes"]);
+        element["itemId"]["postedBy"] = element["user"];
+        SpotlightData spotlight = SpotlightData.fromJson(element["itemId"]);
+        spotlights.add(spotlight);
+      }
+      return RedionesResponse(
+        message: "Successful",
+        payload: spotlights,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Get Saved Spotlights Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again later.",
+    payload: [],
+    status: Status.failed,
+  );
+}
+
+Future<RedionesResponse> saveSpotlight(String spotlightID) async {
+  String errorHeader = "Save Spotlight:";
+
+  try {
+    Response response = await dio.post(
+      "/saved",
+      data: {"itemType": "Spotlight", "itemId": spotlightID},
+      options: configuration(accessToken!),
+    );
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      return RedionesResponse(
+        message: response.data["message"],
+        payload: null,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Save Post Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again!",
+    payload: null,
+    status: Status.failed,
+  );
+}

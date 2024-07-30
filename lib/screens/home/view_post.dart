@@ -49,8 +49,10 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
   @override
   void initState() {
     super.initState();
+    User user = ref.read(userProvider);
+    currentUserID = user.uuid;
     loading = true;
-    getPost();
+    Future.delayed(Duration.zero, () => getPost());
   }
 
   @override
@@ -84,9 +86,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
         isPost = false;
         mediaAndText = false;
       }
-
-      User user = ref.read(userProvider);
-      currentUserID = user.uuid;
+      User user = ref.watch(userProvider);
       liked = object!.likes.contains(currentUserID);
       bookmarked = user.savedPosts.contains(object!.uuid);
       getPostComments(object!.uuid);
@@ -227,14 +227,13 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     savePost(object!.uuid).then((value) {
       if (value.status == Status.success) {
         showToast(value.message, context);
-        List<String> postsID =
-            ref.watch(userProvider.select((value) => value.savedPosts));
-        postsID.clear();
-        postsID.addAll(value.payload);
-        updateDatabaseForSaved(value.payload);
+        List<String> postsID = ref.watch(userProvider.select((value) => value.savedPosts));
+
+        // postsID.addAll(value.payload);
+        // updateDatabaseForSaved(value.payload);
       } else {
         setState(() => bookmarked = !bookmarked);
-        showToast("Something went wrong", context);
+        showToast("Unable to save post", context);
       }
     });
   }

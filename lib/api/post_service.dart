@@ -151,24 +151,11 @@ Future<RedionesResponse<PostObject?>> getPostById(String id) async {
   );
 }
 
-Future<RedionesResponse<List<PostObject>>> getUsersPosts(
-    {String? id, User? currentUser}) async {
-  String errorHeader = "Get Users Posts:";
-
-  if ((id == null && currentUser == null) ||
-      (id != null && currentUser != null)) {
-    return RedionesResponse(
-      message:
-          "$errorHeader You can only provide either the ID or the User object but not both nor neither.",
-      payload: [],
-      status: Status.failed,
-    );
-  }
-
+Future<RedionesResponse<List<PostObject>>> getUserPosts(String id) async {
+  String errorHeader = "Get User Saved Posts:";
   try {
-    Response response = await dio.post(
-      "/post/get-post-by-user",
-      data: {"userId": currentUser == null ? id : currentUser.uuid},
+    Response response = await dio.get(
+      "/post/get-post-by-user/$id",
       options: configuration(accessToken!),
     );
 
@@ -176,12 +163,17 @@ Future<RedionesResponse<List<PostObject>>> getUsersPosts(
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
       List<PostObject> posts = [];
       for (var element in postList) {
-        posts.add(
-            processPost(element as Map<String, dynamic>, user: currentUser));
+        try {
+          PostObject post = processPost(element as Map<String, dynamic>);
+          posts.add(post);
+        } catch (e) {
+          log("Error");
+          log(element.toString());
+        }
       }
 
       return RedionesResponse(
-        message: "Posts Fetched",
+        message: "Saved Posts Fetched",
         payload: posts,
         status: Status.success,
       );
@@ -193,7 +185,7 @@ Future<RedionesResponse<List<PostObject>>> getUsersPosts(
       status: Status.failed,
     );
   } catch (e) {
-    log("Get User Posts Error: $e");
+    log("Get User Saved Posts Error: $e");
   }
 
   return RedionesResponse(
@@ -203,11 +195,11 @@ Future<RedionesResponse<List<PostObject>>> getUsersPosts(
   );
 }
 
-Future<RedionesResponse<List<PostObject>>> getUsersSavedPosts() async {
+Future<RedionesResponse<List<PostObject>>> getUserSavedPosts() async {
   String errorHeader = "Get User Saved Posts:";
   try {
     Response response = await dio.get(
-      "/auth/saved",
+      "/saved/posts",
       options: configuration(accessToken!),
     );
 
@@ -215,7 +207,9 @@ Future<RedionesResponse<List<PostObject>>> getUsersSavedPosts() async {
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
       List<PostObject> posts = [];
       for (var element in postList) {
-        posts.add(processPost(element as Map<String, dynamic>));
+        element["itemId"]["postedBy"] = element["user"];
+        PostObject post = processPost(element["itemId"] as Map<String, dynamic>);
+        posts.add(post);
       }
 
       return RedionesResponse(
@@ -379,29 +373,33 @@ Future<RedionesResponse> votePoll(String pollOptionID) async {
   );
 }
 
-Future<RedionesResponse<List<String>>> savePost(String postID) async {
+Future<RedionesResponse> savePost(String postID) async {
   String errorHeader = "Save Posts:";
 
   try {
-    Response response = await dio.patch(
-      "/post/save/$postID",
+    Response response = await dio.post(
+      "/saved",
+      data: {"itemType": "Post", "itemId": postID},
       options: configuration(accessToken!),
     );
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      List<dynamic> map = response.data["payload"] == null
-          ? []
-          : response.data["payload"] as List<dynamic>;
-      List<String> saved = fromArrayString(map);
+      // Map<String, dynamic> data = response.data;
+      // bool saved = false;
+      // if(data["payload"] != null) {
+      //   saved = true;
+      // }
+
       return RedionesResponse(
         message: response.data["message"],
-        payload: saved,
+        // payload: (savedInitially && !saved) || (!savedInitially && saved),
+        payload: null,
         status: Status.success,
       );
     }
   } on DioException catch (e) {
     return RedionesResponse(
       message: dioErrorResponse(errorHeader, e),
-      payload: [],
+      payload: null,
       status: Status.failed,
     );
   } catch (e) {
@@ -410,7 +408,7 @@ Future<RedionesResponse<List<String>>> savePost(String postID) async {
 
   return RedionesResponse(
     message: "$errorHeader An unknown error occurred. Please try again!",
-    payload: [],
+    payload: null,
     status: Status.failed,
   );
 }

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
@@ -38,10 +37,11 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
   }
 
   void getPosts() {
-    getUsersPosts(currentUser: ref.read(userProvider)).then((resp) {
+    getUserPosts(ref.read(userProvider).uuid).then((resp) {
       if (!mounted) return;
       if (resp.status == Status.failed) {
         showToast(resp.message, context);
+        setState(() => loadingPosts = false);
         return;
       }
 
@@ -54,10 +54,11 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
   }
 
   void getSavedPosts() {
-    getUsersSavedPosts().then((resp) {
+    getUserSavedPosts().then((resp) {
       if (!mounted) return;
       if (resp.status == Status.failed) {
         showToast(resp.message, context);
+        setState(() => loadingSaved = false);
         return;
       }
 
@@ -251,7 +252,8 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                       ),
                       SizedBox(height: 25.h),
                       GestureDetector(
-                        onTap: () => context.router.pushNamed(Pages.yourSpotlight),
+                        onTap: () =>
+                            context.router.pushNamed(Pages.yourSpotlight),
                         child: Container(
                           width: 390.w,
                           height: 35.h,
@@ -280,11 +282,12 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                 tabBar: TabBar(
                   controller: controller,
                   indicatorColor: appRed,
-                  dividerColor: Colors.transparent,
+                  dividerColor: context.isDark ? Colors.white12 : Colors.black12,
                   labelColor: appRed,
-                  labelStyle: context.textTheme.bodyLarge!
+                  labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
+                  labelStyle: context.textTheme.titleSmall!
                       .copyWith(fontWeight: FontWeight.w600),
-                  unselectedLabelStyle: context.textTheme.bodyLarge!
+                  unselectedLabelStyle: context.textTheme.titleSmall!
                       .copyWith(fontWeight: FontWeight.w500),
                   tabs: const [
                     Tab(text: "Posts"),
@@ -297,7 +300,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
             )
           ],
           body: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
             child: TabBarView(
               controller: controller,
               children: [
@@ -314,13 +317,36 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                         ),
                       )
                     : (posts.isEmpty)
-                        ? GestureDetector(
-                            onTap: retryPosts,
-                            child: Center(
-                              child: Text(
-                                "No posts available. Tap to refresh",
-                                style: context.textTheme.bodyLarge,
-                              ),
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  "assets/No Data.png",
+                                  width: 150.r,
+                                  height: 150.r,
+                                  fit: BoxFit.cover,
+                                ),
+                                SizedBox(height: 20.h),
+                                Text(
+                                  "There are no posts available",
+                                  style: context.textTheme.titleSmall!.copyWith(
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                GestureDetector(
+                                  onTap: retryPosts,
+                                  child: Text(
+                                    "Refresh",
+                                    style:
+                                        context.textTheme.titleSmall!.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: appRed,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                         : AnimationLimiter(
@@ -368,13 +394,36 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                         ),
                       )
                     : (savedPosts.isEmpty)
-                        ? GestureDetector(
-                            onTap: retrySaved,
-                            child: Center(
-                              child: Text(
-                                "No saved posts available. Tap to refresh",
-                                style: context.textTheme.bodyLarge,
-                              ),
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  "assets/No Data.png",
+                                  width: 150.r,
+                                  height: 150.r,
+                                  fit: BoxFit.cover,
+                                ),
+                                SizedBox(height: 20.h),
+                                Text(
+                                  "There are no saved posts available",
+                                  style: context.textTheme.titleSmall!.copyWith(
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                GestureDetector(
+                                  onTap: retrySaved,
+                                  child: Text(
+                                    "Refresh",
+                                    style:
+                                        context.textTheme.titleSmall!.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: appRed,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                         : AnimationLimiter(
@@ -398,10 +447,11 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                     child: SlideAnimation(
                                       verticalOffset: 25.h,
                                       child: FadeInAnimation(
-                                          child: PostObjectContainer(
-                                        postObject: post,
-                                        onCommentClicked: () {},
-                                      )),
+                                        child: PostObjectContainer(
+                                          postObject: post,
+                                          onCommentClicked: () {},
+                                        ),
+                                      ),
                                     ),
                                   );
                                 },

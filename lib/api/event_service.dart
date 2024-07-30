@@ -90,3 +90,79 @@ Future<RedionesResponse<List<EventData>>> getEvents() async {
     status: Status.failed,
   );
 }
+
+Future<RedionesResponse> eventInterest(String eventID, String status) async {
+  String errorHeader = "Go/Interested Event:";
+  try {
+    Response response = await dio.patch(
+      "/events/$status/$eventID",
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      Map<String, dynamic> result = response.data;
+      log(result.toString());
+
+      return const RedionesResponse(
+        message: "Event Created",
+        payload: null,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Create Event Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
+    payload: null,
+    status: Status.failed,
+  );
+}
+
+
+
+
+Future<RedionesResponse> rateEvent(String eventID, int rating) async {
+  String errorHeader = "Rate Event:";
+  try {
+    Response response = await dio.patch(
+      "/events/rate/$eventID",
+      data: {
+        "rating": rating,
+      },
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      Map<String, dynamic> result =
+      response.data["payload"] as Map<String, dynamic>;
+      EventData event = _processEvent(result);
+      return RedionesResponse(
+        message: "Event Created",
+        payload: event,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: null,
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Create Event Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
+    payload: null,
+    status: Status.failed,
+  );
+}

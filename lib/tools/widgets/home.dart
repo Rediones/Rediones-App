@@ -37,7 +37,9 @@ class BottomNavBar extends ConsumerWidget {
     int currentTab = ref.watch(dashboardIndexProvider);
 
     return KeyboardVisibilityBuilder(builder: (context, isKeyboardVisible) {
-      if (isKeyboardVisible) {
+      bool onSpotlights = ref.watch(spotlightsPlayStatusProvider);
+
+      if (isKeyboardVisible || onSpotlights) {
         return const SizedBox();
       }
 
@@ -702,9 +704,9 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
         showToast(value.message, context);
         List<String> postsID =
             ref.watch(userProvider.select((value) => value.savedPosts));
-        postsID.clear();
-        postsID.addAll(value.payload);
-        updateDatabaseForSaved(value.payload);
+        // postsID.clear();
+        // postsID.addAll(value.payload);
+        // updateDatabaseForSaved(value.payload);
       } else {
         setState(() => bookmarked = !bookmarked);
         showToast("Something went wrong", context);

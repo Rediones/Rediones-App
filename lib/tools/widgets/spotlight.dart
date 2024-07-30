@@ -77,121 +77,125 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
           likes.remove(currentUserID);
         }
 
-        if(!mounted) return;
+        if (!mounted) return;
         setState(() {});
-        showToast("Unable to ${liked ? "like" : "unlike"} your spotlight", context);
+        showToast(
+            "Unable to ${liked ? "like" : "unlike"} your spotlight", context);
       }
     });
   }
 
   void onBookmark() {
     setState(() => bookmarked = !bookmarked);
-    // savePost(widget.postObject.id).then((value) {
-    //   if (value.status == Status.success) {
-    //     showToast(value.message, context);
-    //     List<String> postsID =
-    //     ref.watch(userProvider.select((value) => value.savedPosts));
-    //     postsID.clear();
-    //     postsID.addAll(value.payload);
-    //   } else {
-    //     setState(() => bookmarked = !bookmarked);
-    //     showToast("Something went wrong", context);
-    //   }
-    // });
+    saveSpotlight(widget.spotlight.id).then((value) {
+      if (value.status == Status.success) {
+        // PROBABLY SAVE SOMETHING
+        showToast(value.message, context);
+      } else {
+        setState(() => bookmarked = !bookmarked);
+        showToast("Unable to save spotlight", context);
+      }
+    });
   }
 
   void onCommentClicked() {}
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 300.h,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Skeleton.ignore(
-                ignore: true,
-                child: AnimatedSwitcherZoom.zoomIn(
-                  duration: const Duration(milliseconds: 200),
+    return AnimatedOpacity(
+      opacity: ref.watch(spotlightsPlayStatusProvider) ? 0 : 1,
+      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 500),
+      child: SizedBox(
+        height: 300.h,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Skeleton.ignore(
+                  ignore: true,
+                  child: AnimatedSwitcherZoom.zoomIn(
+                    duration: const Duration(milliseconds: 200),
+                    child: IconButton(
+                      key: ValueKey<bool>(liked),
+                      splashRadius: 0.01,
+                      onPressed: onLike,
+                      icon: SvgPicture.asset(
+                        "assets/Like Filled.svg",
+                        color: liked ? appRed : Colors.white,
+                        width: 27.r,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 5.w),
+                Text(
+                  "${widget.spotlight.likes.length}",
+                  style: context.textTheme.titleSmall!.copyWith(
+                    color: Colors.white,
+                  ),
+                )
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Skeleton.ignore(
+                  ignore: true,
                   child: IconButton(
-                    key: ValueKey<bool>(liked),
-                    splashRadius: 0.01,
-                    onPressed: onLike,
                     icon: SvgPicture.asset(
-                      "assets/Like Filled.svg",
-                      color: liked ? appRed : Colors.white,
-                      width: 27.r,
+                      "assets/Comments Filled.svg",
+                      width: 26.r,
                     ),
+                    onPressed: onCommentClicked,
                   ),
                 ),
-              ),
-              SizedBox(width: 5.w),
-              Text(
-                "${widget.spotlight.likes.length}",
-                style: context.textTheme.titleSmall!.copyWith(
-                  color: Colors.white,
+                SizedBox(width: 5.w),
+                FutureBuilder(
+                  future: commentsFuture,
+                  builder: (context, snapshot) {
+                    String text = "";
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      text = "...";
+                    } else if (snapshot.connectionState ==
+                        ConnectionState.done) {
+                      text = "${snapshot.data as int}";
+                    }
+                    return Text(
+                      text,
+                      style: context.textTheme.titleSmall!.copyWith(
+                        color: Colors.white,
+                      ),
+                    );
+                  },
                 ),
-              )
-            ],
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Skeleton.ignore(
-                ignore: true,
-                child: IconButton(
-                  icon: SvgPicture.asset(
-                    "assets/Comments Filled.svg",
-                    width: 26.r,
-                  ),
-                  onPressed: onCommentClicked,
+              ],
+            ),
+            AnimatedSwitcherZoom.zoomIn(
+              duration: const Duration(milliseconds: 200),
+              child: IconButton(
+                key: ValueKey<bool>(bookmarked),
+                icon: SvgPicture.asset(
+                  "assets/Bookmark${bookmarked ? " Filled" : ""}.svg",
+                  width: bookmarked ? 32.r : 25.r,
+                  color: !bookmarked ? Colors.white : null,
                 ),
+                onPressed: onBookmark,
               ),
-              SizedBox(width: 5.w),
-              FutureBuilder(
-                future: commentsFuture,
-                builder: (context, snapshot) {
-                  String text = "";
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    text = "...";
-                  } else if (snapshot.connectionState == ConnectionState.done) {
-                    text = "${snapshot.data as int}";
-                  }
-                  return Text(
-                    text,
-                    style: context.textTheme.titleSmall!.copyWith(
-                      color: Colors.white,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          AnimatedSwitcherZoom.zoomIn(
-            duration: const Duration(milliseconds: 200),
-            child: IconButton(
-              key: ValueKey<bool>(bookmarked),
-              icon: SvgPicture.asset(
-                "assets/Bookmark${bookmarked ? " Filled" : ""}.svg",
-                width: bookmarked ? 32.r : 25.r,
-                color: !bookmarked ? Colors.white : null,
-              ),
-              onPressed: onBookmark,
             ),
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.more_horiz_rounded,
-              color: Colors.white,
+            IconButton(
+              icon: const Icon(
+                Icons.more_horiz_rounded,
+                color: Colors.white,
+              ),
+              iconSize: 32.r,
+              splashRadius: 0.01,
+              onPressed: () {},
             ),
-            iconSize: 32.r,
-            splashRadius: 0.01,
-            onPressed: onBookmark,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -216,18 +220,16 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
   void goToProfile() {
     User current = ref.watch(userProvider);
     ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
-    context.router
-        .pushNamed(
-          current == widget.spotlight.postedBy
-              ? Pages.profile
-              : Pages.otherProfile,
-          pathParameters: {
-            "id": current.uuid != widget.spotlight.postedBy.uuid
-                ? widget.spotlight.postedBy.uuid : "",
-          }
-        )
-        .then((res) =>
-            ref.watch(spotlightsPlayStatusProvider.notifier).state = true);
+    context.router.pushNamed(
+        current == widget.spotlight.postedBy
+            ? Pages.profile
+            : Pages.otherProfile,
+        pathParameters: {
+          "id": current.uuid != widget.spotlight.postedBy.uuid
+              ? widget.spotlight.postedBy.uuid
+              : "",
+        }).then(
+        (res) => ref.watch(spotlightsPlayStatusProvider.notifier).state = true);
   }
 
   bool get shouldFollow {
