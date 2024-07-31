@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,11 +28,11 @@ class _EventsPageState extends ConsumerState<EventsPage> {
   @override
   void initState() {
     super.initState();
-    fetchEvents();
+    Future.delayed(Duration.zero, fetchEvents);
   }
 
   void fetchEvents() {
-    getEvents().then((result) {
+    getEvents(ref.watch(userProvider.select((u) => u.uuid))).then((result) {
       if (result.status == Status.failed) {
         showToast(result.message, context);
       }
@@ -71,7 +73,12 @@ class _EventsPageState extends ConsumerState<EventsPage> {
             child: Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
-                onTap: () => context.router.pushNamed(Pages.createEvents),
+                onTap: () {
+                  context.router.pushNamed(Pages.createEvents).then((resp) {
+                    if(resp == null) return;
+                    refreshEvents();
+                  });
+                },
                 child: Container(
                   height: 35.h,
                   width: 100.w,

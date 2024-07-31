@@ -40,11 +40,17 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     Future.delayed(Duration.zero, () => FlutterNativeSplash.remove());
   }
 
+  // FOLLOW/UNFOLLOW & INTERESTED/GOING EVENTS
+
   void _showError(String text) => showToast(text, context);
 
   void goHome() => context.router.goNamed(Pages.login);
 
   void _authenticate(int level) async {
+    if(ref.read(isLoggedInProvider)) {
+      return;
+    }
+
     if (level == 0) {
       _showError("Could not login you in automatically");
       goHome();
@@ -52,7 +58,12 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     }
 
     Map<String, String>? authDetails = await FileHandler.loadAuthDetails();
-    var resp = await authenticate(authDetails!, Pages.login);
+    if(authDetails == null) {
+      goHome();
+      return;
+    }
+
+    var resp = await authenticate(authDetails, Pages.login);
     if (resp.status == Status.failed) {
       _showError("Unable to log you in. Retrying");
       _authenticate(level - 1);

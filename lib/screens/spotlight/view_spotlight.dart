@@ -12,7 +12,7 @@ class ViewSpotlightOptions {
   const ViewSpotlightOptions({
     required this.data,
     this.showUserData = false,
-});
+  });
 }
 
 class ViewSpotlightPage extends StatefulWidget {
@@ -50,77 +50,78 @@ class _ViewSpotlightPageState extends State<ViewSpotlightPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: primary,
-        body: SafeArea(
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                playing = !playing;
-                if (playing) {
-                  player.start();
-                } else {
-                  player.pause();
-                }
-              });
-            },
-            child: Stack(
-              children: [
-                Center(
-                  child: FijkView(
-                    player: player,
-                    fsFit: FijkFit.cover,
-                    fit: FijkFit.cover,
-                    panelBuilder: (player, data, context, rect, size) =>
-                        const SizedBox(),
+      backgroundColor: primary,
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              playing = !playing;
+              if (playing) {
+                player.start();
+              } else {
+                player.pause();
+              }
+            });
+          },
+          child: Stack(
+            children: [
+              Center(
+                child: FijkView(
+                  player: player,
+                  fsFit: FijkFit.cover,
+                  fit: FijkFit.cover,
+                  panelBuilder: (player, data, context, rect, size) =>
+                      const SizedBox(),
+                ),
+              ),
+              Positioned(
+                left: 10.w,
+                top: 15.h,
+                child: Text(
+                  "Spotlight",
+                  style: context.textTheme.titleLarge!.copyWith(
+                    color: Colors.white,
                   ),
                 ),
-                Positioned(
-                  left: 10.w,
-                  top: 15.h,
-                  child: Text(
-                    "Spotlight",
-                    style: context.textTheme.titleLarge!.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                AnimatedOpacity(
-                  opacity: playing ? 0 : 1,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                  child: ColoredBox(
-                    color: Colors.black.withOpacity(0.15),
-                    child: SizedBox(
-                      width: 390.w,
-                      height: 844.h,
-                      child: Center(
-                        child: Icon(
-                          Icons.play_arrow_rounded,
-                          size: 64.r,
-                          color: Colors.white60,
-                        ),
+              ),
+              AnimatedOpacity(
+                opacity: playing ? 0 : 1,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+                child: ColoredBox(
+                  color: Colors.black.withOpacity(0.15),
+                  child: SizedBox(
+                    width: 390.w,
+                    height: 844.h,
+                    child: Center(
+                      child: Icon(
+                        Icons.play_arrow_rounded,
+                        size: 64.r,
+                        color: Colors.white60,
                       ),
                     ),
                   ),
                 ),
-                Positioned(
-                  right: 10.w,
-                  bottom: 80.h,
-                  child: SpotlightToolbar(
-                    spotlight: widget.options.data,
-                  ),
+              ),
+              Positioned(
+                right: 10.w,
+                bottom: 40.h,
+                child: SpotlightToolbar(
+                  spotlight: widget.options.data,
                 ),
-                if(widget.options.showUserData)
-                  Positioned(
-                    left: 10.w,
-                    bottom: 100.h,
-                    child: SpotlightUserData(
-                      spotlight: widget.options.data,
-                    ),
-                  )
-              ],
-            ),
+              ),
+              Positioned(
+                left: 10.w,
+                bottom: 40.h,
+                child: SpotlightUserData(
+                  spotlight: widget.options.data,
+                  blockNavigation: widget.options.showUserData,
+                ),
+              )
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

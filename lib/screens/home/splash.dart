@@ -37,13 +37,13 @@ class _SplashState extends ConsumerState<Splash>
       () => controller.forward().then((_) async {
         Map<String, String>? authDetails = await FileHandler.loadAuthDetails();
         controller.reverse().then(
-            (_) => navigate(authDetails == null ? Pages.login : Pages.home));
+              (_) => navigate(),
+            );
       }),
     );
   }
 
-  void navigate(String destination) =>
-      context.router.pushReplacementNamed(destination);
+  void navigate() => context.router.pushReplacementNamed(Pages.login);
 
   @override
   void dispose() {

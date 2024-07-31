@@ -81,17 +81,17 @@ final List<GoRoute> routes = [
     path: Pages.home.path,
     name: Pages.home,
     builder: (_, __) => const LandingPage(),
-    onExit: (context, state) {
-      ProviderContainer container = ProviderContainer();
-      var controller = container.read(exitAttemptProvider.notifier);
-      if (controller.state == 0) {
-        return true;
-      } else {
-        controller.state--;
-        Future.delayed(const Duration(seconds: 2), () => controller.state = 2);
-      }
-      return false;
-    },
+    // onExit: (context, state) {
+    //   ProviderContainer container = ProviderContainer();
+    //   var controller = container.read(exitAttemptProvider.notifier);
+    //   if (controller.state == 0) {
+    //     return true;
+    //   } else {
+    //     controller.state--;
+    //     Future.delayed(const Duration(seconds: 2), () => controller.state = 2);
+    //   }
+    //   return false;
+    // },
   ),
   GoRoute(
     path: Pages.createPosts.path,
@@ -154,7 +154,7 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.yourSpotlight.path,
     name: Pages.yourSpotlight,
-    builder: (_, __) => const YourSpotlightsPage(),
+    builder: (_, state) => YourSpotlightsPage(id: state.extra as String),
   ),
   GoRoute(
     path: Pages.messagePocket.path,

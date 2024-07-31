@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rediones/api/spotlight_service.dart';
 import 'package:rediones/components/spotlight_data.dart';
 import 'package:rediones/screens/spotlight/view_spotlight.dart';
@@ -8,10 +11,13 @@ import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets/common.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 class YourSpotlightsPage extends ConsumerStatefulWidget {
+  final String id;
   const YourSpotlightsPage({
     super.key,
+    required this.id,
   });
 
   @override
@@ -26,13 +32,18 @@ class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
 
   bool loadingSaved = true, loadingMine = true;
 
+  late bool isViewingOtherUserSpotlights;
+
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 2, vsync: this);
+    isViewingOtherUserSpotlights = ref.read(userProvider.select((u) => u.uuid)) != widget.id;
+    tabController = TabController(length: isViewingOtherUserSpotlights ? 1 : 2, vsync: this);
     Future.delayed(Duration.zero, () {
       getMySpotlights();
-      getSavedSpotlights();
+      if(!isViewingOtherUserSpotlights) {
+        getSavedSpotlights();
+      }
     });
   }
 
@@ -45,7 +56,7 @@ class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
   void showMessage(String msg) => showToast(msg, context);
 
   Future<void> getMySpotlights() async {
-    String id = ref.watch(userProvider.select((u) => u.uuid));
+    String id = isViewingOtherUserSpotlights ? widget.id : ref.watch(userProvider.select((u) => u.uuid));
     var response = await getUserSpotlights(id);
 
     if (response.status == Status.failed) {
@@ -98,6 +109,7 @@ class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
           child: Column(
             children: [
               SizedBox(height: 10.h),
+              if(!isViewingOtherUserSpotlights)
               TabBar(
                 controller: tabController,
                 indicatorColor: appRed,
@@ -114,6 +126,7 @@ class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
                 ],
               ),
               SizedBox(height: 10.h),
+
               Expanded(
                 child: TabBarView(
                   controller: tabController,
@@ -179,6 +192,8 @@ class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
                                   ),
                                 ),
                               ),
+
+                    if(!isViewingOtherUserSpotlights)
                     loadingSaved
                         ? const Center(
                             child: loader,
@@ -269,6 +284,26 @@ class _SpotlightContainer extends StatefulWidget {
 }
 
 class _SpotlightContainerState extends State<_SpotlightContainer> {
+  String? filePath;
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  Future<void> load() async {
+    final fileName = await VideoThumbnail.thumbnailFile(
+      video: widget.data.url,
+      thumbnailPath: (await getTemporaryDirectory()).path,
+      imageFormat: ImageFormat.WEBP,
+      maxWidth: 180.w.toInt(),
+      maxHeight: 220.h.toInt(),
+      quality: 75,
+    );
+    setState(() => filePath = fileName);
+  }
+
   @override
   Widget build(BuildContext context) {
     bool darkTheme = context.isDark;
@@ -280,32 +315,22 @@ class _SpotlightContainerState extends State<_SpotlightContainer> {
         height: 220.h,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: darkTheme ? neutral3 : fadedPrimary),
+          border: filePath == null
+              ? Border.all(
+                  color: darkTheme ? neutral3 : fadedPrimary,
+                )
+              : null,
+          image: filePath == null
+              ? null
+              : DecorationImage(
+                  image: FileImage(
+                    File(filePath!),
+                  ),
+                  fit: BoxFit.cover,
+                ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left: 5.w),
-              child: Text(widget.header, style: context.textTheme.bodyMedium),
-            ),
-            ClipRRect(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(8.r),
-                bottomRight: Radius.circular(8.r),
-              ),
-              // child: FadeInImage(
-              //   height: 155.h,
-              //   width: 180.w,
-              //   fit: BoxFit.cover,
-              //   placeholder: MemoryImage(kTransparentImage),
-              //   image: MediaThumbnailProvider(
-              //     media: widget.data,
-              //   ),
-              // ),
-            )
-          ],
-        ),
+        alignment: Alignment.center,
+        child: filePath == null ? loader : null,
       ),
     );
   }

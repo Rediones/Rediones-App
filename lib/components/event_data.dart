@@ -13,7 +13,10 @@ class EventData {
   final List<String> interested;
   final DateTime date;
   final TimeOfDay time;
-  final double rating;
+  final int rated;
+  final int totalRatings;
+  final int count;
+  final double averageRating;
   final User author;
 
   const EventData({
@@ -28,7 +31,10 @@ class EventData {
     required this.going,
     required this.time,
     required this.author,
-    this.rating = 0.0,
+    this.count = 0,
+    this.rated = 0,
+    this.totalRatings = 0,
+    this.averageRating = 0.0,
   });
 
   EventData.fromJson(Map<String, dynamic> data)
@@ -40,8 +46,11 @@ class EventData {
         categories = data["categories"],
         interested = data["interested"],
         going = data["going"],
-        rating = (data["rating"] as num).toDouble(),
+        averageRating = (data["averageRating"] as num).toDouble(),
         id = data["_id"],
+        count = (data["count"] as num).toInt(),
+        totalRatings = (data["totalRatings"] as num).toInt(),
+        rated = (data["rated"] as num).toInt(),
         author = User.fromJson(data["postedBy"]),
         time = TimeOfDay.now();
 }

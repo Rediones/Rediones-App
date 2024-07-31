@@ -22,7 +22,10 @@ class HomeDrawer extends ConsumerStatefulWidget {
 
 class _HomeDrawerState extends ConsumerState<HomeDrawer> {
 
-  void logoutApp() => context.router.goNamed(Pages.login);
+  void logoutApp() {
+    logout(ref);
+    context.router.goNamed(Pages.splash);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,9 +137,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
             onTap: () async {
-              logout(ref);
               Isar isar = GetIt.I.get();
-
               await isar.writeTxn(() async {
                 await isar.users.where().deleteAll();
                 await isar.posts.where().deleteAll();

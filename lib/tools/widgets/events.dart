@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:intl/intl.dart';
+import 'package:rediones/api/event_service.dart';
 import 'package:rediones/components/event_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
@@ -25,10 +26,16 @@ class EventContainer extends ConsumerStatefulWidget {
 }
 
 class _EventContainerState extends ConsumerState<EventContainer> {
-  int status = 0;
   bool expanded = false;
   late bool past;
-  double stars = 0.0;
+  late double stars, averageRating;
+
+  late bool going, interested;
+
+  final List<String> options = [
+    "Interested",
+    "Going",
+  ];
 
   String truncate() {
     if (!expanded) {
@@ -44,6 +51,66 @@ class _EventContainerState extends ConsumerState<EventContainer> {
     super.initState();
     past = DateTime.now().millisecondsSinceEpoch >=
         widget.data.date.millisecondsSinceEpoch;
+    stars = widget.data.rated.toDouble();
+    averageRating = widget.data.averageRating;
+    String currentID = ref.read(userProvider.select((u) => u.uuid));
+
+    going = widget.data.going.contains(currentID);
+    interested = widget.data.interested.contains(currentID);
+  }
+
+  void showMsg(String msg) => showToast(msg, context);
+
+  void rate(double value) async {
+    if (stars != 0) {
+      showToast("You have already rated this event", context);
+      return;
+    }
+
+    double originalRating = stars;
+    setState(() => stars = value);
+    var resp = await rateEvent(widget.data.id, value);
+    if (resp.status == Status.failed) {
+      setState(() => stars = originalRating);
+      showMsg(resp.message);
+    }
+
+    averageRating =
+        (widget.data.totalRatings + value.toInt()) / (widget.data.count + 1);
+    setState(() {});
+  }
+
+  void indicateInterest(int index) async {
+    late String path;
+    late bool initial;
+
+    if (index == 0) {
+      path = "interested";
+      initial = interested;
+    } else {
+      path = "going";
+      initial = going;
+    }
+
+    setState(() {
+      if (index == 0) {
+        interested = !initial;
+      } else {
+        going = !initial;
+      }
+    });
+
+    var resp = await eventInterest(widget.data.id, path);
+    if (resp.status == Status.failed) {
+      setState(() {
+        if (index == 0) {
+          interested = initial;
+        } else {
+          going = initial;
+        }
+      });
+      showMsg(resp.message);
+    }
   }
 
   @override
@@ -219,21 +286,21 @@ class _EventContainerState extends ConsumerState<EventContainer> {
                             horizontal: 5.w,
                             vertical: 2.h,
                           ),
-                          linearGradient: LinearGradient(
+                          linearGradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              theme.withOpacity(0.1),
-                              theme.withOpacity(0.05),
+                              Colors.black26,
+                              Colors.black26,
                             ],
-                            stops: const [0.1, 1],
+                            stops: [0.1, 1],
                           ),
-                          borderGradient: LinearGradient(
+                          borderGradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              theme.withOpacity(0.5),
-                              theme.withOpacity(0.5),
+                              Colors.black26,
+                              Colors.black26,
                             ],
                           ),
                           child: Row(
@@ -244,7 +311,7 @@ class _EventContainerState extends ConsumerState<EventContainer> {
                                   color: appRed, size: 14.r),
                               SizedBox(width: 2.w),
                               Text(
-                                widget.data.rating.toStringAsFixed(1),
+                                averageRating.toStringAsFixed(1),
                                 style: context.textTheme.labelMedium!.copyWith(
                                   color: theme,
                                   fontWeight: FontWeight.w500,
@@ -289,7 +356,7 @@ class _EventContainerState extends ConsumerState<EventContainer> {
                     SizedBox(height: 5.h),
                     RatingStars(
                       value: stars,
-                      onValueChanged: (val) => setState(() => stars = val),
+                      onValueChanged: rate,
                       starBuilder: (_, color) =>
                           Icon(Boxicons.bxs_star, color: color, size: 16.r),
                       starCount: 5,
@@ -308,35 +375,36 @@ class _EventContainerState extends ConsumerState<EventContainer> {
               : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(
-                    3,
-                    (index) => GestureDetector(
-                      onTap: () => setState(() => status = index),
-                      child: Container(
-                        width: 105.w,
-                        height: 35.h,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.h),
-                          color:
-                              (index == status) ? appRed : Colors.transparent,
-                          border: Border.all(
-                            color: (index == status)
-                                ? Colors.transparent
-                                : (darkTheme ? neutral3 : fadedPrimary),
+                    options.length,
+                    (index) {
+                      bool selected =
+                          ((index == 0 && interested) || (index == 1 && going));
+                      return GestureDetector(
+                        onTap: () => indicateInterest(index),
+                        child: Container(
+                          width: 160.w,
+                          height: 35.h,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20.h),
+                            color: selected ? appRed : Colors.transparent,
+                            border: Border.all(
+                              color: selected
+                                  ? Colors.transparent
+                                  : (darkTheme ? neutral3 : fadedPrimary),
+                            ),
+                          ),
+                          child: Text(
+                            options[index],
+                            style: context.textTheme.bodyLarge!.copyWith(
+                              color: selected
+                                  ? theme
+                                  : (darkTheme ? Colors.white : Colors.black),
+                            ),
                           ),
                         ),
-                        child: Text(
-                          index == 0
-                              ? "Interested"
-                              : (index == 1 ? "Going" : "Not Interested"),
-                          style: context.textTheme.bodyLarge!.copyWith(
-                            color: (index == status)
-                                ? theme
-                                : (darkTheme ? Colors.white : Colors.black),
-                          ),
-                        ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ),
           SizedBox(height: 10.h),

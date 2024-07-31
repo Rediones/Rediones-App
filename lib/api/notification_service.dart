@@ -7,6 +7,7 @@ import 'user_service.dart' as ps;
 export 'base.dart';
 
 Future<RedionesResponse<List<NotificationData>>> getNotifications() async {
+  log("Before Notification Check");
   if (ps.accessToken == null) {
     return const RedionesResponse(
       message: "",
@@ -14,14 +15,18 @@ Future<RedionesResponse<List<NotificationData>>> getNotifications() async {
       status: Status.success,
     );
   }
+  log("After Notification Check");
 
   String errorHeader = "Get Notification:";
 
   try {
-    Response response = await dio.get("/notifications/",
-        options: configuration(ps.accessToken!));
+    Response response = await dio.get(
+      "/notifications/",
+      options: configuration(ps.accessToken!),
+    );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      log("Notification Response");
       List<dynamic> data = response.data["payload"] as List<dynamic>;
       List<NotificationData> notifications = [];
       for (var notification in data) {

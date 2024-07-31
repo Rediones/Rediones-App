@@ -110,7 +110,6 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
         setState(() => _shouldRefresh = true);
       }
     });
-
   }
 
   bool get available {
@@ -187,11 +186,15 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                           if (spotlightStates[index]) {
                             spotlightPlayers[index].pause();
                             spotlightStates[index] = false;
-                            ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+                            ref
+                                .watch(spotlightsPlayStatusProvider.notifier)
+                                .state = false;
                           } else {
                             spotlightPlayers[index].start();
                             spotlightStates[index] = true;
-                            ref.watch(spotlightsPlayStatusProvider.notifier).state = true;
+                            ref
+                                .watch(spotlightsPlayStatusProvider.notifier)
+                                .state = true;
                           }
                         });
                       },
@@ -275,7 +278,9 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                             curve: Curves.easeOut,
                             duration: const Duration(milliseconds: 500),
                             left: 10.w,
-                            bottom: ref.watch(spotlightsPlayStatusProvider) ? 20.h : 100.h,
+                            bottom: ref.watch(spotlightsPlayStatusProvider)
+                                ? 20.h
+                                : 100.h,
                             child: SpotlightUserData(
                               spotlight: spotlights[index],
                             ),
@@ -293,12 +298,17 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
                         children: [
                           TextSpan(
                             text: "No spotlights available.",
-                            style: context.textTheme.bodyLarge,
+                            style: context.textTheme.bodyLarge!.copyWith(
+                              color: theme,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           TextSpan(
-                            text: " Tap to refresh",
-                            style: context.textTheme.bodyLarge!
-                                .copyWith(color: appRed),
+                            text: " Refresh",
+                            style: context.textTheme.bodyLarge!.copyWith(
+                              color: appRed,
+                              fontWeight: FontWeight.w700,
+                            ),
                             recognizer: TapGestureRecognizer()
                               ..onTap =
                                   () => setState(() => _shouldRefresh = true),

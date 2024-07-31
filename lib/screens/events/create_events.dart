@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:crop_image/crop_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -49,9 +50,8 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
   DateTime? pickedDate;
   TimeOfDay? pickedTime;
 
-  void navigate(RedionesResponse<EventData?> result) {
-    ref.watch(eventsProvider.notifier).state.add(result.payload!);
-    context.router.pop();
+  void navigate() {
+    context.router.pop(true);
   }
 
   void create() {
@@ -61,7 +61,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
         Navigator.of(context).pop();
         showToast(result.message, context);
         if (result.status == Status.success) {
-          navigate(result);
+          navigate();
         }
       },
     );
@@ -353,7 +353,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                   SizedBox(height: 4.h),
                   Container(
                     height: 40.h,
-                    width: 250.w,
+                    width: 390.w,
                     padding: EdgeInsets.only(left: 10.w),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20.h),
@@ -373,7 +373,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                             );
                             if (pickedDate != null) {
                               setState(
-                                    () => formattedDate = formatDate(
+                                () => formattedDate = formatDate(
                                     DateFormat("dd/MM/yyyy")
                                         .format(pickedDate!),
                                     shorten: true),
@@ -389,7 +389,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                               ),
                               SizedBox(width: 10.w),
                               SizedBox(
-                                width: 80.w,
+                                width: 100.w,
                                 child: Text(
                                   pickedDate == null
                                       ? "Jan 1, 2023"
@@ -426,13 +426,17 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                           child: Row(
                             children: [
                               SizedBox(
-                                width: 70.w,
+                                width: 100.w,
                                 child: Text(
-                                  pickedDate == null ? "12:00 AM" : formattedTime,
+                                  pickedDate == null
+                                      ? "12:00 AM"
+                                      : formattedTime,
                                   style: context.textTheme.bodyLarge!.copyWith(
-                                      fontWeight: pickedDate == null
-                                          ? FontWeight.w200
-                                          : FontWeight.normal),
+                                    fontWeight: pickedDate == null
+                                        ? FontWeight.w200
+                                        : FontWeight.normal,
+                                  ),
+                                  textAlign: TextAlign.end,
                                 ),
                               ),
                               SizedBox(width: 10.w),

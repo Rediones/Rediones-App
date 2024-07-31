@@ -22,7 +22,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
     with SingleTickerProviderStateMixin {
   final List<NotificationData> filtered = [];
   late TabController controller;
-  bool loaded = false;
+  bool loading = true;
 
   @override
   void initState() {
@@ -40,15 +40,15 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
   void fetch() => getNotifications().then(
         (response) {
           if (mounted) {
+            ref.watch(notificationsProvider).clear();
             ref.watch(notificationsProvider).addAll(response.payload);
-            setState(() => loaded = true);
+            setState(() => loading = false);
           }
         },
       );
 
   Future<void> refresh() async {
-    setState(() => loaded = false);
-    ref.watch(notificationsProvider).clear();
+    setState(() => loading = true);
     fetch();
   }
 
@@ -108,7 +108,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
               children: [
                 SizedBox(height: 10.h),
                 Expanded(
-                  child: !loaded
+                  child: loading
                       ? const CenteredPopup()
                       : (notifications.isEmpty)
                           ? Center(
@@ -164,70 +164,66 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
               ],
             ),
           ),
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/No Data.png",
-                    width: 150.r,
-                    height: 150.r,
-                    fit: BoxFit.cover,
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  "assets/No Data.png",
+                  width: 150.r,
+                  height: 150.r,
+                  fit: BoxFit.cover,
+                ),
+                SizedBox(height: 20.h),
+                Text(
+                  "There are no verified notifications available",
+                  style: context.textTheme.titleSmall!.copyWith(
+                    fontWeight: FontWeight.w400,
                   ),
-                  SizedBox(height: 20.h),
-                  Text(
-                    "There are no verified notifications available",
+                ),
+                SizedBox(height: 10.h),
+                GestureDetector(
+                  onTap: refresh,
+                  child: Text(
+                    "Refresh",
                     style: context.textTheme.titleSmall!.copyWith(
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w700,
+                      color: appRed,
                     ),
                   ),
-                  SizedBox(height: 10.h),
-                  GestureDetector(
-                    onTap: refresh,
-                    child: Text(
-                      "Refresh",
-                      style: context.textTheme.titleSmall!.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: appRed,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/No Data.png",
-                    width: 150.r,
-                    height: 150.r,
-                    fit: BoxFit.cover,
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  "assets/No Data.png",
+                  width: 150.r,
+                  height: 150.r,
+                  fit: BoxFit.cover,
+                ),
+                SizedBox(height: 20.h),
+                Text(
+                  "There are no tags and mentions available",
+                  style: context.textTheme.titleSmall!.copyWith(
+                    fontWeight: FontWeight.w400,
                   ),
-                  SizedBox(height: 20.h),
-                  Text(
-                    "There are no tags and mentions available",
+                ),
+                SizedBox(height: 10.h),
+                GestureDetector(
+                  onTap: refresh,
+                  child: Text(
+                    "Refresh",
                     style: context.textTheme.titleSmall!.copyWith(
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w700,
+                      color: appRed,
                     ),
                   ),
-                  SizedBox(height: 10.h),
-                  GestureDetector(
-                    onTap: refresh,
-                    child: Text(
-                      "Refresh",
-                      style: context.textTheme.titleSmall!.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: appRed,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

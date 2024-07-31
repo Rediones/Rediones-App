@@ -69,6 +69,7 @@ PostObject processPost(Map<String, dynamic> result, {User? user}) {
 }
 
 Future<RedionesResponse<List<PostObject>>> getPosts() async {
+  log("Here Before Access Token");
   if (accessToken == null) {
     return const RedionesResponse(
       message: "",
@@ -86,6 +87,7 @@ Future<RedionesResponse<List<PostObject>>> getPosts() async {
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      log(response.data.toString());
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
       List<PostObject> posts = [];
       for (var element in postList) {
@@ -204,6 +206,7 @@ Future<RedionesResponse<List<PostObject>>> getUserSavedPosts() async {
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      log(response.data.toString());
       List<dynamic> postList = response.data["payload"] as List<dynamic>;
       List<PostObject> posts = [];
       for (var element in postList) {

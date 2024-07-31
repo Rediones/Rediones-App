@@ -415,7 +415,10 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                         children: [
                           SizedBox(height: 10.h),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () => context.router.pushNamed(
+                              Pages.yourSpotlight,
+                              extra: user.uuid,
+                            ),
                             child: Container(
                               width: 390.w,
                               height: 35.h,
@@ -428,7 +431,7 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                               ),
                               child: Text(
                                 "View Spotlights",
-                                style: context.textTheme.bodyMedium,
+                                style: context.textTheme.bodyLarge,
                               ),
                             ),
                           ),

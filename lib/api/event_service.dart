@@ -4,7 +4,7 @@ import 'package:rediones/components/event_data.dart';
 
 export 'package:rediones/api/base.dart' show RedionesResponse, Status;
 
-Future<RedionesResponse<EventData?>> createEvent(
+Future<RedionesResponse> createEvent(
     Map<String, dynamic> data) async {
   String errorHeader = "Create Event:";
   try {
@@ -15,12 +15,9 @@ Future<RedionesResponse<EventData?>> createEvent(
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      Map<String, dynamic> result =
-          response.data["payload"] as Map<String, dynamic>;
-      EventData event = _processEvent(result);
-      return RedionesResponse(
+      return const RedionesResponse(
         message: "Event Created",
-        payload: event,
+        payload: null,
         status: Status.success,
       );
     }
@@ -41,7 +38,7 @@ Future<RedionesResponse<EventData?>> createEvent(
   );
 }
 
-EventData _processEvent(Map<String, dynamic> result) {
+EventData _processEvent(Map<String, dynamic> result, String currentUserID) {
   Map<String, dynamic> user = result["postedBy"] as Map<String, dynamic>;
   processUser(user);
 
@@ -50,10 +47,27 @@ EventData _processEvent(Map<String, dynamic> result) {
   result["going"] = fromArrayString(result["going"] as List<dynamic>);
   result["categories"] = fromArrayString(result["categories"] as List<dynamic>);
 
+  int rated = 0, total = 0, count = 0;
+  if (currentUserID.isNotEmpty) {
+    List<dynamic> ratings = result["ratings"];
+    for (var element in ratings) {
+      if (element["user"] == currentUserID && rated == 0) {
+        rated = element["value"];
+      }
+      total += element["value"] as int;
+    }
+    count = ratings.length;
+  }
+
+  result["rated"] = rated;
+  result["totalRatings"] = total;
+  result["count"] = count;
+
   return EventData.fromJson(result);
 }
 
-Future<RedionesResponse<List<EventData>>> getEvents() async {
+Future<RedionesResponse<List<EventData>>> getEvents(
+    String currentUserID) async {
   String errorHeader = "Get Events:";
   try {
     Response response = await dio.get(
@@ -65,7 +79,8 @@ Future<RedionesResponse<List<EventData>>> getEvents() async {
       List<dynamic> eventList = response.data["payload"] as List<dynamic>;
       List<EventData> events = [];
       for (var element in eventList) {
-        events.add(_processEvent(element as Map<String, dynamic>));
+        events
+            .add(_processEvent(element as Map<String, dynamic>, currentUserID));
       }
 
       return RedionesResponse(
@@ -126,27 +141,21 @@ Future<RedionesResponse> eventInterest(String eventID, String status) async {
   );
 }
 
-
-
-
-Future<RedionesResponse> rateEvent(String eventID, int rating) async {
+Future<RedionesResponse> rateEvent(String eventID, double rating) async {
   String errorHeader = "Rate Event:";
   try {
     Response response = await dio.patch(
       "/events/rate/$eventID",
       data: {
-        "rating": rating,
+        "rating": rating.toInt(),
       },
       options: configuration(accessToken!),
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      Map<String, dynamic> result =
-      response.data["payload"] as Map<String, dynamic>;
-      EventData event = _processEvent(result);
-      return RedionesResponse(
-        message: "Event Created",
-        payload: event,
+      return const RedionesResponse(
+        message: "Event Rated",
+        payload: null,
         status: Status.success,
       );
     }

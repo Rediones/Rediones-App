@@ -252,8 +252,10 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                       ),
                       SizedBox(height: 25.h),
                       GestureDetector(
-                        onTap: () =>
-                            context.router.pushNamed(Pages.yourSpotlight),
+                        onTap: () => context.router.pushNamed(
+                          Pages.yourSpotlight,
+                          extra: user.uuid,
+                        ),
                         child: Container(
                           width: 390.w,
                           height: 35.h,
@@ -282,7 +284,8 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                 tabBar: TabBar(
                   controller: controller,
                   indicatorColor: appRed,
-                  dividerColor: context.isDark ? Colors.white12 : Colors.black12,
+                  dividerColor:
+                      context.isDark ? Colors.white12 : Colors.black12,
                   labelColor: appRed,
                   labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
                   labelStyle: context.textTheme.titleSmall!

@@ -221,9 +221,11 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
 
 class SpotlightUserData extends ConsumerStatefulWidget {
   final SpotlightData spotlight;
+  final bool blockNavigation;
 
   const SpotlightUserData({
     super.key,
+    this.blockNavigation = false,
     required this.spotlight,
   });
 
@@ -236,6 +238,8 @@ class _SpotlightUserDataState extends ConsumerState<SpotlightUserData> {
   late String _time;
 
   void goToProfile() {
+    if(widget.blockNavigation) return;
+
     User current = ref.watch(userProvider);
     ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
     context.router.pushNamed(
