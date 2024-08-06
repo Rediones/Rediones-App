@@ -2,7 +2,8 @@ import 'package:rediones/api/base.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 
-export 'package:rediones/api/base.dart' show RedionesResponse, Status, initSocket;
+export 'package:rediones/api/base.dart'
+    show RedionesResponse, Status, initSocket;
 //ignore_for_file: empty_catches
 
 String? accessToken;
@@ -49,15 +50,15 @@ Future<RedionesResponse<User?>> authenticate(
 Future<RedionesResponse> followUser(String userID) async {
   String errorHeader = "Follow User:";
   try {
-    Response response = await dio.post("/auth/follow-user",
-        data: {
-          "otherUser": userID,
-        },
-        options: configuration(accessToken!));
+    Response response = await dio.post(
+      "/auth/follow-user",
+      data: {
+        "userId": userID,
+      },
+      options: configuration(accessToken!),
+    );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      log(response.data.toString());
-
       return const RedionesResponse(
         message: "User Followed/Unfollowed",
         payload: null,
@@ -65,6 +66,7 @@ Future<RedionesResponse> followUser(String userID) async {
       );
     }
   } on DioException catch (e) {
+    log(e.toString());
     return RedionesResponse(
       message: dioErrorResponse(errorHeader, e),
       payload: null,
@@ -128,7 +130,7 @@ Future<RedionesResponse<User?>> getUser(String id) async {
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       Map<String, dynamic> processedUser =
-      response.data["payload"] as Map<String, dynamic>;
+          response.data["payload"] as Map<String, dynamic>;
       processUser(processedUser);
       User user = User.fromJson(processedUser);
       return RedionesResponse(
@@ -155,7 +157,6 @@ Future<RedionesResponse<User?>> getUser(String id) async {
 }
 
 Future<RedionesResponse<List<User>>> searchForUsers(String query) async {
-
   String errorHeader = "Search Users:";
 
   try {

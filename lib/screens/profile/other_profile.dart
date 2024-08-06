@@ -79,6 +79,9 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
     });
   }
 
+  void navigate(Conversation resp) =>
+      context.router.pushNamed(Pages.inbox, extra: resp);
+
   bool shouldFollow(String id) {
     User currentUser = ref.watch(userProvider);
     if (currentUser.following.contains(id)) {
@@ -158,8 +161,9 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                                     progressIndicatorBuilder:
                                         (context, url, download) => Center(
                                       child: CircularProgressIndicator(
-                                          color: appRed,
-                                          value: download.progress),
+                                        color: appRed,
+                                        value: download.progress,
+                                      ),
                                     ),
                                     imageBuilder: (context, provider) =>
                                         Container(
@@ -169,7 +173,9 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                                         borderRadius:
                                             BorderRadius.circular(8.r),
                                         image: DecorationImage(
-                                            image: provider, fit: BoxFit.cover),
+                                          image: provider,
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -307,7 +313,7 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                                 onPressed: () => onFollow(user.uuid),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: appRed,
-                                  elevation: 1.0,
+                                  elevation: 0.0,
                                   fixedSize: Size(168.w, 32.h),
                                 ),
                                 child: Text(
@@ -322,10 +328,6 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                               ),
                               ElevatedButton(
                                 onPressed: () {
-                                  void navigate(Conversation resp) =>
-                                      context.router
-                                          .pushNamed(Pages.inbox, extra: resp);
-
                                   showDialog(
                                     context: context,
                                     useSafeArea: true,
@@ -364,7 +366,7 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
-                                  elevation: 1.0,
+                                  elevation: 0.0,
                                   fixedSize: Size(168.w, 40.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20.h),
@@ -425,7 +427,8 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                    color: darkTheme ? neutral3 : fadedPrimary),
+                                  color: darkTheme ? neutral3 : fadedPrimary,
+                                ),
                                 borderRadius: BorderRadius.circular(6.r),
                                 color: Colors.transparent,
                               ),

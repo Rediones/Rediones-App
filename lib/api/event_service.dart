@@ -175,3 +175,44 @@ Future<RedionesResponse> rateEvent(String eventID, double rating) async {
     status: Status.failed,
   );
 }
+
+Future<RedionesResponse<List<EventData>>> getAllInterestedEvents(
+    String currentUserID) async {
+  String errorHeader = "Get Interested Events:";
+  try {
+    Response response = await dio.get(
+      "/events/user-interested",
+      options: configuration(accessToken!),
+    );
+
+    if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      List<dynamic> eventList = response.data["payload"] as List<dynamic>;
+      List<EventData> events = [];
+      for (var element in eventList) {
+        events
+            .add(_processEvent(element as Map<String, dynamic>, currentUserID));
+      }
+
+      return RedionesResponse(
+        message: "Interested Events Fetched",
+        payload: events,
+        status: Status.success,
+      );
+    }
+  } on DioException catch (e) {
+    return RedionesResponse(
+      message: dioErrorResponse(errorHeader, e),
+      payload: [],
+      status: Status.failed,
+    );
+  } catch (e) {
+    log("Get Interested Events Error: $e");
+  }
+
+  return RedionesResponse(
+    message: "$errorHeader An unknown error occurred. Please try again.",
+    payload: [],
+    status: Status.failed,
+  );
+}
+

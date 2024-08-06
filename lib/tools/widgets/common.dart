@@ -32,11 +32,13 @@ class TabHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) =>
-      Container(
-        color: context.isDark ? const Color(0xFF121212) : Colors.white,
-        child: tabBar,
-      );
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    bool isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    return Container(
+      color: isDark ? const Color(0xFF121212) : Colors.white,
+      child: tabBar,
+    );
+  }
 
   @override
   bool shouldRebuild(TabHeaderDelegate oldDelegate) => false;
@@ -57,7 +59,7 @@ class WidgetHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) =>
+          BuildContext context, double shrinkOffset, bool overlapsContent) =>
       Container(
         color: color,
         height: height,
@@ -76,10 +78,10 @@ class Popup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const AlertDialog(
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    content: CenteredPopup(),
-  );
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        content: CenteredPopup(),
+      );
 }
 
 class CenteredPopup extends StatelessWidget {
@@ -150,7 +152,7 @@ class SpecialForm extends StatelessWidget {
       height: height,
       child: TextFormField(
         autovalidateMode:
-        autoValidate ? AutovalidateMode.always : AutovalidateMode.disabled,
+            autoValidate ? AutovalidateMode.always : AutovalidateMode.disabled,
         maxLines: maxLines,
         focusNode: focus,
         autofocus: autoFocus,
@@ -165,7 +167,8 @@ class SpecialForm extends StatelessWidget {
           }
         },
         cursorColor: appRed,
-        style: style ?? context.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),
+        style: style ??
+            context.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           errorMaxLines: 1,
           errorStyle: const TextStyle(height: 0, fontSize: 0),
@@ -176,45 +179,42 @@ class SpecialForm extends StatelessWidget {
                 horizontal: 15.w,
                 vertical: maxLines == 1 ? 5.h : 10.h,
               ),
-          prefixIcon: prefix != null ? SizedBox(
-            width: height,
-            height: height,
-            child: Center(
-              child: prefix,
-            ),
-          ) : null,
-          suffixIcon: suffix != null ? SizedBox(
-            width: height,
-            height: height,
-            child: Center(
-                child: suffix
-            ),
-          ) : null,
+          prefixIcon: prefix != null
+              ? SizedBox(
+                  width: height,
+                  height: height,
+                  child: Center(
+                    child: prefix,
+                  ),
+                )
+              : null,
+          suffixIcon: suffix != null
+              ? SizedBox(
+                  width: height,
+                  height: height,
+                  child: Center(child: suffix),
+                )
+              : null,
           focusedBorder: OutlineInputBorder(
             borderRadius:
-            BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
-            borderSide: BorderSide(
-              color: borderColor ?? neutral2
-            ),
+                BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
+            borderSide: BorderSide(color: borderColor ?? neutral2),
           ),
           border: OutlineInputBorder(
             borderRadius:
-            BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
-            borderSide: BorderSide(
-                color: borderColor ?? neutral2
-            ),
+                BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
+            borderSide: BorderSide(color: borderColor ?? neutral2),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius:
-            BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
-            borderSide: BorderSide(
-                color: borderColor ?? neutral2
-            ),
+                BorderRadius.circular(maxLines > 1 ? 15.r : height * 0.5),
+            borderSide: BorderSide(color: borderColor ?? neutral2),
           ),
           hintText: hint,
           hintStyle: hintStyle ??
-              context.textTheme.bodyLarge!
-                  .copyWith(fontWeight: FontWeight.w500, color: context.isDark ? Colors.white54 : primaryPoint6),
+              context.textTheme.bodyLarge!.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: context.isDark ? Colors.white54 : primaryPoint6),
         ),
         onChanged: (value) {
           if (onChange == null) return;
@@ -304,27 +304,28 @@ class ComboBox extends StatelessWidget {
             hint,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
-            style: context.textTheme.bodyLarge!
-                .copyWith(fontWeight: FontWeight.w500, color: context.isDark ? offWhite : primaryPoint6),
+            style: context.textTheme.bodyLarge!.copyWith(
+                fontWeight: FontWeight.w500,
+                color: context.isDark ? offWhite : primaryPoint6),
           ),
         ),
         value: value,
         items: dropdownItems
             .map(
               (String item) => DropdownMenuItem<String>(
-            value: item,
-            child: Container(
-              alignment: valueAlignment,
-              child: Text(
-                item,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: context.textTheme.bodyLarge!
-                    .copyWith(fontWeight: FontWeight.w500),
+                value: item,
+                child: Container(
+                  alignment: valueAlignment,
+                  child: Text(
+                    item,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: context.textTheme.bodyLarge!
+                        .copyWith(fontWeight: FontWeight.w500),
+                  ),
+                ),
               ),
-            ),
-          ),
-        )
+            )
             .toList(),
         onChanged: onChanged,
         selectedItemBuilder: selectedItemBuilder,
@@ -337,10 +338,11 @@ class ComboBox extends StatelessWidget {
           decoration: (noDecoration)
               ? null
               : buttonDecoration ??
-              BoxDecoration(
-                borderRadius: BorderRadius.circular(buttonHeight == null ? 20 : buttonHeight! * 0.5),
-                border: Border.all(color: neutral2),
-              ),
+                  BoxDecoration(
+                    borderRadius: BorderRadius.circular(
+                        buttonHeight == null ? 20 : buttonHeight! * 0.5),
+                    border: Border.all(color: neutral2),
+                  ),
           elevation: buttonElevation,
         ),
         iconStyleData: IconStyleData(
@@ -379,9 +381,3 @@ class ComboBox extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-

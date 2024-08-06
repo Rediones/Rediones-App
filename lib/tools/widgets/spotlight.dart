@@ -91,7 +91,6 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
     saveSpotlight(widget.spotlight.id).then((value) {
       if (value.status == Status.success) {
         // PROBABLY SAVE SOMETHING
-        showToast(value.message, context);
       } else {
         setState(() => bookmarked = !bookmarked);
         showToast("Unable to save spotlight", context);

@@ -73,6 +73,7 @@ Future<RedionesResponse<Conversation?>> createConversation(String id) async {
       options: configuration(accessToken!),
     );
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      log("${response.data}");
       Map<String, dynamic> body = response.data as Map<String, dynamic>;
       List<dynamic> memberList = body["members"] as List<dynamic>;
       List<User> profiles = _getUsers(memberList);
@@ -164,7 +165,6 @@ Future<RedionesResponse<List<MessageData>>> getMessagesFor(
       options: configuration(accessToken!),
     );
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      log(response.data.toString());
       List<dynamic> result = response.data as List<dynamic>;
       List<MessageData> messages = [];
       for (var element in result) {
@@ -325,7 +325,7 @@ Future<RedionesResponse<StickyData?>> makeSticky(String id) async {
   );
 }
 
-Future<RedionesResponse> createStory(Map<String, dynamic> data) async {
+Future<RedionesResponse<MediaData?>> createStory(Map<String, dynamic> data) async {
   String errorHeader = "Create Story:";
   try {
     Response response = await dio.post(
@@ -334,10 +334,21 @@ Future<RedionesResponse> createStory(Map<String, dynamic> data) async {
       options: configuration(accessToken!),
     );
     if (response.statusCode! >= 200 && response.statusCode! <= 201) {
+      // Map<String, dynamic> data = response.data;
+      // MediaData md = MediaData(
+      //   id: data["_id"],
+      //   mediaUrl: data["media"],
+      //   caption: (data["caption"] ?? ""),
+      //   timestamp: DateTime.parse(data["timestamp"]),
+      //   views: data["views"].length,
+      //   type: (data["type"] as num).toInt() == 1
+      //       ? MediaType.imageAndText
+      //       : MediaType.videoAndText,
+      // );
+
       return const RedionesResponse(
         message: "Successful",
         payload: null,
-        // payload: PocketMessageData.fromJson(response.data["payload"]),
         status: Status.success,
       );
     }

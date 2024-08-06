@@ -250,7 +250,7 @@ class _YourSpotlightsPageState extends ConsumerState<YourSpotlightsPage>
                                   onClick: () => context.router.pushNamed(
                                     Pages.viewSpotlight,
                                     extra: ViewSpotlightOptions(
-                                      data: mySpotlights[index],
+                                      data: savedSpotlights[index],
                                       showUserData: true,
                                     ),
                                   ),

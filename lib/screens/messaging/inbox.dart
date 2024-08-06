@@ -1,16 +1,15 @@
+import 'package:chatview/chatview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chatview/chatview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get_it/get_it.dart';
-import 'package:uuid/uuid.dart';
 import 'package:rediones/api/message_service.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
-import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/functions.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
+import 'package:uuid/uuid.dart';
 
 class Inbox extends ConsumerStatefulWidget {
   final Conversation details;
@@ -66,22 +65,11 @@ class _InboxState extends ConsumerState<Inbox> {
       scrollController: ScrollController(),
       chatUsers: users,
     );
+
+    fetchMessages();
   }
 
-  Future<void> getLocalMessages() async {
-    // final MessageRepository messageRepository = GetIt.I.get();
-    // List<MessageData> msgs =
-    //     await messageRepository.getMessagesWith(conversationID);
-    // if (msgs.isEmpty) {
-    //   fetchMessages();
-    // } else {
-    //   assignMessages(msgs);
-    //   fetchMessages();
-    // }
-  }
-
-  void assignMessages(List<MessageData> messages,
-      {bool online = false, bool consistent = true}) {
+  void assignMessages(List<MessageData> messages, {bool online = false}) {
     List<Message> msgs = messages
         .map(
           (msg) => Message(
@@ -99,10 +87,8 @@ class _InboxState extends ConsumerState<Inbox> {
 
     chatController.addAll(msgs);
     setState(() {
-      if (!online) {
-        loading = false;
-        hasError = false;
-      }
+      loading = false;
+      hasError = false;
     });
   }
 
@@ -119,15 +105,15 @@ class _InboxState extends ConsumerState<Inbox> {
       return;
     }
 
-    bool consistent = true;
-    // if (response.payload.length != chatController.numberOfMessages) {
-    //   final MessageRepository messageRepository = GetIt.I.get();
-    //   messageRepository.deleteAllWhere(where: "conversationID = ?", whereArgs: [conversationID]);
-    //   messageRepository.addAll(response.payload);
-    //   consistent = false;
-    // }
+    assignMessages(response.payload, online: true);
+  }
 
-    assignMessages(response.payload, online: true, consistent: consistent);
+  void refresh() {
+    setState(() {
+      loading = true;
+      hasError = false;
+    });
+    fetchMessages();
   }
 
   @override
@@ -156,11 +142,7 @@ class _InboxState extends ConsumerState<Inbox> {
         sender: currentUserID,
         conversationID: conversationID,
       ),
-    ).then((resp) {
-      if (resp.payload == null) return;
-      // final MessageRepository messageRepository = GetIt.I.get();
-      // messageRepository.add(resp.payload!);
-    });
+    );
   }
 
   @override
@@ -182,8 +164,9 @@ class _InboxState extends ConsumerState<Inbox> {
             ),
             profilePicture: otherUser.profilePicture,
             chatTitle: otherUser.username,
-            chatTitleTextStyle: context.textTheme.bodyLarge!.copyWith(
-              fontWeight: FontWeight.w600,
+            userStatus: "Online",
+            chatTitleTextStyle: context.textTheme.titleSmall!.copyWith(
+              fontWeight: FontWeight.w700,
             ),
             userStatusTextStyle: context.textTheme.bodyMedium!.copyWith(
               fontWeight: FontWeight.w500,
@@ -198,12 +181,80 @@ class _InboxState extends ConsumerState<Inbox> {
             ],
           ),
           onSendTap: onSendTap,
-          chatViewState: ChatViewState.hasMessages,
+          chatViewState: loading
+              ? ChatViewState.loading
+              : hasError
+                  ? ChatViewState.error
+                  : ChatViewState.hasMessages,
+          chatViewStateConfig: ChatViewStateConfiguration(
+            loadingWidgetConfig: const ChatViewStateWidgetConfiguration(
+              widget: loader,
+            ),
+            errorWidgetConfig: ChatViewStateWidgetConfiguration(
+              widget: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/No Data.png",
+                      width: 150.r,
+                      height: 150.r,
+                      fit: BoxFit.cover,
+                    ),
+                    SizedBox(height: 20.h),
+                    Text(
+                      "An error occurred",
+                      style: context.textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    GestureDetector(
+                      onTap: refresh,
+                      child: Text(
+                        "Refresh",
+                        style: context.textTheme.titleSmall!.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: appRed,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            noMessageWidgetConfig: ChatViewStateWidgetConfiguration(
+              widget: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/No Data.png",
+                      width: 150.r,
+                      height: 150.r,
+                      fit: BoxFit.cover,
+                    ),
+                    SizedBox(height: 20.h),
+                    Text(
+                      "There are no messages yet",
+                      style: context.textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           chatBackgroundConfig: ChatBackgroundConfiguration(
             backgroundColor:
                 context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
+            messageTimeAnimationCurve: Curves.easeOut,
+            defaultGroupSeparatorConfig: DefaultGroupSeparatorConfiguration(
+              textStyle: context.textTheme.bodyMedium
+            ),
           ),
-          // Add this state once data is available.
+          // showTypingIndicator: true,
           featureActiveConfig: const FeatureActiveConfig(
             enableSwipeToReply: true,
             enableSwipeToSeeTime: false,
@@ -219,7 +270,7 @@ class _InboxState extends ConsumerState<Inbox> {
             textFieldBackgroundColor:
                 context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
             textFieldConfig: TextFieldConfiguration(
-              textStyle: context.textTheme.bodyMedium!,
+              textStyle: context.textTheme.bodyLarge!,
             ),
           ),
           chatBubbleConfig: ChatBubbleConfiguration(
@@ -232,20 +283,24 @@ class _InboxState extends ConsumerState<Inbox> {
                 topLeft: Radius.circular(12),
                 bottomLeft: Radius.circular(12),
               ),
-              textStyle: context.textTheme.bodyMedium!
-                  .copyWith(color: theme, fontWeight: FontWeight.w500),
+              textStyle: context.textTheme.bodyLarge!.copyWith(
+                color: theme,
+                fontWeight: FontWeight.w500,
+              ),
               color: appRed,
             ),
             inComingChatBubbleConfig: ChatBubble(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
-                textStyle: context.textTheme.bodyMedium!.copyWith(
-                    color: context.isDark ? theme : midPrimary,
-                    fontWeight: FontWeight.w500),
-                color: context.isDark ? primary : theme),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              ),
+              textStyle: context.textTheme.bodyLarge!.copyWith(
+                color: context.isDark ? theme : midPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+              color: context.isDark ? primary : theme,
+            ),
           ),
           loadingWidget: loader,
         ),

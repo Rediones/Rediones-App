@@ -49,7 +49,7 @@ class _LoginState extends ConsumerState<Login> {
     saveToDatabase(result.payload!);
     saveAuthDetails(_authDetails, ref);
     ref.watch(userProvider.notifier).state = result.payload!;
-    initSocket();
+    initSocket(result.payload!.uuid);
     context.router.pushReplacementNamed(Pages.home);
   }
 

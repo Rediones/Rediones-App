@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/user_service.dart';
@@ -52,8 +53,17 @@ final StateProvider<List<StoryData>> storiesProvider = StateProvider(
   (ref) => [],
 );
 
-final StateProvider<StoryData> currentUserStory =
-    StateProvider((ref) => const StoryData());
+final StateProvider<StoryData> currentUserStory = StateProvider((ref) {
+  User user = ref.watch(userProvider);
+  UserSubData usb = UserSubData(
+    profilePicture: user.profilePicture,
+    username: user.nickname,
+    lastName: user.lastName,
+    firstName: user.firstName,
+    id: user.uuid,
+  );
+  return StoryData(postedBy: usb);
+});
 
 final StateProvider<List<ProjectData>> projectsProvider =
     StateProvider((ref) => []);
@@ -189,6 +199,23 @@ final List<Post> dummyPosts = List.generate(
     text: loremIpsum,
     timestamp: DateTime(1900),
     shares: 0,
+  ),
+);
+
+final List<EventData> dummyEvents = List.generate(
+  4,
+  (index) => EventData(
+    id: "id",
+    cover: "cover",
+    header: "header",
+    description: "description",
+    location: "location",
+    date: DateTime.now(),
+    categories: [],
+    interested: [],
+    going: [],
+    time: TimeOfDay.now(),
+    author: dummyUser,
   ),
 );
 

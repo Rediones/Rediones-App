@@ -40,8 +40,6 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     Future.delayed(Duration.zero, () => FlutterNativeSplash.remove());
   }
 
-  // FOLLOW/UNFOLLOW & INTERESTED/GOING EVENTS
-
   void _showError(String text) => showToast(text, context);
 
   void goHome() => context.router.goNamed(Pages.login);
@@ -68,7 +66,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
       _showError("Unable to log you in. Retrying");
       _authenticate(level - 1);
     } else {
-      initSocket();
+      initSocket(resp.payload!.uuid);
       saveToDatabase(resp.payload!);
       saveAuthDetails(authDetails, ref);
       ref.watch(userProvider.notifier).state = resp.payload!;

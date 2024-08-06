@@ -227,7 +227,6 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     setState(() => bookmarked = !bookmarked);
     savePost(object!.uuid).then((value) {
       if (value.status == Status.success) {
-        showToast(value.message, context);
         List<String> postsID = ref.watch(userProvider.select((value) => value.savedPosts));
 
         // postsID.addAll(value.payload);

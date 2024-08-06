@@ -55,12 +55,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> {
   }
 
   void create(Map<String, dynamic> map) {
-    ref.watch(outgoingStatus.notifier).state.add(map);
-    createStory(map).then((resp) {
-      if(resp.status == Status.success) {
-        ref.watch(outgoingStatus.notifier).state.remove(map);
-      }
-    });
+    createStory(map);
     context.router.pop();
   }
 

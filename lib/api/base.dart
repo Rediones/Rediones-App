@@ -17,6 +17,8 @@ Socket? _socket;
 
 const String messageSignal = "on-message";
 const String newPostSignal = 'newPost';
+const String newStorySignal = 'newStory';
+const String notificationSignal = 'notification';
 
 final Dio dio = Dio(
   BaseOptions(
@@ -62,7 +64,7 @@ class RedionesResponse<T> {
   });
 }
 
-void initSocket() {
+void initSocket(String userID) {
   _socket = io(
     'ws://rediones.onrender.com',
     OptionBuilder().setTransports(['websocket']).build(),
@@ -70,7 +72,10 @@ void initSocket() {
 
   _socket?.onConnect((e) {
     log("Connected To WebSocket");
+    emit("identify", userID);
     setupSignalHandlers(newPostSignal);
+    setupSignalHandlers(newStorySignal);
+    setupSignalHandlers(notificationSignal);
   });
   _socket?.onConnectError((e) => log("Socket Connection Error: $e"));
   _socket?.onDisconnect((e) => log('Disconnected From WebSocket'));
@@ -94,6 +99,6 @@ void addHandler(String key, Function handler) => _socketManager[key]?.add(handle
 
 void removeHandler(String key, Function handler) => _socketManager[key]?.remove(handler);
 
-void emit(String signal, Map<String, dynamic> data) => _socket?.emit(signal, data);
+void emit(String signal, dynamic data) => _socket?.emit(signal, data);
 
 void shutdown() => _socket?.disconnect();

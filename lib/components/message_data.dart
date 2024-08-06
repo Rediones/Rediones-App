@@ -44,11 +44,9 @@ class Conversation {
   });
 
   factory Conversation.fromJson(Map<String, dynamic> map) => Conversation(
-      id: map["_id"],
-      users: map["members"],
-      lastMessage: map["lastMessage"],
-      timestamp: DateTime.parse(
-        map["timestamp"],
-      ),
-  );
+        id: map["_id"],
+        users: map["members"],
+        lastMessage: map["lastMessage"],
+        timestamp: DateTime.parse(map["timestamp"]),
+      );
 }

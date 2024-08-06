@@ -82,7 +82,7 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
   void navigate(RedionesResponse<User?> result) {
     saveToDatabase(result.payload!);
     ref.watch(userProvider.notifier).state = result.payload!;
-    context.router.pop();
+    context.router.pop(true);
   }
 
   Future<void> saveToDatabase(User user) async {
@@ -96,12 +96,14 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
     updateUser(details).then(
       (result) {
         if (!mounted) return;
+        if(result.status == Status.failed) {
+          showToast(result.message, context);
+        }
+
+        Navigator.of(context).pop();
 
         if (result.status == Status.success) {
           navigate(result);
-        } else {
-          showToast(result.message, context);
-          Navigator.of(context).pop();
         }
       },
     );

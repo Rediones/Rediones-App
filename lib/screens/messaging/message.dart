@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get_it/get_it.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/message_service.dart';
 import 'package:rediones/components/media_data.dart';
@@ -53,6 +52,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
     // getLocalConversations();
     Future.delayed(Duration.zero, () {
       fetchStories();
+      fetchConversations();
     });
   }
 
@@ -67,12 +67,9 @@ class _MessagePageState extends ConsumerState<MessagePage>
       return;
     }
 
-    List<Conversation> con = ref.watch(conversationsProvider.notifier).state;
+    List<Conversation> con = ref.watch(conversationsProvider);
     con.clear();
     con.addAll(p);
-
-    // final ConversationRepository repository = GetIt.I.get();
-    // repository.clearAllAndAddAll(p);
 
     setState(() => loadingConversations = false);
   }
@@ -97,25 +94,17 @@ class _MessagePageState extends ConsumerState<MessagePage>
     setState(() => loadingStories = false);
   }
 
-  Future<void> getLocalConversations() async {
-    // final ConversationRepository repository = GetIt.I.get();
-    // List<Conversation> c = await repository.getAll();
-    // if (c.isEmpty) {
-    //   fetchConversations();
-    // } else {
-    //   ref.watch(conversationsProvider.notifier).state.addAll(c);
-    //   fetchConversations();
-    //   setState(() => loadingConversations = false);
-    // }
-  }
-
   Future<void> refresh() async {
     setState(() => loadingConversations = true);
     fetchConversations();
   }
 
-  void openInbox(Conversation conversation) =>
-      context.router.pushNamed(Pages.inbox, extra: conversation);
+  void openInbox(Conversation conversation) {
+    context.router.pushNamed(
+      Pages.inbox,
+      extra: conversation,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,8 +220,9 @@ class _MessagePageState extends ConsumerState<MessagePage>
                     controller: controller,
                     tabs: [
                       Tab(
-                        child:
-                            Text("Chats", style: context.textTheme.bodyLarge),
+                        child: Text("Chats",
+                            style: context.textTheme.titleSmall!
+                                .copyWith(fontWeight: FontWeight.w600)),
                       ),
                       Tab(
                         child: RichText(
@@ -240,16 +230,18 @@ class _MessagePageState extends ConsumerState<MessagePage>
                             children: [
                               TextSpan(
                                 text: "Requests (",
-                                style: context.textTheme.bodyMedium,
+                                style: context.textTheme.bodyLarge!
+                                    .copyWith(fontWeight: FontWeight.w600),
                               ),
                               TextSpan(
                                 text: "${requests.length}",
-                                style: context.textTheme.bodyMedium!
-                                    .copyWith(color: appRed),
+                                style: context.textTheme.bodyLarge!
+                                    .copyWith(fontWeight: FontWeight.w600),
                               ),
                               TextSpan(
                                 text: ")",
-                                style: context.textTheme.bodyMedium,
+                                style: context.textTheme.bodyLarge!
+                                    .copyWith(fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -278,84 +270,89 @@ class _MessagePageState extends ConsumerState<MessagePage>
                       ),
                     ),
                   ),
-                  SizedBox(height: 20.h),
-                  SizedBox(
-                    height: 465.h,
-                    child: loadingConversations
-                        ? Skeletonizer(
-                            enabled: true,
-                            child: ListView.separated(
-                              itemCount: dummyConversations.length,
-                              itemBuilder: (_, index) => LastMessageContainer(
-                                data: dummyConversations[index],
-                                currentID: userID,
-                                onOpen: () {},
-                              ),
-                              separatorBuilder: (_, __) =>
-                                  SizedBox(height: 20.h),
-                            ),
-                          )
-                        : TabBarView(
-                            controller: controller,
-                            children: [
-                              lastMessages.isEmpty
-                                  ? GestureDetector(
-                                      onTap: refresh,
-                                      child: Center(
-                                        child: Text(
-                                          "No conversations available. Tap to refresh",
-                                          style: context.textTheme.bodyLarge,
-                                        ),
+                  SizedBox(height: 5.h),
+                ],
+              ),
+            ),
+            Expanded(
+              child: loadingConversations
+                  ? Skeletonizer(
+                      enabled: true,
+                      child: ListView.separated(
+                        itemCount: dummyConversations.length,
+                        itemBuilder: (_, index) => LastMessageContainer(
+                          data: dummyConversations[index],
+                          currentID: userID,
+                          onOpen: () {},
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 15.w),
+                        separatorBuilder: (_, __) => SizedBox(height: 5.h),
+                      ),
+                    )
+                  : TabBarView(
+                      controller: controller,
+                      children: [
+                        lastMessages.isEmpty
+                            ? GestureDetector(
+                                onTap: refresh,
+                                child: Center(
+                                  child: Text(
+                                    "No conversations available. Tap to refresh",
+                                    style: context.textTheme.bodyLarge,
+                                  ),
+                                ),
+                              )
+                            : AnimationLimiter(
+                                child: RefreshIndicator(
+                                  onRefresh: refresh,
+                                  child: ListView.separated(
+                                    itemBuilder: (_, index) =>
+                                        AnimationConfiguration.staggeredList(
+                                      position: index,
+                                      duration: const Duration(
+                                        milliseconds: 750,
                                       ),
-                                    )
-                                  : AnimationLimiter(
-                                      child: RefreshIndicator(
-                                        onRefresh: refresh,
-                                        child: ListView.separated(
-                                          itemBuilder: (_, index) =>
-                                              AnimationConfiguration
-                                                  .staggeredList(
-                                            position: index,
-                                            duration: const Duration(
-                                                milliseconds: 750),
-                                            child: SlideAnimation(
-                                              verticalOffset: 25.h,
-                                              child: FadeInAnimation(
-                                                child: LastMessageContainer(
-                                                  currentID: userID,
-                                                  onOpen: () => openInbox(
-                                                      lastMessages[index]),
-                                                  data: lastMessages[index],
-                                                ),
-                                              ),
-                                            ),
+                                      child: SlideAnimation(
+                                        verticalOffset: 25.h,
+                                        child: FadeInAnimation(
+                                          child: LastMessageContainer(
+                                            currentID: userID,
+                                            onOpen: () =>
+                                                openInbox(lastMessages[index]),
+                                            data: lastMessages[index],
                                           ),
-                                          separatorBuilder: (_, __) =>
-                                              SizedBox(height: 15.h),
-                                          itemCount: lastMessages.length,
                                         ),
                                       ),
                                     ),
-                              SizedBox(
-                                height: 470.h,
-                                child: ListView.separated(
-                                  itemBuilder: (_, index) =>
-                                      LastMessageContainer(
-                                    onOpen: () {},
-                                    currentID: userID,
-                                    data: lastMessages[index],
+                                    separatorBuilder: (_, __) =>
+                                        SizedBox(height: 15.h),
+                                    itemCount: lastMessages.length,
                                   ),
-                                  separatorBuilder: (_, __) =>
-                                      SizedBox(height: 15.h),
-                                  itemCount: requests.length,
+                                ),
+                              ),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                "assets/No Data.png",
+                                width: 150.r,
+                                height: 150.r,
+                                fit: BoxFit.cover,
+                              ),
+                              SizedBox(height: 20.h),
+                              Text(
+                                "There are no message requests available",
+                                style: context.textTheme.titleSmall!.copyWith(
+                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
                             ],
                           ),
-                  ),
-                ],
-              ),
-            )
+                        )
+                      ],
+                    ),
+            ),
           ],
         ),
       ),
@@ -482,11 +479,19 @@ class _AddStory extends ConsumerStatefulWidget {
 }
 
 class _AddStoryState extends ConsumerState<_AddStory> {
+  void selectStory() {
+    FileHandler.single(type: FileType.media).then((resp) {
+      if (resp == null) return;
+      context.router.pushNamed(Pages.createStory, extra: resp);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     String image = ref.read(userProvider).profilePicture;
-    StoryData currentStory = ref.watch(currentUserStory);
-    bool hasStory = currentStory.stories.isNotEmpty;
+    List<MediaData> stories =
+        ref.watch(currentUserStory.select((u) => u.stories));
+    bool hasStory = stories.isNotEmpty;
 
     Stack content = Stack(
       children: [
@@ -495,12 +500,7 @@ class _AddStoryState extends ConsumerState<_AddStory> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             GestureDetector(
-              onTap: () {
-                FileHandler.single(type: FileType.media).then((resp) {
-                  if (resp == null) return;
-                  context.router.pushNamed(Pages.createStory, extra: resp);
-                });
-              },
+              onTap: selectStory,
               child: Container(
                 height: 20.r,
                 width: 20.r,
@@ -579,13 +579,17 @@ class _AddStoryState extends ConsumerState<_AddStory> {
 
     return GestureDetector(
       onTap: () {
-        context.router.pushNamed(
-          Pages.viewStory,
-          extra: currentStory,
-        );
+        if (hasStory) {
+          context.router.pushNamed(
+            Pages.viewStory,
+            extra: ref.watch(currentUserStory),
+          );
+        } else {
+          selectStory();
+        }
       },
       child: CachedNetworkImage(
-        imageUrl: hasStory ? currentStory.stories.last.mediaUrl : "",
+        imageUrl: hasStory ? stories.last.mediaUrl : "",
         errorWidget: (_, __, ___) {
           return Container(
             width: 90.r,
@@ -594,7 +598,7 @@ class _AddStoryState extends ConsumerState<_AddStory> {
               border:
                   Border.all(color: context.isDark ? neutral3 : fadedPrimary),
               borderRadius: BorderRadius.circular(10.r),
-              color: appRed,
+              color: hasStory ? appRed : null,
             ),
             alignment: Alignment.center,
             child: hasStory
@@ -603,7 +607,7 @@ class _AddStoryState extends ConsumerState<_AddStory> {
                     color: theme,
                     size: 26.r,
                   )
-                : null,
+                : content,
           );
         },
         progressIndicatorBuilder: (_, __, ___) {
@@ -652,87 +656,81 @@ class LastMessageContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     late User? sender;
-    sender = data.users.firstWhere((element) => element.uuid != currentID,
-        orElse: () => dummyUser);
+    sender = data.users.firstWhere(
+      (element) => element.uuid != currentID,
+      orElse: () => dummyUser,
+    );
 
-    return GestureDetector(
+    return ListTile(
       onTap: onOpen,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 15.w,
+        vertical: 0.h,
+      ),
+      leading: CachedNetworkImage(
+        imageUrl: sender.profilePicture,
+        errorWidget: (context, url, error) => CircleAvatar(
+          backgroundColor: neutral2,
+          radius: 22.r,
+          child: Icon(Icons.person_outline_rounded,
+              color: Colors.black, size: 16.r),
+        ),
+        progressIndicatorBuilder: (context, url, download) {
+          return Container(
+            width: 35.r,
+            height: 35.r,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: neutral2,
+            ),
+          );
+        },
+        imageBuilder: (context, provider) {
+          return CircleAvatar(
+            backgroundImage: provider,
+            foregroundColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            radius: 22.r,
+            child: Align(
+              alignment: Alignment.topRight,
+              child: SvgPicture.asset("assets/Green Dot.svg"),
+            ),
+          );
+        },
+      ),
+      title: Text(
+        sender.username,
+        style:
+            context.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700),
+      ),
+      subtitle: Text(
+        data.lastMessage,
+        style: context.textTheme.bodyMedium,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          CachedNetworkImage(
-            imageUrl: sender.profilePicture,
-            errorWidget: (context, url, error) => CircleAvatar(
-              backgroundColor: neutral2,
-              radius: 22.r,
-              child: Icon(Icons.person_outline_rounded,
-                  color: Colors.black, size: 16.r),
-            ),
-            progressIndicatorBuilder: (context, url, download) {
-              return Container(
-                width: 35.r,
-                height: 35.r,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: neutral2,
-                ),
-              );
-            },
-            imageBuilder: (context, provider) {
-              return CircleAvatar(
-                backgroundImage: provider,
-                foregroundColor: Colors.transparent,
-                backgroundColor: Colors.transparent,
-                radius: 22.r,
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: SvgPicture.asset("assets/Green Dot.svg"),
-                ),
-              );
-            },
-          ),
-          SizedBox(width: 10.w),
-          SizedBox(
-            width: 250.w,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  sender.username,
-                  style: context.textTheme.bodyLarge!
-                      .copyWith(fontWeight: FontWeight.w700),
-                ),
-                SizedBox(height: 5.h),
-                Text(
-                  data.lastMessage,
-                  style: context.textTheme.bodyMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 5.h),
-                Text(
-                  time.format(data.timestamp!),
-                  style: context.textTheme.bodySmall,
-                )
-              ],
+          Skeleton.ignore(
+            ignore: true,
+            child: bg.Badge(
+              badgeStyle: const bg.BadgeStyle(
+                badgeColor: appRed,
+                elevation: 1.0,
+              ),
+              showBadge: true,
+              badgeContent: Text(
+                "0",
+                style: context.textTheme.bodySmall!.copyWith(color: theme),
+              ),
             ),
           ),
-          Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Skeleton.ignore(
-                ignore: true,
-                child: bg.Badge(
-                  badgeStyle: const bg.BadgeStyle(
-                    badgeColor: appRed,
-                    elevation: 1.0,
-                  ),
-                  showBadge: true,
-                  badgeContent: Text("0",
-                      style:
-                          context.textTheme.bodySmall!.copyWith(color: theme)),
-                ),
-              ))
+          SizedBox(height: 2.h),
+          Text(
+            time.format(data.timestamp!),
+            style: context.textTheme.bodySmall,
+          ),
         ],
       ),
     );

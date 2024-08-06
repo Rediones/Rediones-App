@@ -699,7 +699,6 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     setState(() => bookmarked = !bookmarked);
     savePost(widget.postObject.uuid).then((value) {
       if (value.status == Status.success) {
-        showToast(value.message, context);
         List<String> postsID =
             ref.watch(userProvider.select((value) => value.savedPosts));
         // postsID.clear();
@@ -1325,7 +1324,7 @@ class _PollContainerState extends ConsumerState<PollContainer> {
         Padding(
           padding: EdgeInsets.only(left: 20.r + 5.w),
           child: Text(
-            "${formatRawAmount(widget.poll.totalVotes)} vote${widget.poll.totalVotes == 1 ? "" : "s"}",
+            "$totalVotes vote${totalVotes == 1 ? "" : "s"}",
             style: context.textTheme.bodyLarge,
           ),
         ),

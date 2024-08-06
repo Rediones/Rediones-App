@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rediones/api/event_service.dart';
 import 'package:rediones/api/post_service.dart';
+import 'package:rediones/components/event_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
@@ -26,6 +28,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
 
   bool loadingPosts = false, loadingSaved = false, loadingEvents = false;
   final List<PostObject> posts = [], savedPosts = [];
+  final List<EventData> events = [];
 
   @override
   void initState() {
@@ -34,6 +37,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
     loadingEvents = loadingPosts = loadingSaved = true;
     getPosts();
     getSavedPosts();
+    getInterestedEvents();
   }
 
   void getPosts() {
@@ -70,6 +74,22 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
     });
   }
 
+  void getInterestedEvents() {
+    getAllInterestedEvents(ref.read(userProvider).uuid).then((resp) {
+      if (!mounted) return;
+      if (resp.status == Status.failed) {
+        showToast(resp.message, context);
+        setState(() => loadingEvents = false);
+        return;
+      }
+
+      events.clear();
+      events.addAll(resp.payload);
+      loadingEvents = false;
+      setState(() {});
+    });
+  }
+
   Future<void> retryPosts() async {
     setState(() => loadingPosts = true);
     getPosts();
@@ -78,6 +98,11 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
   Future<void> retrySaved() async {
     setState(() => loadingSaved = true);
     getSavedPosts();
+  }
+
+  Future<void> retryEvents() async {
+    setState(() => loadingEvents = true);
+    getInterestedEvents();
   }
 
   @override
@@ -226,8 +251,14 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                               ),
                             ),
                             GestureDetector(
-                              onTap: () =>
-                                  context.router.pushNamed(Pages.editProfile),
+                              onTap: () => context.router
+                                  .pushNamed(Pages.editProfile)
+                                  .then((resp) {
+                                if (resp == null) return;
+                                retrySaved();
+                                retryPosts();
+                                retryEvents();
+                              }),
                               child:
                                   SvgPicture.asset("assets/Edit Profile.svg"),
                             )
@@ -461,7 +492,81 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                               ),
                             ),
                           ),
-                const SizedBox(),
+                loadingEvents
+                    ? Skeletonizer(
+                        enabled: true,
+                        child: ListView.separated(
+                          itemCount: dummyEvents.length,
+                          itemBuilder: (_, index) => EventContainer(
+                            data: dummyEvents[index],
+                          ),
+                          separatorBuilder: (_, __) => SizedBox(height: 20.h),
+                        ),
+                      )
+                    : (events.isEmpty)
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  "assets/No Data.png",
+                                  width: 150.r,
+                                  height: 150.r,
+                                  fit: BoxFit.cover,
+                                ),
+                                SizedBox(height: 20.h),
+                                Text(
+                                  "There are no interested events available",
+                                  style: context.textTheme.titleSmall!.copyWith(
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                GestureDetector(
+                                  onTap: retryEvents,
+                                  child: Text(
+                                    "Refresh",
+                                    style:
+                                        context.textTheme.titleSmall!.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: appRed,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : AnimationLimiter(
+                            child: RefreshIndicator(
+                              onRefresh: retryEvents,
+                              child: ListView.separated(
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: events.length + 1,
+                                separatorBuilder: (_, __) =>
+                                    SizedBox(height: 20.h),
+                                itemBuilder: (_, index) {
+                                  if (index == events.length) {
+                                    return SizedBox(height: 100.h);
+                                  }
+
+                                  EventData event = events[index];
+
+                                  return AnimationConfiguration.staggeredList(
+                                    position: index,
+                                    duration: const Duration(milliseconds: 750),
+                                    child: SlideAnimation(
+                                      verticalOffset: 25.h,
+                                      child: FadeInAnimation(
+                                        child: EventContainer(
+                                          data: event,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
               ],
             ),
           ),
