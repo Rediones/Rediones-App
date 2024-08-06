@@ -3,6 +3,7 @@ import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rediones/api/post_service.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
@@ -61,7 +62,11 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
       if (response.payload == null) {
         showToast(response.message, context);
       } else {
-        ref.watch(postsProvider).add(response.payload!);
+        List<PostObject> posts = ref.read(postsProvider);
+        ref.watch(postsProvider.notifier).state = [
+          response.payload!,
+          ...posts,
+        ];
         navigate();
       }
     });

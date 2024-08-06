@@ -15,7 +15,8 @@ final Map<String, List<Function>> _socketManager = {};
 
 Socket? _socket;
 
-const String messageSignal = "on-message";
+const String sendMessageSignal = "sendMessage";
+const String receiveMessageSignal = "receiveMessage";
 const String newPostSignal = 'newPost';
 const String newStorySignal = 'newStory';
 const String notificationSignal = 'notification';
@@ -73,15 +74,16 @@ void initSocket(String userID) {
   _socket?.onConnect((e) {
     log("Connected To WebSocket");
     emit("identify", userID);
-    setupSignalHandlers(newPostSignal);
-    setupSignalHandlers(newStorySignal);
-    setupSignalHandlers(notificationSignal);
   });
+
   _socket?.onConnectError((e) => log("Socket Connection Error: $e"));
   _socket?.onDisconnect((e) => log('Disconnected From WebSocket'));
   _socket?.onError((e) => log("WebSocket Error: $e"));
 
-
+  setupSignalHandlers(newPostSignal);
+  setupSignalHandlers(newStorySignal);
+  setupSignalHandlers(notificationSignal);
+  setupSignalHandlers(receiveMessageSignal);
 }
 
 void setupSignalHandlers(String signal) {

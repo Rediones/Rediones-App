@@ -31,14 +31,16 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
     fetch();
   }
 
+
   @override
   void dispose() {
     controller.dispose();
     super.dispose();
   }
 
-  void fetch() => getNotifications().then(
-        (response) {
+  void fetch() =>
+      getNotifications().then(
+            (response) {
           if (mounted) {
             ref.watch(notificationsProvider).clear();
             ref.watch(notificationsProvider).addAll(response.payload);
@@ -58,6 +60,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
         refresh();
       }
     });
+    Future.delayed(Duration.zero, () => ref.watch(registeredNotificationHandler));
   }
 
   @override

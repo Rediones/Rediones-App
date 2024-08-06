@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/post_service.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
@@ -36,7 +37,11 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
       if (response.payload == null) {
         showToast(response.message, context);
       } else {
-        ref.watch(postsProvider).add(response.payload!);
+        List<PostObject> posts = ref.read(postsProvider);
+        ref.watch(postsProvider.notifier).state = [
+          response.payload!,
+          ...posts,
+        ];
         navigate();
       }
     });

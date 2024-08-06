@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rediones/api/file_handler.dart';
+import 'package:rediones/api/notification_service.dart';
 import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/event_data.dart';
 import 'package:rediones/components/group_data.dart';
@@ -227,6 +228,23 @@ final StateProvider<bool> isNewUserProvider = StateProvider((ref) => false);
 final StateProvider<bool> isLoggedInProvider = StateProvider((ref) => false);
 final StateProvider<bool> createdProfileProvider =
     StateProvider((ref) => false);
+
+final StateProvider<bool> registeredNotificationHandler = StateProvider((ref) {
+  ref.listen(isLoggedInProvider, (oldVal, newVal) {
+    if (!oldVal! && newVal) {
+      addHandler(notificationSignal, (data) {
+        List<NotificationData> notifications = ref.read(notificationsProvider);
+        NotificationData notificationData = processSocketNotification(data);
+        ref.watch(notificationsProvider.notifier).state = [
+          notificationData,
+          ...notifications,
+        ];
+      });
+    }
+  });
+  return true;
+});
+
 final StateProvider<bool> initializedProvider = StateProvider((ref) => false);
 final StateProvider<bool> hideBottomProvider = StateProvider((ref) => false);
 final StateProvider<int> dashboardIndexProvider = StateProvider((ref) => 0);
@@ -242,7 +260,7 @@ final StateProvider<bool> loadingLocalPostsProvider =
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);
   FileHandler.saveString(userIsarId, "");
-  ref.invalidate(loadingLocalPostsProvider);
+  ref.invalidate(registeredNotificationHandler);
   ref.invalidate(currentUserStory);
   ref.invalidate(outgoingStatus);
   ref.invalidate(exitAttemptProvider);

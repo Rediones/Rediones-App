@@ -92,9 +92,10 @@ class _SignupState extends ConsumerState<Signup> {
   }
 
   void navigate(RedionesResponse<User?> result) {
-    saveAuthDetails(_authDetails, ref);
     ref.watch(userProvider.notifier).state = result.payload!;
     ref.watch(isNewUserProvider.notifier).state = true;
+    initSocket(result.payload!.uuid);
+    saveAuthDetails(_authDetails, ref);
     context.router.pushReplacementNamed(Pages.createProfile);
   }
 

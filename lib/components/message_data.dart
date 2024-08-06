@@ -33,10 +33,10 @@ class MessageData {
 class Conversation {
   final String id;
   final List<User> users;
-  final String lastMessage;
+  String lastMessage;
   final DateTime? timestamp;
 
-  const Conversation({
+  Conversation({
     this.id = "",
     this.users = const [],
     this.timestamp,

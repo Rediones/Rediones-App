@@ -546,7 +546,7 @@ class PostObjectContainer extends ConsumerStatefulWidget {
       _PostObjectContainerState();
 }
 
-class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
+class _PostObjectContainerState extends ConsumerState<PostObjectContainer>  {
   int length = 0;
   bool liked = false;
   bool bookmarked = false;
@@ -563,7 +563,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
       Post post = widget.postObject as Post;
       length = post.media.length;
       isPost = true;
-      mediaAndText = post.type == MediaType.imageAndText;
+      mediaAndText = post.media.isNotEmpty;
     } else {
       isPost = false;
       mediaAndText = false;

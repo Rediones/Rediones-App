@@ -24,6 +24,7 @@ Future<RedionesResponse<PostObject?>> createPost(
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
       Map<String, dynamic> result =
           response.data["payload"] as Map<String, dynamic>;
+
       PostObject post = processPost(result);
       return RedionesResponse(
         message: "Post Created",
@@ -52,6 +53,7 @@ PostObject processPost(Map<String, dynamic> result, {User? user}) {
   if (user == null) {
     Map<String, dynamic> user = result["postedBy"] as Map<String, dynamic>;
     processUser(user);
+
   } else {
     result["postedBy"] = user.toJson();
   }

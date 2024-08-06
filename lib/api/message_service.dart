@@ -18,6 +18,8 @@ bool _has(List<Conversation> conversations, String conversationID) {
 }
 
 Future<RedionesResponse<List<Conversation>>> getConversations() async {
+
+
   String errorHeader = "Get Conversations:";
   try {
     Response response = await dio.get(
@@ -102,7 +104,11 @@ Future<RedionesResponse<Conversation?>> createConversation(String id) async {
 }
 
 Future<RedionesResponse<MessageData?>> sendMessage(MessageData message) async {
-  emit(messageSignal, message.toJson());
+  emit(sendMessageSignal, {
+    "message" : message.content,
+    "senderId": message.sender,
+    "receiverId": message.id,
+  });
 
   String errorHeader = "Send Message:";
   try {
@@ -113,6 +119,7 @@ Future<RedionesResponse<MessageData?>> sendMessage(MessageData message) async {
         "messageContent": message.content,
         "conversationId": message.conversationID,
         "timestamp": message.timestamp.toString(),
+        "otherUserId": message.id,
       },
       options: configuration(accessToken!),
     );
@@ -414,6 +421,14 @@ class JointStoryData {
 
 Future<RedionesResponse<JointStoryData>> getStories(
     String currentUserID) async {
+  if(accessToken == null) {
+    return RedionesResponse(
+      message: "Success",
+      payload: JointStoryData(),
+      status: Status.success,
+    );
+  }
+
   String errorHeader = "Get Stories:";
   try {
     Response response = await dio.get(

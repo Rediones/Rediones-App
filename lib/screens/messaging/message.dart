@@ -235,8 +235,10 @@ class _MessagePageState extends ConsumerState<MessagePage>
                               ),
                               TextSpan(
                                 text: "${requests.length}",
-                                style: context.textTheme.bodyLarge!
-                                    .copyWith(fontWeight: FontWeight.w600),
+                                style: context.textTheme.bodyLarge!.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: appRed,
+                                ),
                               ),
                               TextSpan(
                                 text: ")",

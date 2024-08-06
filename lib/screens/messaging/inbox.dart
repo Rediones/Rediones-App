@@ -2,6 +2,7 @@ import 'package:chatview/chatview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:rediones/api/base.dart';
 import 'package:rediones/api/message_service.dart';
 import 'package:rediones/components/message_data.dart';
 import 'package:rediones/components/user_data.dart';
@@ -41,8 +42,14 @@ class _InboxState extends ConsumerState<Inbox> {
 
     User currentUser = ref.read(userProvider);
     currentUserID = currentUser.uuid;
-    otherUser = widget.details.users
-        .firstWhere((user) => user != currentUser, orElse: () => currentUser);
+
+    for (User user in widget.details.users) {
+      if (user.uuid != currentUserID) {
+        otherUser = user;
+        break;
+      }
+    }
+
     otherID = otherUser.uuid;
     conversationID = widget.details.id;
 
@@ -66,7 +73,22 @@ class _InboxState extends ConsumerState<Inbox> {
       chatUsers: users,
     );
 
+    addHandler(receiveMessageSignal, handleIncomingMessage);
     fetchMessages();
+  }
+
+  void handleIncomingMessage(dynamic data) {
+    log("Incoming Message: $data");
+    String sender = data["senderId"], content = data["content"], timestamp = data["timestamp"];
+
+    final message = Message(
+      id: uuid.v4(),
+      message: content,
+      createdAt: DateTime.parse(timestamp),
+      sendBy: sender,
+    );
+    chatController.addMessage(message);
+    setState(() {});
   }
 
   void assignMessages(List<MessageData> messages, {bool online = false}) {
@@ -118,12 +140,16 @@ class _InboxState extends ConsumerState<Inbox> {
 
   @override
   void dispose() {
+    removeHandler(receiveMessageSignal, handleIncomingMessage);
     chatController.dispose();
     super.dispose();
   }
 
   void onSendTap(
-      String rawMessage, ReplyMessage replyMessage, MessageType messageType) {
+    String rawMessage,
+    ReplyMessage replyMessage,
+    MessageType messageType,
+  ) {
     final message = Message(
       id: uuid.v4(),
       message: rawMessage,
@@ -133,11 +159,12 @@ class _InboxState extends ConsumerState<Inbox> {
       messageType: messageType,
     );
     chatController.addMessage(message);
+    widget.details.lastMessage = rawMessage;
 
     sendMessage(
       MessageData(
         timestamp: DateTime.now(),
-        id: uuid.v4(),
+        id: otherID,
         content: rawMessage,
         sender: currentUserID,
         conversationID: conversationID,
@@ -162,9 +189,11 @@ class _InboxState extends ConsumerState<Inbox> {
               icon: const Icon(Icons.chevron_left_rounded),
               onPressed: () => context.router.pop(),
             ),
-            profilePicture: otherUser.profilePicture,
-            chatTitle: otherUser.username,
+            profilePicture: users[1].profilePhoto,
+            chatTitle: users[1].name,
             userStatus: "Online",
+            showLeading: false,
+            padding: EdgeInsets.only(left: 15.w),
             chatTitleTextStyle: context.textTheme.titleSmall!.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -251,14 +280,14 @@ class _InboxState extends ConsumerState<Inbox> {
                 context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
             messageTimeAnimationCurve: Curves.easeOut,
             defaultGroupSeparatorConfig: DefaultGroupSeparatorConfiguration(
-              textStyle: context.textTheme.bodyMedium
-            ),
+                textStyle: context.textTheme.bodyMedium,),
           ),
           // showTypingIndicator: true,
           featureActiveConfig: const FeatureActiveConfig(
             enableSwipeToReply: true,
             enableSwipeToSeeTime: false,
             enableDoubleTapToLike: true,
+            enableOtherUserProfileAvatar: true,
           ),
           sendMessageConfig: SendMessageConfiguration(
             replyMessageColor: context.isDark ? theme : primary,
@@ -267,8 +296,10 @@ class _InboxState extends ConsumerState<Inbox> {
             closeIconColor: context.isDark ? theme : primary,
             allowRecordingVoice: false,
             defaultSendButtonColor: appRed,
+            enableCameraImagePicker: false,
+            enableGalleryImagePicker: false,
             textFieldBackgroundColor:
-                context.isDark ? fadedPrimary : const Color(0xFFF5F5F5),
+                context.isDark ? primary : const Color(0xFFF5F5F5),
             textFieldConfig: TextFieldConfiguration(
               textStyle: context.textTheme.bodyLarge!,
             ),
