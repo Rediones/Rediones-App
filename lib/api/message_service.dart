@@ -18,8 +18,6 @@ bool _has(List<Conversation> conversations, String conversationID) {
 }
 
 Future<RedionesResponse<List<Conversation>>> getConversations() async {
-
-
   String errorHeader = "Get Conversations:";
   try {
     Response response = await dio.get(
@@ -28,6 +26,7 @@ Future<RedionesResponse<List<Conversation>>> getConversations() async {
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
+
       List<dynamic> conversationData = response.data as List<dynamic>;
       List<Conversation> conversations = [];
 
@@ -42,13 +41,13 @@ Future<RedionesResponse<List<Conversation>>> getConversations() async {
         body["lastMessage"] = element["lastMessage"];
         body["timestamp"] = element["timestamp"];
         conversations.add(Conversation.fromJson(body));
-
-        return RedionesResponse(
-          message: "Success",
-          payload: conversations,
-          status: Status.success,
-        );
       }
+
+      return RedionesResponse(
+        message: "Success",
+        payload: conversations,
+        status: Status.success,
+      );
     }
   } on DioException catch (e) {
     return RedionesResponse(
@@ -57,7 +56,7 @@ Future<RedionesResponse<List<Conversation>>> getConversations() async {
       status: Status.failed,
     );
   } catch (e) {
-    log("Create Conversation Error: $e");
+    log("Get Conversations Error: $e");
   }
 
   return RedionesResponse(

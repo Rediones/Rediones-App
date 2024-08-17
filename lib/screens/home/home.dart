@@ -93,18 +93,7 @@ class _HomeState extends ConsumerState<Home> {
     super.dispose();
   }
 
-  void onCommentClicked(String postID, Future future) {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      showDragHandle: true,
-      context: context,
-      builder: (context) => PostComments(
-        future: future,
-        postID: postID,
-        parentContext: context,
-      ),
-    );
-  }
+
 
   void checkForChanges() {
     ref.listen(isLoggedInProvider, (oldVal, newVal) {
@@ -114,19 +103,7 @@ class _HomeState extends ConsumerState<Home> {
     });
   }
 
-  void show() {
-    AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: 10,
-          channelKey: 'rediones_notification_channel_key',
-          actionType: ActionType.Default,
-          title: 'Hello World!',
-          body: 'This is my first notification!',
-          fullScreenIntent: true,
-          wakeUpScreen: true,
-        )
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +203,6 @@ class _HomeState extends ConsumerState<Home> {
                     itemCount: dummyPosts.length,
                     itemBuilder: (_, index) => PostObjectContainer(
                       postObject: dummyPosts[index],
-                      onCommentClicked: () {},
                     ),
                     separatorBuilder: (_, __) => SizedBox(height: 20.h),
                   ),
@@ -322,10 +298,6 @@ class _HomeState extends ConsumerState<Home> {
                                   child: PostObjectContainer(
                                     postObject: post,
                                     index: index - 1,
-                                    onCommentClicked: () => onCommentClicked(
-                                      post.uuid,
-                                      getComments(post.uuid),
-                                    ),
                                   ),
                                 ),
                               ),

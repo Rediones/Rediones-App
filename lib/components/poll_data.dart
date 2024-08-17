@@ -32,6 +32,7 @@ class Poll extends PostObject {
   const Poll({
     super.uuid,
     super.text,
+    super.saved,
     required super.timestamp,
     required super.posterID,
     required super.posterUsername,
@@ -39,6 +40,7 @@ class Poll extends PostObject {
     required super.posterPicture,
     super.likes,
     super.shares,
+    super.comments,
     this.pollID = "",
     this.polls = const [],
     this.totalVotes = 0,
@@ -72,6 +74,7 @@ class Poll extends PostObject {
     return Poll(
       timestamp: DateTime.parse(poll["createdAt"]),
       posterID: map["postedBy"]["_id"],
+      saved: map["saved"],
       posterName:
           "${map["postedBy"]["firstName"]} ${map["postedBy"]["lastName"]}",
       posterPicture: map["postedBy"]["profilePicture"],
@@ -83,7 +86,29 @@ class Poll extends PostObject {
       shares: 0,
       text: poll["title"],
       totalVotes: count,
+      comments: map["comments"],
       durationInHours: poll["duration"],
+    );
+  }
+
+  @override
+  Poll copyWith({int? newComments}) {
+    return Poll(
+      text: text,
+      comments: newComments ?? comments,
+      uuid: uuid,
+      timestamp: timestamp,
+      likes: likes,
+      shares: shares,
+      saved: saved,
+      polls: polls,
+      totalVotes: totalVotes,
+      durationInHours: durationInHours,
+      pollID: pollID,
+      posterID: posterID,
+      posterName: posterName,
+      posterPicture: posterPicture,
+      posterUsername: posterUsername,
     );
   }
 }

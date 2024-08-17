@@ -345,7 +345,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                           itemCount: dummyPosts.length,
                           itemBuilder: (_, index) => PostObjectContainer(
                             postObject: dummyPosts[index],
-                            onCommentClicked: () {},
+
                           ),
                           separatorBuilder: (_, __) => SizedBox(height: 20.h),
                         ),
@@ -406,7 +406,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                       child: FadeInAnimation(
                                         child: PostObjectContainer(
                                           postObject: post,
-                                          onCommentClicked: () {},
+
                                         ),
                                       ),
                                     ),
@@ -422,7 +422,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                           itemCount: dummyPosts.length,
                           itemBuilder: (_, index) => PostObjectContainer(
                             postObject: dummyPosts[index],
-                            onCommentClicked: () {},
+
                           ),
                           separatorBuilder: (_, __) => SizedBox(height: 20.h),
                         ),
@@ -483,7 +483,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                       child: FadeInAnimation(
                                         child: PostObjectContainer(
                                           postObject: post,
-                                          onCommentClicked: () {},
+
                                         ),
                                       ),
                                     ),

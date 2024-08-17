@@ -321,7 +321,6 @@ class _GroupHomeState extends State<GroupHome> {
 
                             return PostObjectContainer(
                               postObject: post,
-                              onCommentClicked: () {},
                             );
                           },
                           separatorBuilder: (_, __) => SizedBox(height: 25.h),

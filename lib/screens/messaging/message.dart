@@ -505,11 +505,76 @@ class _AddStory extends ConsumerStatefulWidget {
 }
 
 class _AddStoryState extends ConsumerState<_AddStory> {
-  void selectStory() {
-    FileHandler.single(type: FileType.media).then((resp) {
-      if (resp == null) return;
+  void navigate(SingleFileResponse resp) =>
       context.router.pushNamed(Pages.createStory, extra: resp);
-    });
+
+  void showMedia() => FileHandler.single(type: FileType.media).then((resp) {
+        if (resp == null) return;
+        navigate(resp);
+      });
+
+  void selectStory() {
+    List<MediaData> stories =
+        ref.watch(currentUserStory.select((u) => u.stories));
+    bool hasStory = stories.isNotEmpty;
+
+    if (hasStory) {
+      showModalBottomSheet(
+        context: context,
+        builder: (ctx) => SizedBox(
+          height: 180.h,
+          child: Column(
+            children: [
+              ListTile(
+                leading: Icon(
+                  Icons.add_rounded,
+                  size: 26.r,
+                  color: appRed,
+                ),
+                title: Text(
+                  "Add Story",
+                  style: context.textTheme.titleSmall,
+                ),
+                subtitle: Text(
+                  "Add a new story",
+                  style: context.textTheme.bodyMedium,
+                ),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  showMedia();
+                },
+              ),
+
+              ListTile(
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  context.router.pushNamed(
+                    Pages.viewStory,
+                    extra: ref.watch(currentUserStory),
+                  );
+                },
+                leading: Icon(
+                  Icons.image_outlined,
+                  size: 26.r,
+                  color: appRed,
+                ),
+                title: Text(
+                  "View Story",
+                  style: context.textTheme.titleSmall,
+                ),
+                subtitle: Text(
+                  "View all the stories you uploaded",
+                  style: context.textTheme.bodyMedium,
+                ),
+              )
+            ],
+          ),
+        ),
+        showDragHandle: true,
+      );
+    } else {
+      showMedia();
+    }
   }
 
   @override
@@ -525,21 +590,18 @@ class _AddStoryState extends ConsumerState<_AddStory> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            GestureDetector(
-              onTap: selectStory,
-              child: Container(
-                height: 20.r,
-                width: 20.r,
-                decoration: BoxDecoration(
-                  color: primary,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.add_rounded,
-                  color: theme,
-                  size: 16.r,
-                ),
+            Container(
+              height: 20.r,
+              width: 20.r,
+              decoration: BoxDecoration(
+                color: primary,
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.add_rounded,
+                color: theme,
+                size: 16.r,
               ),
             ),
             SizedBox(height: 25.r),
@@ -604,16 +666,7 @@ class _AddStoryState extends ConsumerState<_AddStory> {
     );
 
     return GestureDetector(
-      onTap: () {
-        if (hasStory) {
-          context.router.pushNamed(
-            Pages.viewStory,
-            extra: ref.watch(currentUserStory),
-          );
-        } else {
-          selectStory();
-        }
-      },
+      onTap: selectStory,
       child: CachedNetworkImage(
         imageUrl: hasStory ? stories.last.mediaUrl : "",
         errorWidget: (_, __, ___) {

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photo_gallery/photo_gallery.dart';
@@ -13,7 +14,7 @@ import 'package:rediones/tools/widgets.dart';
 import 'package:video_player/video_player.dart';
 
 class EditSpotlightPage extends StatefulWidget {
-  final Medium spotlight;
+  final SingleFileResponse spotlight;
 
   const EditSpotlightPage({super.key, required this.spotlight});
 
@@ -61,13 +62,15 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
   }
 
   Future<void> onCreate() async {
-    File file = await widget.spotlight.getFile();
+    File file = File(widget.spotlight.path);
     Uint8List data = await file.readAsBytes();
     String videoData = FileHandler.convertTo64(data);
     _create("$vidPrefix$videoData");
   }
 
   void popSuccess() => context.router.pop(true);
+
+  void showMessage(String message) => showToast(message, context);
 
   void _create(String videoData) {
     String text = textEditingController.text.trim();
@@ -77,10 +80,10 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
       caption: text.isEmpty ? null : text,
     ).then((resp) {
       if (resp.status == Status.failed) {
-        showToast(resp.message, context);
+        showMessage(resp.message);
       }
 
-      Navigator.of(context).pop();
+      popSuccess();
 
       if (resp.status == Status.success) {
         popSuccess();
@@ -96,7 +99,7 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
   }
 
   Future<void> setup() async {
-    spotlightFile = await widget.spotlight.getFile();
+    spotlightFile = File(widget.spotlight.path);
     videoController = VideoPlayerController.file(
       spotlightFile,
       videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: false),
@@ -196,6 +199,10 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: primary,
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        toolbarHeight: 0.h,
+      ),
       body: SafeArea(
         child: !loaded
             ? const Center(child: loader)
@@ -303,6 +310,13 @@ class _EditSpotlightPageState extends State<EditSpotlightPage>
                       child: SpecialForm(
                         controller: textEditingController,
                         action: TextInputAction.send,
+                        hintStyle: context.textTheme.bodyLarge!.copyWith(
+                          color: theme.withOpacity(0.6)
+                        ),
+                        style: context.textTheme.bodyLarge!.copyWith(
+                            color: theme,
+                          fontWeight: FontWeight.w500,
+                        ),
                         borderColor: Colors.transparent,
                         width: 390.w,
                         height: 40.h,

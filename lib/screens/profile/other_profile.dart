@@ -314,7 +314,8 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: appRed,
                                   elevation: 0.0,
-                                  fixedSize: Size(168.w, 32.h),
+                                  minimumSize: Size(168.w, 35.h),
+                                  fixedSize: Size(168.w, 35.h),
                                 ),
                                 child: Text(
                                   shouldFollow(user.uuid)
@@ -367,7 +368,8 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   elevation: 0.0,
-                                  fixedSize: Size(168.w, 40.h),
+                                  minimumSize: Size(168.w, 35.h),
+                                  fixedSize: Size(168.w, 35.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20.h),
                                     side: BorderSide(
@@ -461,7 +463,6 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                                 itemCount: dummyPosts.length,
                                 itemBuilder: (_, index) => PostObjectContainer(
                                   postObject: dummyPosts[index],
-                                  onCommentClicked: () {},
                                 ),
                                 separatorBuilder: (_, __) =>
                                     SizedBox(height: 20.h),
@@ -504,8 +505,8 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                                         child: FadeInAnimation(
                                             child: PostObjectContainer(
                                           postObject: post,
-                                          onCommentClicked: () {},
-                                        )),
+
+                                        ),),
                                       ),
                                     );
                                   },

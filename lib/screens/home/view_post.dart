@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -21,12 +23,14 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 import 'comments.dart';
 
-
 class ViewPostData {
   final String id;
   final PostObject? object;
 
-  const ViewPostData({this.id = "", this.object,});
+  const ViewPostData({
+    this.id = "",
+    this.object,
+  });
 }
 
 class ViewPostObjectPage extends ConsumerStatefulWidget {
@@ -42,7 +46,7 @@ class ViewPostObjectPage extends ConsumerStatefulWidget {
 }
 
 class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
-  int length = 0;
+  int length = 0, totalComments = 0;
   bool liked = false;
   bool bookmarked = false;
   bool expandText = false;
@@ -91,6 +95,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     User user = ref.read(userProvider);
     liked = object!.likes.contains(currentUserID);
     bookmarked = user.savedPosts.contains(object!.uuid);
+    totalComments = object!.comments;
     getPostComments(object!.uuid);
   }
 
@@ -127,16 +132,22 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
     User user = ref.watch(userProvider);
     liked = object.likes.contains(currentUserID);
-    bookmarked = user.savedPosts.contains(object.uuid);
+    bookmarked = object.saved.contains(user.uuid);
+    totalComments = object.comments;
     getPostComments(object.uuid);
   }
 
-
   Future<void> getPostComments(String id) async {
     var response = await getComments(id);
-    comments.clear();
-    comments.addAll(response);
-    setState(() => loadingComments = false);
+    if(response != null) {
+      comments.clear();
+      comments.addAll(response);
+    }
+
+    setState(() {
+      loadingComments = false;
+      totalComments = response?.length ?? totalComments;
+    });
   }
 
   void showExtension() {
@@ -210,7 +221,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
     likePost(object!.uuid).then((response) {
       if (response.status == Status.success) {
-        updateDatabaseForLikes(object!);
+        updateDatabase(object!);
         if (!mounted) return;
         setState(() {});
       } else {
@@ -223,15 +234,42 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
           likes.remove(currentUserID);
         }
 
-        if(!mounted) return;
+        if (!mounted) return;
         setState(() {});
         showMessage("Unable to ${liked ? "like" : "unlike"} your post");
       }
     });
   }
 
-  Future<void> updateDatabaseForLikes(
-      PostObject object) async {
+  Future<void> updateComment(int count) async {
+    List<PostObject> objects = ref.watch(postsProvider);
+    int index = objects.indexWhere((e) => e.uuid == object!.uuid);
+    if (index != -1) {
+      PostObject obj = object!.copyWith(newComments: count);
+      ref.watch(postsProvider.notifier).state = [
+        ...objects.sublist(0, index),
+        obj,
+        ...objects.sublist(index + 1),
+      ];
+
+      Isar isar = GetIt.I.get();
+      if (obj is Post) {
+        Post post = obj;
+
+        await isar.writeTxn(() async {
+          await isar.posts.put(post);
+        });
+      } else if (obj is Poll) {
+        Poll poll = obj;
+
+        await isar.writeTxn(() async {
+          await isar.polls.put(poll);
+        });
+      }
+    }
+  }
+
+  Future<void> updateDatabase(PostObject object) async {
     Isar isar = GetIt.I.get();
     if (object is Post) {
       Post post = object;
@@ -248,36 +286,36 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     }
   }
 
-  Future<void> updateDatabaseForSaved(List<String> saved) async {
-    Isar isar = GetIt.I.get();
-    int id = ref.watch(userProvider.select((value) => value.isarId));
-    User? user = await isar.users.get(id);
-    if (user != null) {
-      user.savedPosts.clear();
-      user.savedPosts.addAll(saved);
-      await isar.writeTxn(() async {
-        await isar.users.put(user);
-      });
-    }
-  }
-
   void onBookmark() {
-    setState(() => bookmarked = !bookmarked);
+    bool savedInitially = bookmarked;
+
+    setState(() {
+      bookmarked = !savedInitially;
+      if(savedInitially) {
+        object!.saved.remove(currentUserID);
+      } else {
+        object!.saved.add(currentUserID);
+      }
+    });
     savePost(object!.uuid).then((value) {
       if (value.status == Status.success) {
-        List<String> postsID = ref.watch(userProvider.select((value) => value.savedPosts));
-
-        // postsID.addAll(value.payload);
-        // updateDatabaseForSaved(value.payload);
+        updateDatabase(object!);
       } else {
-        setState(() => bookmarked = !bookmarked);
-        showMessage("Unable to save post");
+        setState(() {
+          bookmarked = savedInitially;
+          if(savedInitially) {
+            object!.saved.add(currentUserID);
+          } else {
+            object!.saved.remove(currentUserID);
+          }
+        });
+        showMessage("Something went wrong");
       }
     });
   }
 
-  void showMessage(String message) => showToast(message, context);
 
+  void showMessage(String message) => showToast(message, context);
 
   void onFollow() {
     List<String> following = ref.watch(userProvider.select((u) => u.following));
@@ -322,6 +360,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
         await createComment(object!.uuid, text);
     if (resp.status == Status.success) {
       comments.add(resp.payload!.data);
+      updateComment(resp.payload!.count);
       setState(() {});
     }
   }
@@ -452,7 +491,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                               bookmarked: bookmarked,
                               onBookmark: onBookmark,
                               onLike: onLike,
-                              length: comments.length,
+                              length: loadingComments ? object!.comments : comments.length,
                             ),
                             SizedBox(height: 20.h),
                             if (comments.isNotEmpty)
@@ -471,7 +510,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                       ),
                     ),
                   ),
-                if(loadingComments && object != null)
+                if (loadingComments && object != null)
                   SliverToBoxAdapter(
                     child: SizedBox(
                       width: 390.w,
@@ -506,7 +545,11 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                   child: SpecialForm(
                     controller: controller,
                     suffix: IconButton(
-                      icon: Icon(Icons.send_rounded, size: 18.r, color: appRed),
+                      icon: Icon(
+                        Icons.send_rounded,
+                        size: 26.r,
+                        color: appRed,
+                      ),
                       onPressed: () => onSend(controller.text),
                       splashRadius: 0.01,
                     ),

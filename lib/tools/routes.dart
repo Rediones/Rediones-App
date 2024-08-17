@@ -149,7 +149,7 @@ final List<GoRoute> routes = [
   GoRoute(
     path: Pages.editSpotlight.path,
     name: Pages.editSpotlight,
-    builder: (_, state) => EditSpotlightPage(spotlight: state.extra as Medium),
+    builder: (_, state) => EditSpotlightPage(spotlight: state.extra as SingleFileResponse),
   ),
   GoRoute(
     path: Pages.yourSpotlight.path,

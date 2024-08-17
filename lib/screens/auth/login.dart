@@ -48,6 +48,7 @@ class _LoginState extends ConsumerState<Login> {
   void navigate(RedionesResponse<User?> result) {
     saveToDatabase(result.payload!);
     ref.watch(userProvider.notifier).state = result.payload!;
+    ref.watch(loadingLocalPostsProvider.notifier).state = false;
     initSocket(result.payload!.uuid);
     saveAuthDetails(_authDetails, ref);
     context.router.pushReplacementNamed(Pages.home);

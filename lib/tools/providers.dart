@@ -200,6 +200,7 @@ final List<Post> dummyPosts = List.generate(
     uuid: "Dummy Post ID: $index",
     text: loremIpsum,
     timestamp: DateTime(1900),
+    comments: 0,
     shares: 0,
   ),
 );

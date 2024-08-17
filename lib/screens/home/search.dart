@@ -539,77 +539,91 @@ class ResultContainer extends ConsumerWidget {
     bool darkTheme = context.isDark;
     bool shouldFollow = !user.followers.contains(ref.watch(userProvider));
 
-    return Container(
-      width: 120.w,
-      height: 150.h,
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: darkTheme ? neutral3 : fadedPrimary),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 15.h),
-          CachedNetworkImage(
-            imageUrl: user.profilePicture,
-            errorWidget: (context, url, error) => CircleAvatar(
-              backgroundColor: neutral2,
-              radius: 22.r,
-            ),
-            progressIndicatorBuilder: (context, url, download) => Container(
-              width: 44.r,
-              height: 45.r,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: neutral2,
+    return GestureDetector(
+      onTap: () {
+        if (user.uuid == ref.watch(userProvider).uuid) {
+          context.router.pushNamed(Pages.profile);
+        } else {
+          context.router.pushNamed(
+            Pages.otherProfile,
+            pathParameters: {
+              "id": user.uuid,
+            },
+          );
+        }
+      },
+      child: Container(
+        width: 120.w,
+        height: 150.h,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(color: darkTheme ? neutral3 : fadedPrimary),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 15.h),
+            CachedNetworkImage(
+              imageUrl: user.profilePicture,
+              errorWidget: (context, url, error) => CircleAvatar(
+                backgroundColor: neutral2,
+                radius: 22.r,
               ),
-            ),
-            imageBuilder: (context, provider) => CircleAvatar(
-              backgroundImage: provider,
-              radius: 22.r,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          SizedBox(
-            width: 100.w,
-            child: Center(
-              child: Text(
-                user.username,
-                overflow: TextOverflow.visible,
-                style: context.textTheme.bodyLarge!
-                    .copyWith(fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          SizedBox(height: 2.h),
-          SizedBox(
-            width: 100.w,
-            child: Center(
-              child: Text(
-                "@${user.nickname}",
-                style: context.textTheme.labelMedium,
-              ),
-            ),
-          ),
-          SizedBox(height: 10.h),
-          if (shouldFollow)
-            GestureDetector(
-              onTap: onAdd,
-              child: Container(
-                height: 22.r,
-                width: 22.r,
-                decoration: BoxDecoration(
-                  color: appRed,
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-                child: Center(
-                  child: Icon(Icons.add_rounded, color: theme, size: 18.r),
+              progressIndicatorBuilder: (context, url, download) => Container(
+                width: 44.r,
+                height: 45.r,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: neutral2,
                 ),
               ),
-            )
-        ],
+              imageBuilder: (context, provider) => CircleAvatar(
+                backgroundImage: provider,
+                radius: 22.r,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            SizedBox(
+              width: 100.w,
+              child: Center(
+                child: Text(
+                  user.username,
+                  overflow: TextOverflow.visible,
+                  style: context.textTheme.bodyLarge!
+                      .copyWith(fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            SizedBox(height: 2.h),
+            SizedBox(
+              width: 100.w,
+              child: Center(
+                child: Text(
+                  "@${user.nickname}",
+                  style: context.textTheme.labelMedium,
+                ),
+              ),
+            ),
+            SizedBox(height: 10.h),
+            if (shouldFollow)
+              GestureDetector(
+                onTap: onAdd,
+                child: Container(
+                  height: 22.r,
+                  width: 22.r,
+                  decoration: BoxDecoration(
+                    color: appRed,
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: Center(
+                    child: Icon(Icons.add_rounded, color: theme, size: 18.r),
+                  ),
+                ),
+              )
+          ],
+        ),
       ),
     );
   }

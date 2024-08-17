@@ -69,168 +69,178 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
     List<NotificationData> notifications = ref.watch(notificationsProvider);
     String username = ref.watch(userProvider).username;
 
-    return NestedScrollView(
-      headerSliverBuilder: (context, isScrolled) => [
-        SliverPadding(
-          padding: EdgeInsets.only(left: 15.w, top: 10.h),
-          sliver: SliverToBoxAdapter(
-            child: Text(
-              "Notifications",
-              style: context.textTheme.titleLarge,
+    return BackButtonListener(
+        onBackButtonPressed: () async {
+          final canPop = context.router.canPop();
+          if(!canPop) {
+            ref.watch(dashboardIndexProvider.notifier).state = 0;
+            ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+          }
+          return !canPop;
+        },
+      child: NestedScrollView(
+        headerSliverBuilder: (context, isScrolled) => [
+          SliverPadding(
+            padding: EdgeInsets.only(left: 15.w, top: 10.h),
+            sliver: SliverToBoxAdapter(
+              child: Text(
+                "Notifications",
+                style: context.textTheme.titleLarge,
+              ),
             ),
           ),
-        ),
-        SliverPersistentHeader(
-          delegate: TabHeaderDelegate(
-            tabBar: TabBar(
-              controller: controller,
-              indicatorColor: appRed,
-              dividerColor: context.isDark ? Colors.white12 : Colors.black12,
-              labelColor: appRed,
-              labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
-              labelStyle: context.textTheme.titleSmall!
-                  .copyWith(fontWeight: FontWeight.w600),
-              unselectedLabelStyle: context.textTheme.titleSmall!
-                  .copyWith(fontWeight: FontWeight.w500),
-              tabs: const [
-                Tab(text: "All"),
-                Tab(text: "Verified"),
-                Tab(text: "Tags & Mention")
-              ],
+          SliverPersistentHeader(
+            delegate: TabHeaderDelegate(
+              tabBar: TabBar(
+                controller: controller,
+                indicatorColor: appRed,
+                dividerColor: context.isDark ? Colors.white12 : Colors.black12,
+                labelColor: appRed,
+                labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
+                labelStyle: context.textTheme.titleSmall!
+                    .copyWith(fontWeight: FontWeight.w600),
+                unselectedLabelStyle: context.textTheme.titleSmall!
+                    .copyWith(fontWeight: FontWeight.w500),
+                tabs: const [
+                  Tab(text: "All"),
+                  Tab(text: "Verified"),
+                  Tab(text: "Tags & Mention")
+                ],
+              ),
             ),
-          ),
-          pinned: true,
-        ),
-      ],
-      body: TabBarView(
-        controller: controller,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(left: 15.w),
-            child: Column(
-              children: [
-                SizedBox(height: 10.h),
-                Expanded(
-                  child: loading
-                      ? const CenteredPopup()
-                      : (notifications.isEmpty)
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    "assets/No Data.png",
-                                    width: 150.r,
-                                    height: 150.r,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  Text(
-                                    "There are no notifications available",
-                                    style:
-                                        context.textTheme.titleSmall!.copyWith(
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  SizedBox(height: 10.h),
-                                  GestureDetector(
-                                    onTap: refresh,
-                                    child: Text(
-                                      "Refresh",
-                                      style: context.textTheme.titleSmall!
-                                          .copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: appRed,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : RefreshIndicator(
-                              onRefresh: refresh,
-                              child: ListView.separated(
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: notifications.length + 1,
-                                itemBuilder: (_, index) =>
-                                    (index == notifications.length)
-                                        ? SizedBox(height: 100.h)
-                                        : NotificationHeader(
-                                            notifications[index],
-                                            username: username,
-                                          ),
-                                separatorBuilder: (_, __) =>
-                                    SizedBox(height: 20.h),
-                              ),
-                            ),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  "assets/No Data.png",
-                  width: 150.r,
-                  height: 150.r,
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(height: 20.h),
-                Text(
-                  "There are no verified notifications available",
-                  style: context.textTheme.titleSmall!.copyWith(
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                GestureDetector(
-                  onTap: refresh,
-                  child: Text(
-                    "Refresh",
-                    style: context.textTheme.titleSmall!.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: appRed,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  "assets/No Data.png",
-                  width: 150.r,
-                  height: 150.r,
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(height: 20.h),
-                Text(
-                  "There are no tags and mentions available",
-                  style: context.textTheme.titleSmall!.copyWith(
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                GestureDetector(
-                  onTap: refresh,
-                  child: Text(
-                    "Refresh",
-                    style: context.textTheme.titleSmall!.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: appRed,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            pinned: true,
           ),
         ],
-      ),
+        body: TabBarView(
+          controller: controller,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: 15.w),
+              child: Column(
+                children: [
+                  SizedBox(height: 10.h),
+                  Expanded(
+                    child: loading
+                        ? const CenteredPopup()
+                        : (notifications.isEmpty)
+                        ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            "assets/No Data.png",
+                            width: 150.r,
+                            height: 150.r,
+                            fit: BoxFit.cover,
+                          ),
+                          SizedBox(height: 20.h),
+                          Text(
+                            "There are no notifications available",
+                            style:
+                            context.textTheme.titleSmall!.copyWith(
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+                          GestureDetector(
+                            onTap: refresh,
+                            child: Text(
+                              "Refresh",
+                              style: context.textTheme.titleSmall!
+                                  .copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: appRed,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                        : RefreshIndicator(
+                      onRefresh: refresh,
+                      child: ListView.separated(
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: notifications.length + 1,
+                        itemBuilder: (_, index) =>
+                        (index == notifications.length)
+                            ? SizedBox(height: 100.h)
+                            : NotificationHeader(
+                          notifications[index],
+                          username: username,
+                        ),
+                        separatorBuilder: (_, __) =>
+                            SizedBox(height: 20.h),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    "assets/No Data.png",
+                    width: 150.r,
+                    height: 150.r,
+                    fit: BoxFit.cover,
+                  ),
+                  SizedBox(height: 20.h),
+                  Text(
+                    "There are no verified notifications available",
+                    style: context.textTheme.titleSmall!.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  GestureDetector(
+                    onTap: refresh,
+                    child: Text(
+                      "Refresh",
+                      style: context.textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: appRed,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    "assets/No Data.png",
+                    width: 150.r,
+                    height: 150.r,
+                    fit: BoxFit.cover,
+                  ),
+                  SizedBox(height: 20.h),
+                  Text(
+                    "There are no tags and mentions available",
+                    style: context.textTheme.titleSmall!.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  GestureDetector(
+                    onTap: refresh,
+                    child: Text(
+                      "Refresh",
+                      style: context.textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: appRed,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      )
     );
   }
 }

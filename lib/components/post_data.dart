@@ -13,12 +13,14 @@ class Post extends PostObject {
   const Post({
     super.uuid,
     super.text,
+    super.saved,
     required super.timestamp,
     this.media = const [],
     required super.posterID,
     required super.posterUsername,
     required super.posterName,
     required super.posterPicture,
+    super.comments,
     super.likes,
     super.shares,
   });
@@ -33,10 +35,29 @@ class Post extends PostObject {
       likes: map["likes"],
       shares: (map["shares"] as num).toInt(),
       media: map["media"],
+      saved: map["saved"],
+      comments: map["comments"],
       posterID: map["postedBy"]["_id"],
       posterName: "${map["postedBy"]["firstName"]} ${map["postedBy"]["lastName"]}",
       posterPicture: map["postedBy"]["profilePicture"],
       posterUsername: map["postedBy"]["username"],
+    );
+  }
+
+  @override
+  Post copyWith({int? newComments}) {
+    return Post(
+      text: text,
+      comments: newComments ?? comments,
+      uuid: uuid,
+      timestamp: timestamp,
+      likes: likes,
+      shares: shares,
+      media: media,
+      posterID: posterID,
+      posterName: posterName,
+      posterPicture: posterPicture,
+      posterUsername: posterUsername,
     );
   }
 

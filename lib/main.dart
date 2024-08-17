@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:camera/camera.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -123,6 +125,7 @@ class _RedionesState extends ConsumerState<Rediones>
 
     List<PostObject> objects = [...sortedPosts, ...sortedPolls];
     objects.sort((b, a) => a.timestamp.compareTo(b.timestamp));
+
 
     List<SearchData> searches = (await isar.searchDatas.where().findAll())
         .whereType<SearchData>()

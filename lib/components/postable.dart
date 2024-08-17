@@ -35,4 +35,6 @@ abstract class PostObject{
     this.shares = 0,
     required this.timestamp,
   });
+
+  PostObject copyWith({int? newComments});
 }

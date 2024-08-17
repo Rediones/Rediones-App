@@ -3,14 +3,21 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
+import 'package:isar/isar.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/comment_data.dart';
+import 'package:rediones/components/poll_data.dart';
+import 'package:rediones/components/post_data.dart';
+import 'package:rediones/components/postable.dart';
 import 'package:rediones/tools/constants.dart';
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 import 'package:timeago/timeago.dart' as time;
 
-class PostComments extends StatefulWidget {
+class PostComments extends ConsumerStatefulWidget {
   final Future future;
   final String postID;
   final BuildContext parentContext;
@@ -25,10 +32,10 @@ class PostComments extends StatefulWidget {
   });
 
   @override
-  State<PostComments> createState() => _PostCommentsState();
+  ConsumerState<PostComments> createState() => _PostCommentsState();
 }
 
-class _PostCommentsState extends State<PostComments> {
+class _PostCommentsState extends ConsumerState<PostComments> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController controller = TextEditingController();
 
@@ -46,12 +53,42 @@ class _PostCommentsState extends State<PostComments> {
         await createComment(widget.postID, text);
     if (resp.status == Status.success) {
       response.add(resp.payload!.data);
+      updateComment(resp.payload!.count);
       setState(() {});
       if(widget.updateCommentsCount != null) {
         widget.updateCommentsCount!(response.length);
       }
     }
   }
+
+  Future<void> updateComment(int count) async {
+    List<PostObject> objects = ref.watch(postsProvider);
+    int index = objects.indexWhere((e) => e.uuid == widget.postID);
+    if(index != -1) {
+      PostObject obj = objects[index].copyWith(newComments: count);
+      ref.watch(postsProvider.notifier).state = [
+        ...objects.sublist(0, index),
+        obj,
+        ...objects.sublist(index + 1),
+      ];
+
+      Isar isar = GetIt.I.get();
+      if (obj is Post) {
+        Post post = obj;
+
+        await isar.writeTxn(() async {
+          await isar.posts.put(post);
+        });
+      } else if (obj is Poll) {
+        Poll poll = obj;
+
+        await isar.writeTxn(() async {
+          await isar.polls.put(poll);
+        });
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +113,33 @@ class _PostCommentsState extends State<PostComments> {
                 ],
               );
             } else if (snapshot.connectionState == ConnectionState.done) {
-              List<CommentData> response = snapshot.data;
+              List<CommentData>? response = snapshot.data;
+
+              if(response == null) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        "assets/No Data.png",
+                        width: 150.r,
+                        height: 150.r,
+                        fit: BoxFit.cover,
+                      ),
+                      SizedBox(height: 20.h),
+                      Text(
+                        "An error occurred. Please try again",
+                        style:
+                        context.textTheme.titleSmall!.copyWith(
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                    ],
+                  ),
+                );
+              }
 
               SpecialForm commentSection = SpecialForm(
                 controller: controller,
@@ -229,7 +292,7 @@ class CommentDataContainer extends StatelessWidget {
                 Text(
                   data.postedBy.username,
                   style: context.textTheme.bodyLarge!
-                      .copyWith(fontWeight: FontWeight.w600),
+                      .copyWith(fontWeight: FontWeight.w700),
                 ),
                 SizedBox(height: 10.h),
                 SizedBox(
@@ -240,44 +303,49 @@ class CommentDataContainer extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 10.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            isLiked() ? Boxicons.bxs_like : Boxicons.bx_like,
-                            color: isLiked() ? niceBlue : null,
-                            size: 18.r,
-                          ),
-                          onPressed: () {},
-                          splashRadius: 0.01,
-                        ),
-                        Text("Like", style: context.textTheme.bodySmall),
-                      ],
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(Boxicons.bx_reply, size: 18.r),
-                          onPressed: () {},
-                          splashRadius: 0.01,
-                        ),
-                        Text("Reply", style: context.textTheme.bodySmall),
-                      ],
-                    ),
-                    Text(
-                      time.format(data.created),
-                      style:
-                          context.textTheme.bodySmall!.copyWith(color: appRed),
-                    ),
-                  ],
+                Text(
+                  time.format(data.created),
+                  style:
+                  context.textTheme.bodyMedium!.copyWith(color: appRed),
                 ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     Row(
+                //       mainAxisSize: MainAxisSize.min,
+                //       crossAxisAlignment: CrossAxisAlignment.center,
+                //       children: [
+                //         IconButton(
+                //           icon: Icon(
+                //             isLiked() ? Boxicons.bxs_like : Boxicons.bx_like,
+                //             color: isLiked() ? niceBlue : null,
+                //             size: 18.r,
+                //           ),
+                //           onPressed: () {},
+                //           splashRadius: 0.01,
+                //         ),
+                //         Text("Like", style: context.textTheme.bodySmall),
+                //       ],
+                //     ),
+                //     Row(
+                //       mainAxisSize: MainAxisSize.min,
+                //       crossAxisAlignment: CrossAxisAlignment.center,
+                //       children: [
+                //         IconButton(
+                //           icon: Icon(Boxicons.bx_reply, size: 18.r),
+                //           onPressed: () {},
+                //           splashRadius: 0.01,
+                //         ),
+                //         Text("Reply", style: context.textTheme.bodySmall),
+                //       ],
+                //     ),
+                //     Text(
+                //       time.format(data.created),
+                //       style:
+                //           context.textTheme.bodySmall!.copyWith(color: appRed),
+                //     ),
+                //   ],
+                // ),
               ],
             ),
           ),

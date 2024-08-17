@@ -37,7 +37,7 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
   late bool liked;
   bool bookmarked = false;
 
-  late Future<List<CommentData>> commentsFuture;
+  late Future<List<CommentData>?> commentsFuture;
 
   int totalComments = -1;
 
@@ -118,101 +118,96 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      opacity: ref.watch(spotlightsPlayStatusProvider) ? 0 : 1,
-      curve: Curves.easeOut,
-      duration: const Duration(milliseconds: 500),
-      child: SizedBox(
-        height: 300.h,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Skeleton.ignore(
-                  ignore: true,
-                  child: AnimatedSwitcherZoom.zoomIn(
-                    duration: const Duration(milliseconds: 200),
-                    child: IconButton(
-                      key: ValueKey<bool>(liked),
-                      splashRadius: 0.01,
-                      onPressed: onLike,
-                      icon: SvgPicture.asset(
-                        "assets/Like Filled.svg",
-                        color: liked ? appRed : Colors.white,
-                        width: 27.r,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 5.w),
-                Text(
-                  "${widget.spotlight.likes.length}",
-                  style: context.textTheme.titleSmall!.copyWith(
-                    color: Colors.white,
-                  ),
-                )
-              ],
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Skeleton.ignore(
-                  ignore: true,
+    return SizedBox(
+      height: 300.h,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Skeleton.ignore(
+                ignore: true,
+                child: AnimatedSwitcherZoom.zoomIn(
+                  duration: const Duration(milliseconds: 200),
                   child: IconButton(
+                    key: ValueKey<bool>(liked),
+                    splashRadius: 0.01,
+                    onPressed: onLike,
                     icon: SvgPicture.asset(
-                      "assets/Comments Filled.svg",
-                      width: 26.r,
+                      "assets/Like Filled.svg",
+                      color: liked ? appRed : Colors.white,
+                      width: 27.r,
                     ),
-                    onPressed: onCommentClicked,
                   ),
                 ),
-                SizedBox(width: 5.w),
-                FutureBuilder(
-                  future: commentsFuture,
-                  builder: (context, snapshot) {
-                    String text = "";
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      text = "...";
-                    } else if (snapshot.connectionState ==
-                        ConnectionState.done) {
-                      text = "${snapshot.data?.length}";
-                      updateCount(snapshot.data?.length ?? totalComments);
-                    }
-                    return Text(
-                      text,
-                      style: context.textTheme.titleSmall!.copyWith(
-                        color: Colors.white,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            AnimatedSwitcherZoom.zoomIn(
-              duration: const Duration(milliseconds: 200),
-              child: IconButton(
-                key: ValueKey<bool>(bookmarked),
-                icon: SvgPicture.asset(
-                  "assets/Bookmark${bookmarked ? " Filled" : ""}.svg",
-                  width: bookmarked ? 32.r : 25.r,
-                  color: !bookmarked ? Colors.white : null,
-                ),
-                onPressed: onBookmark,
               ),
-            ),
-            IconButton(
-              icon: const Icon(
-                Icons.more_horiz_rounded,
-                color: Colors.white,
+              SizedBox(width: 5.w),
+              Text(
+                "${widget.spotlight.likes.length}",
+                style: context.textTheme.titleSmall!.copyWith(
+                  color: Colors.white,
+                ),
+              )
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Skeleton.ignore(
+                ignore: true,
+                child: IconButton(
+                  icon: SvgPicture.asset(
+                    "assets/Comments Filled.svg",
+                    width: 26.r,
+                  ),
+                  onPressed: onCommentClicked,
+                ),
               ),
-              iconSize: 32.r,
-              splashRadius: 0.01,
-              onPressed: () {},
+              SizedBox(width: 5.w),
+              FutureBuilder(
+                future: commentsFuture,
+                builder: (context, snapshot) {
+                  String text = "";
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    text = "...";
+                  } else if (snapshot.connectionState ==
+                      ConnectionState.done) {
+                    text = "${snapshot.data?.length}";
+                    updateCount(snapshot.data?.length ?? totalComments);
+                  }
+                  return Text(
+                    text,
+                    style: context.textTheme.titleSmall!.copyWith(
+                      color: Colors.white,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          AnimatedSwitcherZoom.zoomIn(
+            duration: const Duration(milliseconds: 200),
+            child: IconButton(
+              key: ValueKey<bool>(bookmarked),
+              icon: SvgPicture.asset(
+                "assets/Bookmark${bookmarked ? " Filled" : ""}.svg",
+                width: bookmarked ? 32.r : 25.r,
+                color: !bookmarked ? Colors.white : null,
+              ),
+              onPressed: onBookmark,
             ),
-          ],
-        ),
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.more_horiz_rounded,
+              color: Colors.white,
+            ),
+            iconSize: 32.r,
+            splashRadius: 0.01,
+            onPressed: () {},
+          ),
+        ],
       ),
     );
   }

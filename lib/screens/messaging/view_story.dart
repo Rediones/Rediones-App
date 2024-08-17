@@ -117,7 +117,7 @@ class _ViewStoryPageState extends ConsumerState<ViewStoryPage> {
                           storyController.pause();
                           context.router.pushNamed(
                             isCurrent ? Pages.profile : Pages.otherProfile,
-                            extra: !isCurrent ? widget.story.postedBy.id : null,
+                            pathParameters: {"id": widget.story.postedBy.id},
                           ).then((resp) {
                             storyController.play();
                           });

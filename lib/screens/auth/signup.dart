@@ -2,6 +2,9 @@ import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
+import 'package:isar/isar.dart';
+import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/api/user_service.dart';
@@ -63,22 +66,24 @@ class _SignupState extends ConsumerState<Signup> {
     }
   }
 
+  void pop() => Navigator.of(context).pop();
+
   void register() {
     authenticate(_authDetails, Pages.register).then(
       (result) {
-        f.showToast(
+        showMessage(
           result.status == Status.failed
               ? result.message
-              : "Account Created Successfully", context
+              : "Account Created Successfully"
         );
 
         if (result.status == Status.success) {
           _controller.clear();
           _emailControl.clear();
           _confirmControl.clear();
-          navigate(result);
+          Future.delayed(const Duration(milliseconds: 2100), () => navigate(result));
         } else {
-          Navigator.of(context).pop();
+          pop();
         }
       },
     );
@@ -91,12 +96,24 @@ class _SignupState extends ConsumerState<Signup> {
     );
   }
 
+  void showMessage(String message ) => f.showToast(message, context);
+
   void navigate(RedionesResponse<User?> result) {
+    saveToDatabase(result.payload!);
     ref.watch(userProvider.notifier).state = result.payload!;
     ref.watch(isNewUserProvider.notifier).state = true;
+    ref.watch(loadingLocalPostsProvider.notifier).state = false;
     initSocket(result.payload!.uuid);
     saveAuthDetails(_authDetails, ref);
     context.router.pushReplacementNamed(Pages.createProfile);
+  }
+
+  Future<void> saveToDatabase(User user) async {
+    Isar isar = GetIt.I.get();
+    await isar.writeTxn(() async {
+      await isar.users.put(user);
+      FileHandler.saveString(userIsarId, user.uuid);
+    });
   }
 
   @override

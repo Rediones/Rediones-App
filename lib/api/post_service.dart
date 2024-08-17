@@ -59,6 +59,7 @@ PostObject processPost(Map<String, dynamic> result, {User? user}) {
   }
 
   result["likes"] = fromArrayString(result["likes"] as List<dynamic>);
+  result["saved"] = fromArrayString(result["saved"] as List<dynamic>);
 
   if (result["type"] == "POST") {
     result["media"] = fromArrayString(result["media"] as List<dynamic>);
@@ -251,9 +252,9 @@ class CommentInfo {
   const CommentInfo({required this.data, required this.count,});
 }
 
-Future<List<CommentData>> getComments(String postID) async {
+Future<List<CommentData>?> getComments(String postID) async {
   if (accessToken == null || postID.contains("Dummy")) {
-    return [];
+    return null;
   }
 
   String errorHeader = "Get Comments";
@@ -274,11 +275,11 @@ Future<List<CommentData>> getComments(String postID) async {
       return comments;
     }
   } on DioException catch (e) {
-    return [];
+    return null;
   } catch (e) {
     log("Get Comments Error: $e");
   }
-  return [];
+  return null;
 }
 
 Future<RedionesResponse<CommentInfo?>> createComment(
@@ -294,6 +295,7 @@ Future<RedionesResponse<CommentInfo?>> createComment(
         },
         options: configuration(accessToken!));
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
+      log("${response.data}");
       Map<String, dynamic> map = response.data["payload"]["comment"];
       int noOfComments = response.data["payload"]["noOfComments"];
       CommentData data = _processComment(map);

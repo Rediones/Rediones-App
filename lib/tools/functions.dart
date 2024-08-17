@@ -42,7 +42,7 @@ void showToast(String message, BuildContext context) {
     mobilePositionSettings: const MobilePositionSettings(topOnAppearance: 100),
     animationCurve: Curves.ease,
     snackBarStrategy: const ColumnSnackBarStrategy(),
-    duration: const Duration(seconds: 4),
+    duration: const Duration(seconds: 2),
     animationDuration: const Duration(milliseconds: 350),
   );
   snackBar.show(context);

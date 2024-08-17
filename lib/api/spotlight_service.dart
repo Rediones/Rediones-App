@@ -5,7 +5,7 @@ import 'base.dart';
 
 export 'base.dart';
 
-Future<RedionesResponse<List<SpotlightData>>> getAllSpotlights() async {
+Future<RedionesResponse<List<SpotlightData>?>> getAllSpotlights() async {
   String errorHeader = "Get All Spotlights:";
   try {
     Response response = await dio.get(
@@ -31,7 +31,7 @@ Future<RedionesResponse<List<SpotlightData>>> getAllSpotlights() async {
   } on DioException catch (e) {
     return RedionesResponse(
       message: dioErrorResponse(e),
-      payload: [],
+      payload: null,
       status: Status.failed,
     );
   } catch (e) {
@@ -40,7 +40,7 @@ Future<RedionesResponse<List<SpotlightData>>> getAllSpotlights() async {
 
   return RedionesResponse(
     message: "$errorHeader An unknown error occurred. Please try again later.",
-    payload: [],
+    payload: null,
     status: Status.failed,
   );
 }

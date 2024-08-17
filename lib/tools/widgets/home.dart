@@ -11,12 +11,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
+import 'package:rediones/screens/home/comments.dart';
 import 'package:rediones/screens/other/media_view.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
@@ -28,20 +30,33 @@ import 'common.dart' show loader;
 
 const BottomNavBar bottomNavBar = BottomNavBar();
 
-class BottomNavBar extends ConsumerWidget {
+class BottomNavBar extends ConsumerStatefulWidget {
   const BottomNavBar({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BottomNavBar> createState() => _BottomNavBarState();
+}
+
+class _BottomNavBarState extends ConsumerState<BottomNavBar> {
+  void navigate(SingleFileResponse resp) {
+    context.router
+        .pushNamed(
+          Pages.editSpotlight,
+          extra: resp,
+        )
+        .then((_) =>
+            ref.watch(spotlightsPlayStatusProvider.notifier).state = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     bool darkTheme = context.isDark;
     int currentTab = ref.watch(dashboardIndexProvider);
 
     return KeyboardVisibilityBuilder(builder: (context, isKeyboardVisible) {
-      bool onSpotlights = ref.watch(spotlightsPlayStatusProvider);
-
-      if (isKeyboardVisible || onSpotlights) {
+      if (isKeyboardVisible) {
         return const SizedBox();
       }
 
@@ -160,27 +175,13 @@ class BottomNavBar extends ConsumerWidget {
                                       children: [
                                         SizedBox(height: 15.h),
                                         GestureDetector(
-                                          onTap: () async {
+                                          onTap: () {
                                             Navigator.pop(context);
-                                            Permission.videos
-                                                .request()
+                                            FileHandler.single(
+                                                    type: FileType.video)
                                                 .then((resp) {
-                                              if (resp.isGranted) {
-                                                ref
-                                                    .watch(
-                                                        spotlightsPlayStatusProvider
-                                                            .notifier)
-                                                    .state = false;
-                                                context.router
-                                                    .pushNamed(
-                                                      Pages.createSpotlight,
-                                                    )
-                                                    .then((res) => ref
-                                                        .watch(
-                                                            spotlightsPlayStatusProvider
-                                                                .notifier)
-                                                        .state = true);
-                                              }
+                                              if (resp == null) return;
+                                              navigate(resp);
                                             });
                                           },
                                           child: Text(
@@ -276,6 +277,7 @@ class BottomNavBar extends ConsumerWidget {
                                               .watch(dashboardIndexProvider
                                                   .notifier)
                                               .state = 1;
+
                                           ref
                                               .watch(
                                                   spotlightsPlayStatusProvider
@@ -298,8 +300,8 @@ class BottomNavBar extends ConsumerWidget {
                                       color: currentTab == 1 ? offWhite : null,
                                       height: 70.h,
                                       text: "Communities",
-                                      activeSVG: "assets/Community.svg",
-                                      inactiveSVG: "assets/Community.svg",
+                                      activeSVG: "assets/Groups.svg",
+                                      inactiveSVG: "assets/Groups.svg",
                                       onSelect: () {
                                         unFocus();
                                         ref
@@ -314,7 +316,7 @@ class BottomNavBar extends ConsumerWidget {
                                                 .watch(
                                                     spotlightsPlayStatusProvider
                                                         .notifier)
-                                                .state = true;
+                                                .state = false;
                                           }
                                         });
                                       },
@@ -536,13 +538,11 @@ class TriangleClipper extends CustomClipper<Path> {
 class PostObjectContainer extends ConsumerStatefulWidget {
   final PostObject postObject;
   final int? index;
-  final VoidCallback onCommentClicked;
 
   const PostObjectContainer({
     super.key,
     this.index,
     required this.postObject,
-    required this.onCommentClicked,
   });
 
   @override
@@ -551,12 +551,12 @@ class PostObjectContainer extends ConsumerStatefulWidget {
 }
 
 class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
-  int length = 0;
+  int length = 0, comments = 0;
   bool liked = false;
   bool bookmarked = false;
   bool expandText = false;
   late String currentUserID;
-  late Future<List<dynamic>> commentsFuture;
+  late Future<List<dynamic>?> commentsFuture;
 
   late bool isPost, mediaAndText;
 
@@ -576,7 +576,8 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     User user = ref.read(userProvider);
     currentUserID = user.uuid;
     liked = widget.postObject.likes.contains(currentUserID);
-    bookmarked = user.savedPosts.contains(widget.postObject.uuid);
+    bookmarked = widget.postObject.saved.contains(currentUserID);
+    comments = widget.postObject.comments;
     commentsFuture = getComments(widget.postObject.uuid);
   }
 
@@ -639,7 +640,11 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   void refresh() {
     List<String> likes = widget.postObject.likes;
     bool hasPostAsLiked = likes.contains(currentUserID);
-    setState(() => liked = hasPostAsLiked);
+    setState(() {
+      liked = hasPostAsLiked;
+      comments = widget.postObject.comments;
+    });
+    updateDatabase(widget.postObject);
   }
 
   void onLike() {
@@ -657,7 +662,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
 
     likePost(widget.postObject.uuid).then((response) {
       if (response.status == Status.success) {
-        updateDatabaseForLikes(widget.postObject);
+        updateDatabase(widget.postObject);
         if (!mounted) return;
         setState(() {});
       } else {
@@ -677,7 +682,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     });
   }
 
-  Future<void> updateDatabaseForLikes(PostObject object) async {
+  Future<void> updateDatabase(PostObject object) async {
     Isar isar = GetIt.I.get();
     if (object is Post) {
       Post post = object;
@@ -692,30 +697,29 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     }
   }
 
-  Future<void> updateDatabaseForSaved(List<String> saved) async {
-    Isar isar = GetIt.I.get();
-    int id = ref.watch(userProvider.select((value) => value.isarId));
-    User? user = await isar.users.get(id);
-    if (user != null) {
-      user.savedPosts.clear();
-      user.savedPosts.addAll(saved);
-      await isar.writeTxn(() async {
-        await isar.users.put(user);
-      });
-    }
-  }
-
   void onBookmark() {
-    setState(() => bookmarked = !bookmarked);
+    bool savedInitially = bookmarked;
+
+    setState(() {
+      bookmarked = !savedInitially;
+      if (savedInitially) {
+        widget.postObject.saved.remove(currentUserID);
+      } else {
+        widget.postObject.saved.add(currentUserID);
+      }
+    });
     savePost(widget.postObject.uuid).then((value) {
       if (value.status == Status.success) {
-        List<String> postsID =
-            ref.watch(userProvider.select((value) => value.savedPosts));
-        // postsID.clear();
-        // postsID.addAll(value.payload);
-        // updateDatabaseForSaved(value.payload);
+        updateDatabase(widget.postObject);
       } else {
-        setState(() => bookmarked = !bookmarked);
+        setState(() {
+          bookmarked = savedInitially;
+          if (savedInitially) {
+            widget.postObject.saved.add(currentUserID);
+          } else {
+            widget.postObject.saved.remove(currentUserID);
+          }
+        });
         showMessage("Something went wrong");
       }
     });
@@ -825,8 +829,8 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
               bookmarked: bookmarked,
               onBookmark: onBookmark,
               onLike: onLike,
+              comments: comments,
               commentsFuture: commentsFuture,
-              onCommentClicked: widget.onCommentClicked,
             ),
           ],
         ),
@@ -994,22 +998,79 @@ class PostHeader extends StatelessWidget {
   }
 }
 
-class PostFooter extends StatelessWidget {
+class PostFooter extends ConsumerStatefulWidget {
   final PostObject object;
   final bool liked, bookmarked;
-  final VoidCallback onLike, onBookmark, onCommentClicked;
+  final VoidCallback onLike, onBookmark;
   final Future commentsFuture;
+  final int comments;
 
   const PostFooter({
     super.key,
+    required this.comments,
     required this.object,
     required this.liked,
     required this.bookmarked,
     required this.onLike,
     required this.onBookmark,
-    required this.onCommentClicked,
     required this.commentsFuture,
   });
+
+  @override
+  ConsumerState<PostFooter> createState() => _PostFooterState();
+}
+
+class _PostFooterState extends ConsumerState<PostFooter> {
+  late int totalComments;
+
+  @override
+  void initState() {
+    super.initState();
+    totalComments = widget.comments;
+  }
+
+  void onCommentClicked(String postID, Future future) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      showDragHandle: true,
+      context: context,
+      builder: (ctx) => PostComments(
+        future: future,
+        postID: postID,
+        parentContext: context,
+        updateCommentsCount: updateComment,
+      ),
+    );
+  }
+
+  Future<void> updateComment(int count) async {
+    List<PostObject> objects = ref.watch(postsProvider);
+    int index = objects.indexWhere((e) => e.uuid == widget.object.uuid);
+    if (index != -1) {
+      PostObject obj = widget.object.copyWith(newComments: count);
+      setState(() => totalComments = count);
+      ref.watch(postsProvider.notifier).state = [
+        ...objects.sublist(0, index),
+        obj,
+        ...objects.sublist(index + 1),
+      ];
+
+      Isar isar = GetIt.I.get();
+      if (obj is Post) {
+        Post post = obj;
+
+        await isar.writeTxn(() async {
+          await isar.posts.put(post);
+        });
+      } else if (obj is Poll) {
+        Poll poll = obj;
+
+        await isar.writeTxn(() async {
+          await isar.polls.put(poll);
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1026,12 +1087,12 @@ class PostFooter extends StatelessWidget {
               child: AnimatedSwitcherZoom.zoomIn(
                 duration: const Duration(milliseconds: 200),
                 child: IconButton(
-                  key: ValueKey<bool>(liked),
+                  key: ValueKey<bool>(widget.liked),
                   splashRadius: 0.01,
-                  onPressed: onLike,
+                  onPressed: widget.onLike,
                   icon: SvgPicture.asset(
-                    "assets/Like ${liked ? "F" : "Unf"}illed.svg",
-                    color: darkTheme && !liked ? Colors.white : null,
+                    "assets/Like ${widget.liked ? "F" : "Unf"}illed.svg",
+                    color: darkTheme && !widget.liked ? Colors.white : null,
                     width: 22.r,
                   ),
                 ),
@@ -1039,7 +1100,7 @@ class PostFooter extends StatelessWidget {
             ),
             SizedBox(width: 5.w),
             Text(
-              "${object.likes.length}",
+              "${widget.object.likes.length}",
               style: context.textTheme.bodyLarge,
             )
           ],
@@ -1055,24 +1116,16 @@ class PostFooter extends StatelessWidget {
                   color: darkTheme ? Colors.white : null,
                   width: 22.r,
                 ),
-                onPressed: onCommentClicked,
+                onPressed: () => onCommentClicked(
+                  widget.object.uuid,
+                  getComments(widget.object.uuid),
+                ),
               ),
             ),
             SizedBox(width: 5.w),
-            FutureBuilder(
-              future: commentsFuture,
-              builder: (context, snapshot) {
-                String text = "";
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  text = "...";
-                } else if (snapshot.connectionState == ConnectionState.done) {
-                  text = "${snapshot.data.length}";
-                }
-                return Text(
-                  text,
-                  style: context.textTheme.bodyLarge,
-                );
-              },
+            Text(
+              "$totalComments",
+              style: context.textTheme.bodyLarge,
             ),
           ],
         ),
@@ -1093,7 +1146,7 @@ class PostFooter extends StatelessWidget {
             ),
             SizedBox(width: 5.w),
             Text(
-              "${object.shares}",
+              "${widget.object.shares}",
               style: context.textTheme.bodyLarge,
             )
           ],
@@ -1103,13 +1156,13 @@ class PostFooter extends StatelessWidget {
           child: AnimatedSwitcherZoom.zoomIn(
             duration: const Duration(milliseconds: 200),
             child: IconButton(
-              key: ValueKey<bool>(bookmarked),
+              key: ValueKey<bool>(widget.bookmarked),
               icon: SvgPicture.asset(
-                "assets/Bookmark${bookmarked ? " Filled" : ""}.svg",
-                color: darkTheme && !bookmarked ? Colors.white : null,
-                width: bookmarked ? 24.r : 18.r,
+                "assets/Bookmark${widget.bookmarked ? " Filled" : ""}.svg",
+                color: darkTheme && !widget.bookmarked ? Colors.white : null,
+                width: widget.bookmarked ? 24.r : 18.r,
               ),
-              onPressed: onBookmark,
+              onPressed: widget.onBookmark,
             ),
           ),
         ),
