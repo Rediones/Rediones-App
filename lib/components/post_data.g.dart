@@ -17,53 +17,63 @@ const PostSchema = CollectionSchema(
   name: r'Post',
   id: -1683556178151468304,
   properties: {
-    r'likes': PropertySchema(
+    r'comments': PropertySchema(
       id: 0,
+      name: r'comments',
+      type: IsarType.long,
+    ),
+    r'likes': PropertySchema(
+      id: 1,
       name: r'likes',
       type: IsarType.stringList,
     ),
     r'media': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'media',
       type: IsarType.stringList,
     ),
     r'posterID': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'posterID',
       type: IsarType.string,
     ),
     r'posterName': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'posterName',
       type: IsarType.string,
     ),
     r'posterPicture': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'posterPicture',
       type: IsarType.string,
     ),
     r'posterUsername': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'posterUsername',
       type: IsarType.string,
     ),
+    r'saved': PropertySchema(
+      id: 7,
+      name: r'saved',
+      type: IsarType.stringList,
+    ),
     r'shares': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'shares',
       type: IsarType.long,
     ),
     r'text': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'text',
       type: IsarType.string,
     ),
     r'timestamp': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'uuid': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'uuid',
       type: IsarType.string,
     )
@@ -133,6 +143,13 @@ int _postEstimateSize(
   bytesCount += 3 + object.posterName.length * 3;
   bytesCount += 3 + object.posterPicture.length * 3;
   bytesCount += 3 + object.posterUsername.length * 3;
+  bytesCount += 3 + object.saved.length * 3;
+  {
+    for (var i = 0; i < object.saved.length; i++) {
+      final value = object.saved[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.text.length * 3;
   bytesCount += 3 + object.uuid.length * 3;
   return bytesCount;
@@ -144,16 +161,18 @@ void _postSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeStringList(offsets[0], object.likes);
-  writer.writeStringList(offsets[1], object.media);
-  writer.writeString(offsets[2], object.posterID);
-  writer.writeString(offsets[3], object.posterName);
-  writer.writeString(offsets[4], object.posterPicture);
-  writer.writeString(offsets[5], object.posterUsername);
-  writer.writeLong(offsets[6], object.shares);
-  writer.writeString(offsets[7], object.text);
-  writer.writeDateTime(offsets[8], object.timestamp);
-  writer.writeString(offsets[9], object.uuid);
+  writer.writeLong(offsets[0], object.comments);
+  writer.writeStringList(offsets[1], object.likes);
+  writer.writeStringList(offsets[2], object.media);
+  writer.writeString(offsets[3], object.posterID);
+  writer.writeString(offsets[4], object.posterName);
+  writer.writeString(offsets[5], object.posterPicture);
+  writer.writeString(offsets[6], object.posterUsername);
+  writer.writeStringList(offsets[7], object.saved);
+  writer.writeLong(offsets[8], object.shares);
+  writer.writeString(offsets[9], object.text);
+  writer.writeDateTime(offsets[10], object.timestamp);
+  writer.writeString(offsets[11], object.uuid);
 }
 
 Post _postDeserialize(
@@ -163,16 +182,16 @@ Post _postDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Post(
-    likes: reader.readStringList(offsets[0]) ?? const [],
-    media: reader.readStringList(offsets[1]) ?? const [],
-    posterID: reader.readStringOrNull(offsets[2]) ?? "",
-    posterName: reader.readStringOrNull(offsets[3]) ?? "",
-    posterPicture: reader.readStringOrNull(offsets[4]) ?? "",
-    posterUsername: reader.readStringOrNull(offsets[5]) ?? "",
-    shares: reader.readLongOrNull(offsets[6]) ?? 0,
-    text: reader.readStringOrNull(offsets[7]) ?? "",
-    timestamp: reader.readDateTime(offsets[8]),
-    uuid: reader.readStringOrNull(offsets[9]) ?? "",
+    likes: reader.readStringList(offsets[1]) ?? const [],
+    media: reader.readStringList(offsets[2]) ?? const [],
+    posterID: reader.readStringOrNull(offsets[3]) ?? "",
+    posterName: reader.readStringOrNull(offsets[4]) ?? "",
+    posterPicture: reader.readStringOrNull(offsets[5]) ?? "",
+    posterUsername: reader.readStringOrNull(offsets[6]) ?? "",
+    shares: reader.readLongOrNull(offsets[8]) ?? 0,
+    text: reader.readStringOrNull(offsets[9]) ?? "",
+    timestamp: reader.readDateTime(offsets[10]),
+    uuid: reader.readStringOrNull(offsets[11]) ?? "",
   );
   return object;
 }
@@ -185,11 +204,11 @@ P _postDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringList(offset) ?? const []) as P;
+      return (reader.readLong(offset)) as P;
     case 1:
       return (reader.readStringList(offset) ?? const []) as P;
     case 2:
-      return (reader.readStringOrNull(offset) ?? "") as P;
+      return (reader.readStringList(offset) ?? const []) as P;
     case 3:
       return (reader.readStringOrNull(offset) ?? "") as P;
     case 4:
@@ -197,12 +216,16 @@ P _postDeserializeProp<P>(
     case 5:
       return (reader.readStringOrNull(offset) ?? "") as P;
     case 6:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 7:
       return (reader.readStringOrNull(offset) ?? "") as P;
+    case 7:
+      return (reader.readStringList(offset) ?? []) as P;
     case 8:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 9:
+      return (reader.readStringOrNull(offset) ?? "") as P;
+    case 10:
+      return (reader.readDateTime(offset)) as P;
+    case 11:
       return (reader.readStringOrNull(offset) ?? "") as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -437,6 +460,58 @@ extension PostQueryWhere on QueryBuilder<Post, Post, QWhereClause> {
 }
 
 extension PostQueryFilter on QueryBuilder<Post, Post, QFilterCondition> {
+  QueryBuilder<Post, Post, QAfterFilterCondition> commentsEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'comments',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> commentsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'comments',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> commentsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'comments',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> commentsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'comments',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Post, Post, QAfterFilterCondition> isarIdEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1436,6 +1511,220 @@ extension PostQueryFilter on QueryBuilder<Post, Post, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'saved',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'saved',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'saved',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'saved',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterFilterCondition> savedLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<Post, Post, QAfterFilterCondition> sharesEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1803,6 +2092,18 @@ extension PostQueryObject on QueryBuilder<Post, Post, QFilterCondition> {}
 extension PostQueryLinks on QueryBuilder<Post, Post, QFilterCondition> {}
 
 extension PostQuerySortBy on QueryBuilder<Post, Post, QSortBy> {
+  QueryBuilder<Post, Post, QAfterSortBy> sortByComments() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> sortByCommentsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.desc);
+    });
+  }
+
   QueryBuilder<Post, Post, QAfterSortBy> sortByPosterID() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'posterID', Sort.asc);
@@ -1901,6 +2202,18 @@ extension PostQuerySortBy on QueryBuilder<Post, Post, QSortBy> {
 }
 
 extension PostQuerySortThenBy on QueryBuilder<Post, Post, QSortThenBy> {
+  QueryBuilder<Post, Post, QAfterSortBy> thenByComments() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Post, Post, QAfterSortBy> thenByCommentsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.desc);
+    });
+  }
+
   QueryBuilder<Post, Post, QAfterSortBy> thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isarId', Sort.asc);
@@ -2011,6 +2324,12 @@ extension PostQuerySortThenBy on QueryBuilder<Post, Post, QSortThenBy> {
 }
 
 extension PostQueryWhereDistinct on QueryBuilder<Post, Post, QDistinct> {
+  QueryBuilder<Post, Post, QDistinct> distinctByComments() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'comments');
+    });
+  }
+
   QueryBuilder<Post, Post, QDistinct> distinctByLikes() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'likes');
@@ -2053,6 +2372,12 @@ extension PostQueryWhereDistinct on QueryBuilder<Post, Post, QDistinct> {
     });
   }
 
+  QueryBuilder<Post, Post, QDistinct> distinctBySaved() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'saved');
+    });
+  }
+
   QueryBuilder<Post, Post, QDistinct> distinctByShares() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'shares');
@@ -2084,6 +2409,12 @@ extension PostQueryProperty on QueryBuilder<Post, Post, QQueryProperty> {
   QueryBuilder<Post, int, QQueryOperations> isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isarId');
+    });
+  }
+
+  QueryBuilder<Post, int, QQueryOperations> commentsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'comments');
     });
   }
 
@@ -2120,6 +2451,12 @@ extension PostQueryProperty on QueryBuilder<Post, Post, QQueryProperty> {
   QueryBuilder<Post, String, QQueryOperations> posterUsernameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'posterUsername');
+    });
+  }
+
+  QueryBuilder<Post, List<String>, QQueryOperations> savedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'saved');
     });
   }
 

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
@@ -533,10 +535,12 @@ class TriangleClipper extends CustomClipper<Path> {
 
 class PostObjectContainer extends ConsumerStatefulWidget {
   final PostObject postObject;
+  final int? index;
   final VoidCallback onCommentClicked;
 
   const PostObjectContainer({
     super.key,
+    this.index,
     required this.postObject,
     required this.onCommentClicked,
   });
@@ -546,7 +550,7 @@ class PostObjectContainer extends ConsumerStatefulWidget {
       _PostObjectContainerState();
 }
 
-class _PostObjectContainerState extends ConsumerState<PostObjectContainer>  {
+class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   int length = 0;
   bool liked = false;
   bool bookmarked = false;
@@ -632,6 +636,12 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer>  {
     );
   }
 
+  void refresh() {
+    List<String> likes = widget.postObject.likes;
+    bool hasPostAsLiked = likes.contains(currentUserID);
+    setState(() => liked = hasPostAsLiked);
+  }
+
   void onLike() {
     List<String> likes = widget.postObject.likes;
     bool hasPostAsLiked = likes.contains(currentUserID);
@@ -662,7 +672,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer>  {
 
         if (!mounted) return;
         setState(() {});
-        showToast("Unable to ${liked ? "like" : "unlike"} your post", context);
+        showMessage("Unable to ${liked ? "like" : "unlike"} your post");
       }
     });
   }
@@ -706,7 +716,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer>  {
         // updateDatabaseForSaved(value.payload);
       } else {
         setState(() => bookmarked = !bookmarked);
-        showToast("Something went wrong", context);
+        showMessage("Something went wrong");
       }
     });
   }
@@ -728,7 +738,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer>  {
     followUser(widget.postObject.posterID).then((resp) {
       if (resp.status == Status.failed) {
         following.remove(widget.postObject.posterID);
-        showToast(resp.message, context);
+        showMessage(resp.message);
       }
 
       setState(() {});
@@ -746,15 +756,24 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer>  {
     }
   }
 
+  void showMessage(String message) => showToast(message, context);
+
   @override
   Widget build(BuildContext context) {
     bool darkTheme = context.isDark;
 
     return GestureDetector(
-      onTap: () => context.router.pushNamed(
-        Pages.viewPost,
-        pathParameters: {"id": widget.postObject.uuid},
-      ),
+      onTap: () => context.router
+          .pushNamed(
+            Pages.viewPost,
+            pathParameters: {
+              "id": widget.postObject.uuid,
+            },
+            extra: widget.postObject,
+          )
+          .then(
+            (_) => refresh(),
+          ),
       child: Container(
         width: 390.w,
         decoration: BoxDecoration(
@@ -796,9 +815,10 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer>  {
               ),
             ),
             SizedBox(height: 10.h),
-            if (isPost && mediaAndText)
+            if (isPost && widget.postObject is Post && mediaAndText)
               PostContainer(post: widget.postObject as Post),
-            if (!isPost) PollContainer(poll: widget.postObject as Poll),
+            if (!isPost && widget.postObject is Poll)
+              PollContainer(poll: widget.postObject as Poll),
             PostFooter(
               object: widget.postObject,
               liked: liked,
@@ -1232,7 +1252,6 @@ class _PollContainerState extends ConsumerState<PollContainer> {
     });
     votePoll(id).then((response) {
       if (response.status == Status.success) {
-        showToast(response.message, context);
         widget.poll.polls[index].voters.add(currentUserID);
         setState(() {});
       } else {
@@ -1241,10 +1260,12 @@ class _PollContainerState extends ConsumerState<PollContainer> {
           pollIndex = -1;
           totalVotes -= 1;
         });
-        showToast("Something went wrong", context);
+        showMessage("Something went wrong voting on this poll");
       }
     });
   }
+
+  void showMessage(String message) => showToast(message, context);
 
   @override
   Widget build(BuildContext context) {
@@ -1257,7 +1278,7 @@ class _PollContainerState extends ConsumerState<PollContainer> {
             (index) {
               PollChoice choice = widget.poll.polls[index];
               double percentage = 0.0;
-              if (widget.poll.totalVotes > 0) {
+              if (totalVotes > 0) {
                 percentage = choice.voters.length / totalVotes;
               }
 

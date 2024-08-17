@@ -47,7 +47,7 @@ Future<RedionesResponse<JointGroup>> getGroups() async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: const JointGroup(),
       status: Status.failed,
     );
@@ -86,7 +86,7 @@ Future<RedionesResponse<List<PostObject>>> getGroupPosts(String id) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -129,7 +129,7 @@ Future<RedionesResponse<GroupData?>> createGroup(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -199,7 +199,7 @@ Future<RedionesResponse<CommunityChatServerData>> getGroupMessages(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: const CommunityChatServerData(
         chats: [],
         conversationId: ""
@@ -245,7 +245,7 @@ Future<RedionesResponse> sendGroupMessage(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -282,7 +282,7 @@ Future<RedionesResponse<GroupData?>> createCommunity(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );

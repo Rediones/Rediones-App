@@ -52,7 +52,7 @@ Future<RedionesResponse<List<Conversation>>> getConversations() async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -89,7 +89,7 @@ Future<RedionesResponse<Conversation?>> createConversation(String id) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -139,7 +139,7 @@ Future<RedionesResponse<MessageData?>> sendMessage(MessageData message) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -201,7 +201,7 @@ Future<RedionesResponse<List<MessageData>>> getMessagesFor(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -252,7 +252,7 @@ Future<RedionesResponse<PocketResponse?>> getPocket() async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -286,7 +286,7 @@ Future<RedionesResponse<PocketMessageData?>> createPocketMessageData(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -317,7 +317,7 @@ Future<RedionesResponse<StickyData?>> makeSticky(String id) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -361,7 +361,7 @@ Future<RedionesResponse<MediaData?>> createStory(Map<String, dynamic> data) asyn
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -392,7 +392,7 @@ Future<RedionesResponse> viewStory(String id) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -479,7 +479,7 @@ Future<RedionesResponse<JointStoryData>> getStories(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: JointStoryData(),
       status: Status.failed,
     );

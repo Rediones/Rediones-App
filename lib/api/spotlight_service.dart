@@ -30,7 +30,7 @@ Future<RedionesResponse<List<SpotlightData>>> getAllSpotlights() async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -74,7 +74,7 @@ Future<RedionesResponse> createSpotlight(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -109,7 +109,7 @@ Future<RedionesResponse<List<String>>> likeSpotlight(String spotlightID) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -149,7 +149,7 @@ Future<RedionesResponse<List<SpotlightData>>> getUserSpotlights(String userID) a
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -190,7 +190,7 @@ Future<RedionesResponse<List<SpotlightData>>> getCurrentSavedSpotlights() async 
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -223,7 +223,7 @@ Future<RedionesResponse> saveSpotlight(String spotlightID) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );

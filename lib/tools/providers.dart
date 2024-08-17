@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rediones/api/file_handler.dart';
@@ -239,14 +240,29 @@ final StateProvider<bool> registeredNotificationHandler = StateProvider((ref) {
           notificationData,
           ...notifications,
         ];
+
+        AwesomeNotifications().createNotification(
+            content: NotificationContent(
+              id: 10,
+              channelKey: 'rediones_notification_channel_key',
+              actionType: ActionType.Default,
+              title: "${notificationData.postedBy.nickname} ${notificationData.header}",
+              body: notificationData.content,
+              fullScreenIntent: true,
+              wakeUpScreen: true,
+            )
+        );
       });
     }
   });
   return true;
 });
 
+
+
 final StateProvider<bool> initializedProvider = StateProvider((ref) => false);
 final StateProvider<bool> hideBottomProvider = StateProvider((ref) => false);
+final StateProvider<bool> updatedPostObject = StateProvider((ref) => false);
 final StateProvider<int> dashboardIndexProvider = StateProvider((ref) => 0);
 final StateProvider<bool> spotlightsPlayStatusProvider =
     StateProvider((ref) => false);
@@ -256,6 +272,23 @@ final StateProvider<List<Map<String, dynamic>>> outgoingStatus =
 
 final StateProvider<bool> loadingLocalPostsProvider =
     StateProvider((ref) => true);
+
+
+final StateProvider<UpdatePost> updatedPostInfoProvider = StateProvider((ref) => const UpdatePost());
+class UpdatePost {
+  final int index;
+  final bool update;
+
+  const UpdatePost({this.index = -1, this.update = false});
+}
+void toggle(StateProvider<UpdatePost> provider, WidgetRef ref) {
+  UpdatePost state = ref.watch(provider);
+  ref.watch(provider.notifier).state = UpdatePost(
+    index: state.index,
+    update: !state.update,
+  );
+}
+
 
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);

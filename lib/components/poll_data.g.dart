@@ -17,69 +17,79 @@ const PollSchema = CollectionSchema(
   name: r'Poll',
   id: 2721311222307943076,
   properties: {
-    r'durationInHours': PropertySchema(
+    r'comments': PropertySchema(
       id: 0,
+      name: r'comments',
+      type: IsarType.long,
+    ),
+    r'durationInHours': PropertySchema(
+      id: 1,
       name: r'durationInHours',
       type: IsarType.long,
     ),
     r'likes': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'likes',
       type: IsarType.stringList,
     ),
     r'pollID': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'pollID',
       type: IsarType.string,
     ),
     r'polls': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'polls',
       type: IsarType.objectList,
       target: r'PollChoice',
     ),
     r'posterID': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'posterID',
       type: IsarType.string,
     ),
     r'posterName': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'posterName',
       type: IsarType.string,
     ),
     r'posterPicture': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'posterPicture',
       type: IsarType.string,
     ),
     r'posterUsername': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'posterUsername',
       type: IsarType.string,
     ),
+    r'saved': PropertySchema(
+      id: 9,
+      name: r'saved',
+      type: IsarType.stringList,
+    ),
     r'shares': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'shares',
       type: IsarType.long,
     ),
     r'text': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'text',
       type: IsarType.string,
     ),
     r'timestamp': PropertySchema(
-      id: 10,
+      id: 12,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'totalVotes': PropertySchema(
-      id: 11,
+      id: 13,
       name: r'totalVotes',
       type: IsarType.long,
     ),
     r'uuid': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'uuid',
       type: IsarType.string,
     )
@@ -151,6 +161,13 @@ int _pollEstimateSize(
   bytesCount += 3 + object.posterName.length * 3;
   bytesCount += 3 + object.posterPicture.length * 3;
   bytesCount += 3 + object.posterUsername.length * 3;
+  bytesCount += 3 + object.saved.length * 3;
+  {
+    for (var i = 0; i < object.saved.length; i++) {
+      final value = object.saved[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.text.length * 3;
   bytesCount += 3 + object.uuid.length * 3;
   return bytesCount;
@@ -162,24 +179,26 @@ void _pollSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.durationInHours);
-  writer.writeStringList(offsets[1], object.likes);
-  writer.writeString(offsets[2], object.pollID);
+  writer.writeLong(offsets[0], object.comments);
+  writer.writeLong(offsets[1], object.durationInHours);
+  writer.writeStringList(offsets[2], object.likes);
+  writer.writeString(offsets[3], object.pollID);
   writer.writeObjectList<PollChoice>(
-    offsets[3],
+    offsets[4],
     allOffsets,
     PollChoiceSchema.serialize,
     object.polls,
   );
-  writer.writeString(offsets[4], object.posterID);
-  writer.writeString(offsets[5], object.posterName);
-  writer.writeString(offsets[6], object.posterPicture);
-  writer.writeString(offsets[7], object.posterUsername);
-  writer.writeLong(offsets[8], object.shares);
-  writer.writeString(offsets[9], object.text);
-  writer.writeDateTime(offsets[10], object.timestamp);
-  writer.writeLong(offsets[11], object.totalVotes);
-  writer.writeString(offsets[12], object.uuid);
+  writer.writeString(offsets[5], object.posterID);
+  writer.writeString(offsets[6], object.posterName);
+  writer.writeString(offsets[7], object.posterPicture);
+  writer.writeString(offsets[8], object.posterUsername);
+  writer.writeStringList(offsets[9], object.saved);
+  writer.writeLong(offsets[10], object.shares);
+  writer.writeString(offsets[11], object.text);
+  writer.writeDateTime(offsets[12], object.timestamp);
+  writer.writeLong(offsets[13], object.totalVotes);
+  writer.writeString(offsets[14], object.uuid);
 }
 
 Poll _pollDeserialize(
@@ -189,25 +208,25 @@ Poll _pollDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Poll(
-    durationInHours: reader.readLongOrNull(offsets[0]) ?? 0,
-    likes: reader.readStringList(offsets[1]) ?? const [],
-    pollID: reader.readStringOrNull(offsets[2]) ?? "",
+    durationInHours: reader.readLongOrNull(offsets[1]) ?? 0,
+    likes: reader.readStringList(offsets[2]) ?? const [],
+    pollID: reader.readStringOrNull(offsets[3]) ?? "",
     polls: reader.readObjectList<PollChoice>(
-          offsets[3],
+          offsets[4],
           PollChoiceSchema.deserialize,
           allOffsets,
           PollChoice(),
         ) ??
         const [],
-    posterID: reader.readStringOrNull(offsets[4]) ?? "",
-    posterName: reader.readStringOrNull(offsets[5]) ?? "",
-    posterPicture: reader.readStringOrNull(offsets[6]) ?? "",
-    posterUsername: reader.readStringOrNull(offsets[7]) ?? "",
-    shares: reader.readLongOrNull(offsets[8]) ?? 0,
-    text: reader.readStringOrNull(offsets[9]) ?? "",
-    timestamp: reader.readDateTime(offsets[10]),
-    totalVotes: reader.readLongOrNull(offsets[11]) ?? 0,
-    uuid: reader.readStringOrNull(offsets[12]) ?? "",
+    posterID: reader.readStringOrNull(offsets[5]) ?? "",
+    posterName: reader.readStringOrNull(offsets[6]) ?? "",
+    posterPicture: reader.readStringOrNull(offsets[7]) ?? "",
+    posterUsername: reader.readStringOrNull(offsets[8]) ?? "",
+    shares: reader.readLongOrNull(offsets[10]) ?? 0,
+    text: reader.readStringOrNull(offsets[11]) ?? "",
+    timestamp: reader.readDateTime(offsets[12]),
+    totalVotes: reader.readLongOrNull(offsets[13]) ?? 0,
+    uuid: reader.readStringOrNull(offsets[14]) ?? "",
   );
   return object;
 }
@@ -220,12 +239,14 @@ P _pollDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readStringList(offset) ?? const []) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 2:
-      return (reader.readStringOrNull(offset) ?? "") as P;
+      return (reader.readStringList(offset) ?? const []) as P;
     case 3:
+      return (reader.readStringOrNull(offset) ?? "") as P;
+    case 4:
       return (reader.readObjectList<PollChoice>(
             offset,
             PollChoiceSchema.deserialize,
@@ -233,8 +254,6 @@ P _pollDeserializeProp<P>(
             PollChoice(),
           ) ??
           const []) as P;
-    case 4:
-      return (reader.readStringOrNull(offset) ?? "") as P;
     case 5:
       return (reader.readStringOrNull(offset) ?? "") as P;
     case 6:
@@ -242,14 +261,18 @@ P _pollDeserializeProp<P>(
     case 7:
       return (reader.readStringOrNull(offset) ?? "") as P;
     case 8:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 9:
       return (reader.readStringOrNull(offset) ?? "") as P;
+    case 9:
+      return (reader.readStringList(offset) ?? []) as P;
     case 10:
-      return (reader.readDateTime(offset)) as P;
-    case 11:
       return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 11:
+      return (reader.readStringOrNull(offset) ?? "") as P;
     case 12:
+      return (reader.readDateTime(offset)) as P;
+    case 13:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 14:
       return (reader.readStringOrNull(offset) ?? "") as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -484,6 +507,58 @@ extension PollQueryWhere on QueryBuilder<Poll, Poll, QWhereClause> {
 }
 
 extension PollQueryFilter on QueryBuilder<Poll, Poll, QFilterCondition> {
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> commentsEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'comments',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> commentsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'comments',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> commentsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'comments',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> commentsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'comments',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Poll, Poll, QAfterFilterCondition> durationInHoursEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -1534,6 +1609,220 @@ extension PollQueryFilter on QueryBuilder<Poll, Poll, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'saved',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'saved',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'saved',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'saved',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'saved',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterFilterCondition> savedLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'saved',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<Poll, Poll, QAfterFilterCondition> sharesEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1960,6 +2249,18 @@ extension PollQueryObject on QueryBuilder<Poll, Poll, QFilterCondition> {
 extension PollQueryLinks on QueryBuilder<Poll, Poll, QFilterCondition> {}
 
 extension PollQuerySortBy on QueryBuilder<Poll, Poll, QSortBy> {
+  QueryBuilder<Poll, Poll, QAfterSortBy> sortByComments() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterSortBy> sortByCommentsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.desc);
+    });
+  }
+
   QueryBuilder<Poll, Poll, QAfterSortBy> sortByDurationInHours() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'durationInHours', Sort.asc);
@@ -2094,6 +2395,18 @@ extension PollQuerySortBy on QueryBuilder<Poll, Poll, QSortBy> {
 }
 
 extension PollQuerySortThenBy on QueryBuilder<Poll, Poll, QSortThenBy> {
+  QueryBuilder<Poll, Poll, QAfterSortBy> thenByComments() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Poll, Poll, QAfterSortBy> thenByCommentsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'comments', Sort.desc);
+    });
+  }
+
   QueryBuilder<Poll, Poll, QAfterSortBy> thenByDurationInHours() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'durationInHours', Sort.asc);
@@ -2240,6 +2553,12 @@ extension PollQuerySortThenBy on QueryBuilder<Poll, Poll, QSortThenBy> {
 }
 
 extension PollQueryWhereDistinct on QueryBuilder<Poll, Poll, QDistinct> {
+  QueryBuilder<Poll, Poll, QDistinct> distinctByComments() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'comments');
+    });
+  }
+
   QueryBuilder<Poll, Poll, QDistinct> distinctByDurationInHours() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'durationInHours');
@@ -2289,6 +2608,12 @@ extension PollQueryWhereDistinct on QueryBuilder<Poll, Poll, QDistinct> {
     });
   }
 
+  QueryBuilder<Poll, Poll, QDistinct> distinctBySaved() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'saved');
+    });
+  }
+
   QueryBuilder<Poll, Poll, QDistinct> distinctByShares() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'shares');
@@ -2326,6 +2651,12 @@ extension PollQueryProperty on QueryBuilder<Poll, Poll, QQueryProperty> {
   QueryBuilder<Poll, int, QQueryOperations> isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isarId');
+    });
+  }
+
+  QueryBuilder<Poll, int, QQueryOperations> commentsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'comments');
     });
   }
 
@@ -2374,6 +2705,12 @@ extension PollQueryProperty on QueryBuilder<Poll, Poll, QQueryProperty> {
   QueryBuilder<Poll, String, QQueryOperations> posterUsernameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'posterUsername');
+    });
+  }
+
+  QueryBuilder<Poll, List<String>, QQueryOperations> savedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'saved');
     });
   }
 

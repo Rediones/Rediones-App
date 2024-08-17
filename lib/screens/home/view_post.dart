@@ -21,12 +21,20 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 import 'comments.dart';
 
-class ViewPostObjectPage extends ConsumerStatefulWidget {
+
+class ViewPostData {
   final String id;
+  final PostObject? object;
+
+  const ViewPostData({this.id = "", this.object,});
+}
+
+class ViewPostObjectPage extends ConsumerStatefulWidget {
+  final ViewPostData info;
 
   const ViewPostObjectPage({
     super.key,
-    required this.id,
+    required this.info,
   });
 
   @override
@@ -45,15 +53,20 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
   final TextEditingController controller = TextEditingController();
 
   PostObject? object;
-  bool loading = false;
+  bool loading = false, loadingComments = true;
 
   @override
   void initState() {
     super.initState();
     User user = ref.read(userProvider);
     currentUserID = user.uuid;
-    loading = true;
-    Future.delayed(Duration.zero, () => getPost());
+
+    if (widget.info.object != null) {
+      initPost();
+    } else {
+      loading = true;
+      Future.delayed(Duration.zero, () => getPost());
+    }
   }
 
   @override
@@ -62,12 +75,31 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     super.dispose();
   }
 
+  void initPost() {
+    object = widget.info.object;
+
+    if (object! is Post) {
+      Post post = object! as Post;
+      length = post.media.length;
+      isPost = true;
+      mediaAndText = post.type == MediaType.imageAndText;
+    } else {
+      isPost = false;
+      mediaAndText = false;
+    }
+
+    User user = ref.read(userProvider);
+    liked = object!.likes.contains(currentUserID);
+    bookmarked = user.savedPosts.contains(object!.uuid);
+    getPostComments(object!.uuid);
+  }
+
   void getPost() {
-    getPostById(widget.id).then((resp) {
+    getPostById(widget.info.id).then((resp) {
       if (!mounted) return;
 
       if (resp.status == Status.failed) {
-        showToast(resp.message, context);
+        setState(() => loading = false);
         return;
       }
 
@@ -78,27 +110,33 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
       if (object == null) return;
 
-      if (object! is Post) {
-        Post post = object! as Post;
-        length = post.media.length;
-        isPost = true;
-        mediaAndText = post.type == MediaType.imageAndText;
-      } else {
-        isPost = false;
-        mediaAndText = false;
-      }
-      User user = ref.watch(userProvider);
-      liked = object!.likes.contains(currentUserID);
-      bookmarked = user.savedPosts.contains(object!.uuid);
-      getPostComments(object!.uuid);
+      assign(object!);
     });
   }
+
+  void assign(PostObject object) {
+    if (object is Post) {
+      Post post = object;
+      length = post.media.length;
+      isPost = true;
+      mediaAndText = post.type == MediaType.imageAndText;
+    } else {
+      isPost = false;
+      mediaAndText = false;
+    }
+
+    User user = ref.watch(userProvider);
+    liked = object.likes.contains(currentUserID);
+    bookmarked = user.savedPosts.contains(object.uuid);
+    getPostComments(object.uuid);
+  }
+
 
   Future<void> getPostComments(String id) async {
     var response = await getComments(id);
     comments.clear();
     comments.addAll(response);
-    setState(() {});
+    setState(() => loadingComments = false);
   }
 
   void showExtension() {
@@ -187,7 +225,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
         if(!mounted) return;
         setState(() {});
-        showToast("Unable to ${liked ? "like" : "unlike"} your post", context);
+        showMessage("Unable to ${liked ? "like" : "unlike"} your post");
       }
     });
   }
@@ -233,10 +271,13 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
         // updateDatabaseForSaved(value.payload);
       } else {
         setState(() => bookmarked = !bookmarked);
-        showToast("Unable to save post", context);
+        showMessage("Unable to save post");
       }
     });
   }
+
+  void showMessage(String message) => showToast(message, context);
+
 
   void onFollow() {
     List<String> following = ref.watch(userProvider.select((u) => u.following));
@@ -246,7 +287,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     followUser(object!.posterID).then((resp) {
       if (resp.status == Status.failed) {
         following.remove(object!.posterID);
-        showToast(resp.message, context);
+        showMessage(resp.message);
       }
 
       setState(() {});
@@ -277,10 +318,10 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     controller.clear();
     unFocus();
 
-    RedionesResponse<CommentData?> resp =
+    RedionesResponse<CommentInfo?> resp =
         await createComment(object!.uuid, text);
     if (resp.status == Status.success) {
-      comments.add(resp.payload!);
+      comments.add(resp.payload!.data);
       setState(() {});
     }
   }
@@ -430,7 +471,15 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                       ),
                     ),
                   ),
-                if (!loading && object != null && comments.isNotEmpty)
+                if(loadingComments && object != null)
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      width: 390.w,
+                      height: 400.h,
+                      child: loader,
+                    ),
+                  ),
+                if (!loadingComments && object != null)
                   SliverPadding(
                     padding: EdgeInsets.symmetric(horizontal: 20.w),
                     sliver: SliverList.separated(
@@ -446,7 +495,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                   ),
               ],
             ),
-            if (!loading && object != null)
+            if (!loadingComments && object != null)
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(

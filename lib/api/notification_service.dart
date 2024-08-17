@@ -40,7 +40,7 @@ Future<RedionesResponse<List<NotificationData>>> getNotifications() async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -72,7 +72,7 @@ Future<RedionesResponse> readNotification(String id) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );

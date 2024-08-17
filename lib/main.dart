@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:camera/camera.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
@@ -19,17 +20,37 @@ import 'api/file_handler.dart';
 import 'components/poll_data.dart';
 import 'components/post_data.dart';
 import 'components/postable.dart';
+import 'controllers/notifications.dart';
 import 'repositories/database_manager.dart';
 import 'tools/routes.dart';
 import 'tools/styles.dart';
-
-import 'package:app_links/app_links.dart';
-
 
 void main() async {
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  AwesomeNotifications().initialize(
+      null,
+      [
+        NotificationChannel(
+          channelGroupKey: 'rediones_notification_channel_group',
+          channelKey: 'rediones_notification_channel_key',
+          channelName: 'Rediones',
+          channelShowBadge: true,
+          channelDescription: 'Notification channel for basic tests',
+          defaultColor: appRed,
+          ledColor: Colors.white,
+          importance: NotificationImportance.High,
+        )
+      ],
+      channelGroups: [
+        NotificationChannelGroup(
+          channelGroupKey: 'rediones_notification_channel_group',
+          channelGroupName: 'Rediones Notification Group',
+        )
+      ],
+      debug: true);
 
   c.allCameras = await availableCameras();
   c.currentCamera = 0;
@@ -39,12 +60,19 @@ void main() async {
 
   bool goHome = await FileHandler.hasAuthDetails;
 
+  bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+
+  if (!isAllowed) {
+    AwesomeNotifications().requestPermissionToSendNotifications();
+  }
+
   FlutterNativeSplash.preserve(widgetsBinding: binding);
   runApp(ProviderScope(child: Rediones(goHome: goHome)));
 }
 
 class Rediones extends ConsumerStatefulWidget {
   final bool goHome;
+  static late GoRouter router;
 
   const Rediones({super.key, required this.goHome});
 
@@ -65,11 +93,24 @@ class _RedionesState extends ConsumerState<Rediones>
       initialLocation: widget.goHome ? Pages.home.path : Pages.login.path,
       routes: routes,
     );
+
+    Rediones.router = _router;
+
     time.setDefaultLocale('en_short');
 
     if (widget.goHome) {
       Future.delayed(Duration.zero, getLocalData);
     }
+
+    AwesomeNotifications().setListeners(
+      onActionReceivedMethod: NotificationController.onActionReceivedMethod,
+      onNotificationCreatedMethod:
+          NotificationController.onNotificationCreatedMethod,
+      onNotificationDisplayedMethod:
+          NotificationController.onNotificationDisplayedMethod,
+      onDismissActionReceivedMethod:
+          NotificationController.onDismissActionReceivedMethod,
+    );
   }
 
   Future<void> getLocalData() async {

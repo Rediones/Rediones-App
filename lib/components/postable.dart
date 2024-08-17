@@ -14,6 +14,9 @@ abstract class PostObject{
   final String posterUsername;
 
   final List<String> likes;
+  final List<String> saved;
+
+  final int comments;
   final int shares;
 
   @Index()
@@ -27,6 +30,8 @@ abstract class PostObject{
     this.posterPicture = "",
     this.posterUsername = "",
     this.likes = const [],
+    this.saved = const [],
+    this.comments = 0,
     this.shares = 0,
     required this.timestamp,
   });

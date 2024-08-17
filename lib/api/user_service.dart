@@ -32,7 +32,7 @@ Future<RedionesResponse<User?>> authenticate(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -68,7 +68,7 @@ Future<RedionesResponse> followUser(String userID) async {
   } on DioException catch (e) {
     log(e.toString());
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -105,7 +105,7 @@ Future<RedionesResponse<User?>> updateUser(Map<String, dynamic> data) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -141,7 +141,7 @@ Future<RedionesResponse<User?>> getUser(String id) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -181,7 +181,7 @@ Future<RedionesResponse<List<User>>> searchForUsers(String query) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );

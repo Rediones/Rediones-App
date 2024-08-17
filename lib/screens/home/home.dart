@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
-
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,9 +73,7 @@ class _HomeState extends ConsumerState<Home> {
       return;
     }
 
-    List<PostObject> posts = ref.watch(postsProvider.notifier).state;
-    posts.clear();
-    posts.addAll(p);
+    ref.watch(postsProvider.notifier).state = p;
     setState(() => loadingServer = false);
 
     Isar isar = GetIt.I.get();
@@ -116,6 +114,20 @@ class _HomeState extends ConsumerState<Home> {
     });
   }
 
+  void show() {
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: 10,
+          channelKey: 'rediones_notification_channel_key',
+          actionType: ActionType.Default,
+          title: 'Hello World!',
+          body: 'This is my first notification!',
+          fullScreenIntent: true,
+          wakeUpScreen: true,
+        )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     checkForChanges();
@@ -125,7 +137,7 @@ class _HomeState extends ConsumerState<Home> {
         ref.watch(userProvider.select((value) => value.profilePicture));
 
     bool darkTheme = context.isDark;
-    bool isLoggedIn = ref.watch(userProvider) != dummyUser;
+    bool isLoggedIn = ref.watch(userProvider).uuid != dummyUser.uuid;
     bool loadingLocal = ref.watch(loadingLocalPostsProvider);
 
     return Scaffold(
@@ -186,6 +198,7 @@ class _HomeState extends ConsumerState<Home> {
         ),
         centerTitle: true,
         actions: [
+          if(isLoggedIn)
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
@@ -308,6 +321,7 @@ class _HomeState extends ConsumerState<Home> {
                                 child: FadeInAnimation(
                                   child: PostObjectContainer(
                                     postObject: post,
+                                    index: index - 1,
                                     onCommentClicked: () => onCommentClicked(
                                       post.uuid,
                                       getComments(post.uuid),

@@ -37,11 +37,12 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
       if (response.payload == null) {
         showToast(response.message, context);
       } else {
-        List<PostObject> posts = ref.read(postsProvider);
-        ref.watch(postsProvider.notifier).state = [
-          response.payload!,
-          ...posts,
-        ];
+        // List<PostObject> posts = ref.read(postsProvider);
+        // ref.watch(postsProvider.notifier).state = [
+        //   response.payload!,
+        //   ...posts,
+        // ];
+        showToast("Post created", context);
         navigate();
       }
     });

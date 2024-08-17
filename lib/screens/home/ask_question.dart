@@ -62,11 +62,12 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
       if (response.payload == null) {
         showToast(response.message, context);
       } else {
-        List<PostObject> posts = ref.read(postsProvider);
-        ref.watch(postsProvider.notifier).state = [
-          response.payload!,
-          ...posts,
-        ];
+        // List<PostObject> posts = ref.read(postsProvider);
+        // ref.watch(postsProvider.notifier).state = [
+        //   response.payload!,
+        //   ...posts,
+        // ];
+        showToast("Poll created", context);
         navigate();
       }
     });
@@ -159,32 +160,6 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                       height: 10.h,
                     ),
                   ),
-                ),
-                SizedBox(height: 4.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.add_rounded,
-                      color: appRed,
-                      size: 20.r,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        if(choices.length < 5) {
-                          setState(() => choices.add(_ChoiceData()));
-                        }
-                      },
-                      child: Text(
-                        "Add Options",
-                        style: context.textTheme.titleSmall!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: appRed,
-                        ),
-                      ),
-                    )
-                  ],
                 ),
                 SizedBox(height: 20.h),
                 Text(

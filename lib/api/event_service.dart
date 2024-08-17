@@ -23,7 +23,7 @@ Future<RedionesResponse> createEvent(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -91,7 +91,7 @@ Future<RedionesResponse<List<EventData>>> getEvents(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -126,7 +126,7 @@ Future<RedionesResponse> eventInterest(String eventID, String status) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -161,7 +161,7 @@ Future<RedionesResponse> rateEvent(String eventID, double rating) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -201,7 +201,7 @@ Future<RedionesResponse<List<EventData>>> getAllInterestedEvents(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );

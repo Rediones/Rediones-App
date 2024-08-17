@@ -47,6 +47,11 @@ class Post extends PostObject {
 
   @ignore
   MediaType get type => has ? MediaType.imageAndText : MediaType.textOnly;
+
+  @override
+  String toString() {
+    return "Post { text: $text: uuid: $uuid }";
+  }
 }
 
 enum MediaType {

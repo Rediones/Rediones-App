@@ -255,7 +255,8 @@ final List<GoRoute> routes = [
     name: Pages.viewPost,
     builder: (_, state) {
       String id = state.pathParameters["id"] as String;
-      return ViewPostObjectPage(id: id);
+      PostObject? object = state.extra as PostObject?;
+      return ViewPostObjectPage(info: ViewPostData(id: id, object: object));
     },
   ),
   GoRoute(

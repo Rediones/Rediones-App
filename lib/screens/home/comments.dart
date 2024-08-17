@@ -42,10 +42,10 @@ class _PostCommentsState extends State<PostComments> {
   void onSend(List<CommentData> response, String text) async {
     controller.clear();
 
-    RedionesResponse<CommentData?> resp =
+    RedionesResponse<CommentInfo?> resp =
         await createComment(widget.postID, text);
     if (resp.status == Status.success) {
-      response.add(resp.payload!);
+      response.add(resp.payload!.data);
       setState(() {});
       if(widget.updateCommentsCount != null) {
         widget.updateCommentsCount!(response.length);

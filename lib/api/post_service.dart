@@ -34,7 +34,7 @@ Future<RedionesResponse<PostObject?>> createPost(
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -102,7 +102,7 @@ Future<RedionesResponse<List<PostObject>>> getPosts() async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -118,7 +118,7 @@ Future<RedionesResponse<List<PostObject>>> getPosts() async {
 }
 
 Future<RedionesResponse<PostObject?>> getPostById(String id) async {
-  String errorHeader = "Get Post By ID:";
+  String errorHeader = "Get Post:";
 
   try {
     Response response = await dio.get(
@@ -138,7 +138,7 @@ Future<RedionesResponse<PostObject?>> getPostById(String id) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -181,7 +181,7 @@ Future<RedionesResponse<List<PostObject>>> getUserPosts(String id) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -222,7 +222,7 @@ Future<RedionesResponse<List<PostObject>>> getUserSavedPosts() async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -242,6 +242,13 @@ CommentData _processComment(Map<String, dynamic> result) {
   processUser(user);
   result["likes"] = fromArrayString(result["likes"] as List<dynamic>);
   return CommentData.fromJson(result);
+}
+
+class CommentInfo {
+  final CommentData data;
+  final int count;
+
+  const CommentInfo({required this.data, required this.count,});
 }
 
 Future<List<CommentData>> getComments(String postID) async {
@@ -274,7 +281,7 @@ Future<List<CommentData>> getComments(String postID) async {
   return [];
 }
 
-Future<RedionesResponse<CommentData?>> createComment(
+Future<RedionesResponse<CommentInfo?>> createComment(
   String id,
   String content,
 ) async {
@@ -287,17 +294,18 @@ Future<RedionesResponse<CommentData?>> createComment(
         },
         options: configuration(accessToken!));
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      Map<String, dynamic> map = response.data["payload"];
+      Map<String, dynamic> map = response.data["payload"]["comment"];
+      int noOfComments = response.data["payload"]["noOfComments"];
       CommentData data = _processComment(map);
-      return RedionesResponse<CommentData>(
+      return RedionesResponse<CommentInfo>(
         message: "Comment Created",
-        payload: data,
+        payload: CommentInfo(data: data, count: noOfComments,),
         status: Status.success,
       );
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -305,7 +313,7 @@ Future<RedionesResponse<CommentData?>> createComment(
     log("Create Comment Error: $e");
   }
 
-  return RedionesResponse<CommentData?>(
+  return RedionesResponse<CommentInfo?>(
     message: "$errorHeader An unknown error occurred. Please try again!",
     payload: null,
     status: Status.failed,
@@ -332,7 +340,7 @@ Future<RedionesResponse<List<String>>> likePost(String postID) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -363,7 +371,7 @@ Future<RedionesResponse> votePoll(String pollOptionID) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: [],
       status: Status.failed,
     );
@@ -403,7 +411,7 @@ Future<RedionesResponse> savePost(String postID) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );
@@ -436,7 +444,7 @@ Future<RedionesResponse> delete(String postID) async {
     }
   } on DioException catch (e) {
     return RedionesResponse(
-      message: dioErrorResponse(errorHeader, e),
+      message: dioErrorResponse(e),
       payload: null,
       status: Status.failed,
     );

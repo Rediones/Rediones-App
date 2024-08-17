@@ -5,8 +5,8 @@ export 'package:dio/dio.dart';
 import 'dart:developer' show log;
 export 'dart:developer' show log;
 
-//const String baseURL = "http://192.168.81.168:4013";
-const String baseURL = "https://rediones.onrender.com";
+const String baseURL = "http://192.168.0.58:4013";
+// const String baseURL = "https://rediones.onrender.com";
 
 const String imgPrefix = "data:image/jpeg;base64,";
 const String vidPrefix = "data:image/mp4;base64,";
@@ -38,15 +38,15 @@ Options configuration(String token, {ResponseType? type}) => Options(headers: {
   responseType: type
 );
 
-String dioErrorResponse(String errorHeader, DioException e) {
+String dioErrorResponse(DioException e) {
   if (e.type == DioExceptionType.connectionError) {
-    return "$errorHeader A connection error occurred. Please try again later.";
+    return "A connection error occurred. Please try again later.";
   } else if (e.type == DioExceptionType.connectionTimeout ||
       e.type == DioExceptionType.receiveTimeout ||
       e.type == DioExceptionType.sendTimeout) {
-    return "$errorHeader The connection timed out. Please try again later.";
+    return "The connection timed out. Please try again later.";
   } else {
-    return "$errorHeader ${e.response!.data["message"]!}";
+    return "${e.response!.data["message"]!}";
   }
 }
 
@@ -67,7 +67,8 @@ class RedionesResponse<T> {
 
 void initSocket(String userID) {
   _socket = io(
-    'ws://rediones.onrender.com',
+    // 'ws://rediones.onrender.com',
+    'ws://192.168.0.58:4013',
     OptionBuilder().setTransports(['websocket']).build(),
   );
 

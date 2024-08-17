@@ -47,7 +47,7 @@ class Poll extends PostObject {
 
   @override
   String toString() {
-    return "Poll { totalVotes: $totalVotes, text: $text: polls: $polls }";
+    return "Poll { totalVotes: $totalVotes, text: $text: polls: $polls, uuid: $uuid }";
   }
 
   Id get isarId => fastHash(uuid);

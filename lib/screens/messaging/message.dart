@@ -295,13 +295,37 @@ class _MessagePageState extends ConsumerState<MessagePage>
                       controller: controller,
                       children: [
                         lastMessages.isEmpty
-                            ? GestureDetector(
-                                onTap: refresh,
-                                child: Center(
-                                  child: Text(
-                                    "No conversations available. Tap to refresh",
-                                    style: context.textTheme.bodyLarge,
-                                  ),
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      "assets/No Data.png",
+                                      width: 150.r,
+                                      height: 150.r,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    SizedBox(height: 20.h),
+                                    Text(
+                                      "There are no messages available",
+                                      style: context.textTheme.titleSmall!
+                                          .copyWith(
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    SizedBox(height: 10.h),
+                                    GestureDetector(
+                                      onTap: refresh,
+                                      child: Text(
+                                        "Refresh",
+                                        style: context.textTheme.titleSmall!
+                                            .copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: appRed,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               )
                             : AnimationLimiter(
