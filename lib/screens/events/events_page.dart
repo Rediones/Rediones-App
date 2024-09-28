@@ -72,7 +72,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
               child: GestureDetector(
                 onTap: () {
                   context.router.pushNamed(Pages.createEvents).then((resp) {
-                    if(resp == null) return;
+                    if (resp == null) return;
                     refreshEvents();
                   });
                 },
@@ -190,7 +190,10 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                                 if (index == events.length) {
                                   return SizedBox(height: 30.h);
                                 }
-                                return EventContainer(data: events[index]);
+                                return EventContainer(
+                                  data: events[index],
+                                  key: ValueKey<String>(events[index].id),
+                                );
                               },
                             ),
                           ),

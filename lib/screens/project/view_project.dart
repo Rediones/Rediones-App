@@ -123,24 +123,24 @@ class _ViewProjectPageState extends State<ViewProjectPage> {
                               style: context.textTheme.bodyLarge),
                         ),
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6.r),
-                        child: SizedBox(
-                          width: 170.w,
-                          height: 40.h,
-                          child: TextButton(
-                            style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStateProperty.all(appRed)),
-                            onPressed: () {},
-                            child: Text("Library",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(color: theme)),
-                          ),
-                        ),
-                      ),
+                      // ClipRRect(
+                      //   borderRadius: BorderRadius.circular(6.r),
+                      //   child: SizedBox(
+                      //     width: 170.w,
+                      //     height: 40.h,
+                      //     child: TextButton(
+                      //       style: ButtonStyle(
+                      //           backgroundColor:
+                      //               WidgetStateProperty.all(appRed)),
+                      //       onPressed: () {},
+                      //       child: Text("Library",
+                      //           style: Theme.of(context)
+                      //               .textTheme
+                      //               .bodyLarge!
+                      //               .copyWith(color: theme)),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ],

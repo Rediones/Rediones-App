@@ -35,7 +35,6 @@ dependencies:
   timeago:
   shared_preferences:
   flutter_svg:
-  better_player:
   photo_gallery:
   transparent_image:
   flutter_rating_stars:

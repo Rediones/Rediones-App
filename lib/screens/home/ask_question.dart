@@ -111,8 +111,8 @@ class _AskQuestionPageState extends ConsumerState<AskQuestionPage> {
                     children: [
                       SpecialForm(
                         controller: controller,
-                        maxLines: 10,
-                        height: 150.h,
+                        maxLines: 5,
+                        height: 100.h,
                         width: 390.w,
                         hint: "What would you like to ask?",
                         fillColor: context.isDark ? neutral2 : authFieldBackground,

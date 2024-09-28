@@ -350,32 +350,31 @@ class _MyProfilePageState extends ConsumerState<EditProfilePage>
                     onSave: (value) => details["bio"] = value!,
                   ),
                   SizedBox(height: 30.h),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20.h),
-                    child: SizedBox(
-                      width: 390.w,
-                      height: 40.h,
-                      child: TextButton(
-                        style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.all(appRed)),
-                        onPressed: () {
-                          unFocus();
-                          FormState? currentState = formKey.currentState;
-                          if (currentState != null) {
-                            // if (!currentState.validate()) return;
-                            currentState.save();
-                            details["gender"] = gender ?? "";
+                  ElevatedButton(
+                    onPressed: () {
+                      unFocus();
+                      FormState? currentState = formKey.currentState;
+                      if (currentState != null) {
+                        // if (!currentState.validate()) return;
+                        currentState.save();
+                        details["gender"] = gender ?? "";
 
-                            edit();
-                          }
-                        },
-                        child: Text(
-                          "Save",
-                          style: context.textTheme.titleSmall!.copyWith(
-                            color: theme,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        edit();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appRed,
+                      fixedSize: Size(390.w, 40.h),
+                      minimumSize: Size(390.w, 40.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.h),
+                      )
+                    ),
+                    child: Text(
+                      "Save",
+                      style: context.textTheme.titleSmall!.copyWith(
+                        color: theme,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

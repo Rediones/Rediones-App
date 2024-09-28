@@ -115,9 +115,6 @@ Future<RedionesResponse> eventInterest(String eventID, String status) async {
     );
 
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      Map<String, dynamic> result = response.data;
-      log(result.toString());
-
       return const RedionesResponse(
         message: "Event Created",
         payload: null,

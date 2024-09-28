@@ -9,6 +9,7 @@ import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/event_data.dart';
 import 'package:rediones/components/postable.dart';
 import 'package:rediones/components/user_data.dart';
+import 'package:rediones/screens/spotlight/your_spotlights.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
@@ -33,7 +34,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
   @override
   void initState() {
     super.initState();
-    controller = TabController(length: 3, vsync: this);
+    controller = TabController(length: 4, vsync: this);
     loadingEvents = loadingPosts = loadingSaved = true;
     getPosts();
     getSavedPosts();
@@ -123,44 +124,45 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                       SizedBox(height: 15.h),
                       SizedBox(
                         width: 390.w,
-                        height: 130.h,
+                        height: 100.h,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            GestureDetector(
-                              onTap: () {},
-                              child: CachedNetworkImage(
-                                imageUrl: user.profilePicture,
-                                errorWidget: (context, url, error) => Container(
-                                  width: 90.w,
-                                  height: 130.h,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    image: const DecorationImage(
-                                        image: AssetImage("images/home.jpeg"),
-                                        fit: BoxFit.contain),
-                                  ),
+                            CachedNetworkImage(
+                              imageUrl: user.profilePicture,
+                              errorWidget: (context, url, error) => Container(
+                                width: 90.w,
+                                height: 130.h,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  color: appRed.withOpacity(0.5),
                                 ),
-                                progressIndicatorBuilder:
-                                    (context, url, download) => Center(
-                                  child: CircularProgressIndicator(
-                                      color: appRed, value: download.progress),
+                              ),
+                              progressIndicatorBuilder:
+                                  (context, url, download) => Container(
+                                width: 90.w,
+                                height: 130.h,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  color: neutral2,
                                 ),
-                                imageBuilder: (context, provider) => Container(
-                                  width: 90.w,
-                                  height: 130.h,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    image: DecorationImage(
-                                        image: provider, fit: BoxFit.cover),
+                              ),
+                              imageBuilder: (context, provider) => Container(
+                                width: 90.w,
+                                height: 130.h,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  image: DecorationImage(
+                                    image: provider,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
                             ),
                             SizedBox(
                               width: 220.w,
-                              height: 130.h,
+                              height: 100.h,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment:
@@ -274,34 +276,11 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                         ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15.r),
-                          color: darkTheme ? midPrimary : neutral,
+                          color: neutral2,
                         ),
                         child: Text(
                           user.description,
                           style: context.textTheme.bodyLarge,
-                        ),
-                      ),
-                      SizedBox(height: 25.h),
-                      GestureDetector(
-                        onTap: () => context.router.pushNamed(
-                          Pages.yourSpotlight,
-                          extra: user.uuid,
-                        ),
-                        child: Container(
-                          width: 390.w,
-                          height: 35.h,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: darkTheme ? neutral3 : fadedPrimary,
-                            ),
-                            borderRadius: BorderRadius.circular(6.r),
-                            color: Colors.transparent,
-                          ),
-                          child: Text(
-                            "My Spotlights",
-                            style: context.textTheme.bodyLarge,
-                          ),
                         ),
                       ),
                       SizedBox(height: 25.h),
@@ -327,6 +306,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                     Tab(text: "Posts"),
                     Tab(text: "Saved"),
                     Tab(text: "Events"),
+                    Tab(text: "Spotlights"),
                   ],
                 ),
               ),
@@ -345,7 +325,6 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                           itemCount: dummyPosts.length,
                           itemBuilder: (_, index) => PostObjectContainer(
                             postObject: dummyPosts[index],
-
                           ),
                           separatorBuilder: (_, __) => SizedBox(height: 20.h),
                         ),
@@ -406,7 +385,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                       child: FadeInAnimation(
                                         child: PostObjectContainer(
                                           postObject: post,
-
+                                          key: ValueKey<String>(post.uuid),
                                         ),
                                       ),
                                     ),
@@ -483,7 +462,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                       child: FadeInAnimation(
                                         child: PostObjectContainer(
                                           postObject: post,
-
+                                          key: ValueKey<String>(post.uuid),
                                         ),
                                       ),
                                     ),
@@ -559,6 +538,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                                       child: FadeInAnimation(
                                         child: EventContainer(
                                           data: event,
+                                          key: ValueKey<String>(event.id),
                                         ),
                                       ),
                                     ),
@@ -567,6 +547,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage>
                               ),
                             ),
                           ),
+                YourSpotlightsPage(id: user.uuid),
               ],
             ),
           ),

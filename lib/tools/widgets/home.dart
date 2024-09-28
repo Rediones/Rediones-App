@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
@@ -10,7 +8,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/post_service.dart';
 import 'package:rediones/api/user_service.dart';
@@ -974,21 +971,22 @@ class PostHeader extends StatelessWidget {
             height: 18.r,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
                   time.format(object.timestamp),
                   style: context.textTheme.labelMedium!.copyWith(color: gray),
                 ),
-                if (!hideMore)
-                  GestureDetector(
-                    onTap: showExtension,
-                    child: Icon(
-                      Icons.more_horiz,
-                      color: Colors.grey,
-                      size: 26.r,
-                    ),
-                  )
+                // if (!hideMore)
+                //   GestureDetector(
+                //     onTap: showExtension,
+                //     child: Icon(
+                //       Icons.more_horiz,
+                //       color: Colors.grey,
+                //       size: 26.r,
+                //     ),
+                //   )
               ],
             ),
           ),

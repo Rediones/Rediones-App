@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -10,7 +9,6 @@ import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart';
 import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
-import 'package:timeago/timeago.dart' as time;
 
 class GroupsPage extends ConsumerStatefulWidget {
   const GroupsPage({
@@ -251,10 +249,10 @@ class _CommunitiesSectionState extends ConsumerState<CommunitiesSection>
           tabAlignment: TabAlignment.center,
           labelColor: context.isDark ? theme : primary,
           tabs: const [
+            Tab(text: "For You"),
             Tab(
               text: "Communities",
             ),
-            Tab(text: "For You"),
           ],
         ),
         SizedBox(height: 20.h),
@@ -269,9 +267,9 @@ class _CommunitiesSectionState extends ConsumerState<CommunitiesSection>
                   crossAxisCount: 2,
                   crossAxisSpacing: 10.h,
                 ),
-                itemCount: myGroups.length,
+                itemCount: forYou.length,
                 itemBuilder: (_, index) => _GroupDataContainer(
-                  data: myGroups[index],
+                  data: forYou[index],
                 ),
               ),
               GridView.builder(
@@ -280,9 +278,10 @@ class _CommunitiesSectionState extends ConsumerState<CommunitiesSection>
                   crossAxisCount: 2,
                   crossAxisSpacing: 10.h,
                 ),
-                itemCount: forYou.length,
+                itemCount: myGroups.length,
                 itemBuilder: (_, index) => _GroupDataContainer(
-                  data: forYou[index],
+                  data: myGroups[index],
+                  key: ValueKey<String>(myGroups[index].id),
                 ),
               ),
             ],
@@ -296,7 +295,7 @@ class _CommunitiesSectionState extends ConsumerState<CommunitiesSection>
 class _GroupDataContainer extends StatefulWidget {
   final GroupData data;
 
-  const _GroupDataContainer({required this.data});
+  const _GroupDataContainer({super.key, required this.data});
 
   @override
   State<_GroupDataContainer> createState() => _GroupDataContainerState();

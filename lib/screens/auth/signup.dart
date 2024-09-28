@@ -1,15 +1,15 @@
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 import 'package:rediones/api/file_handler.dart';
-import 'package:rediones/tools/providers.dart';
-import 'package:rediones/components/user_data.dart';
 import 'package:rediones/api/user_service.dart';
+import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' as f;
+import 'package:rediones/tools/providers.dart';
 import 'package:rediones/tools/widgets.dart';
 
 class Signup extends ConsumerStatefulWidget {
@@ -71,17 +71,16 @@ class _SignupState extends ConsumerState<Signup> {
   void register() {
     authenticate(_authDetails, Pages.register).then(
       (result) {
-        showMessage(
-          result.status == Status.failed
-              ? result.message
-              : "Account Created Successfully"
-        );
+        showMessage(result.status == Status.failed
+            ? result.message
+            : "Account Created Successfully");
 
         if (result.status == Status.success) {
           _controller.clear();
           _emailControl.clear();
           _confirmControl.clear();
-          Future.delayed(const Duration(milliseconds: 2100), () => navigate(result));
+          Future.delayed(
+              const Duration(milliseconds: 2100), () => navigate(result));
         } else {
           pop();
         }
@@ -96,7 +95,7 @@ class _SignupState extends ConsumerState<Signup> {
     );
   }
 
-  void showMessage(String message ) => f.showToast(message, context);
+  void showMessage(String message) => f.showToast(message, context);
 
   void navigate(RedionesResponse<User?> result) {
     saveToDatabase(result.payload!);
@@ -130,12 +129,20 @@ class _SignupState extends ConsumerState<Signup> {
               SizedBox(
                 height: 63.h,
               ),
-              Image.asset("assets/Rediones Logo.png", ),
+              Image.asset(
+                "assets/Rediones Logo.png",
+              ),
               SizedBox(height: 10.h),
-              Text("Sign Up", style: context.textTheme.titleLarge),
+              Text(
+                "Sign Up",
+                style: context.textTheme.headlineSmall!.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               Text(
                 "Welcome to Rediones",
-                style: context.textTheme.bodyLarge,
+                style: context.textTheme.bodyLarge!.copyWith(
+                    color: darkTheme ? Colors.white : const Color(0xFF546881)),
               ),
               SizedBox(height: 32.h),
               Form(

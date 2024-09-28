@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:rediones/components/post_data.dart';
+import 'package:get_it/get_it.dart';
+import 'package:isar/isar.dart';
+import 'package:rediones/components/group_data.dart';
 import 'package:rediones/components/poll_data.dart';
+import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/search_data.dart';
 import 'package:rediones/components/user_data.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/providers.dart';
-
-import 'package:get_it/get_it.dart';
-import 'package:isar/isar.dart';
 
 class HomeDrawer extends ConsumerStatefulWidget {
   const HomeDrawer({super.key});
@@ -21,7 +21,6 @@ class HomeDrawer extends ConsumerStatefulWidget {
 }
 
 class _HomeDrawerState extends ConsumerState<HomeDrawer> {
-
   void logoutApp() {
     logout(ref);
     context.router.goNamed(Pages.splash);
@@ -33,6 +32,8 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
         ref.watch(userProvider.select((value) => value.profilePicture));
     String username = ref.watch(userProvider.select((value) => value.username));
     String nickname = ref.watch(userProvider.select((value) => value.nickname));
+
+    List<GroupData> forYou = ref.watch(forYouGroupsProvider);
 
     return Container(
       color: context.isDark ? Colors.black : Colors.white,
@@ -113,9 +114,7 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            onTap: () {
-
-            },
+            onTap: () {},
           ),
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -134,6 +133,79 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               context.router.pushNamed(Pages.events);
             },
           ),
+          SizedBox(height: 30.h),
+          Padding(
+            padding: EdgeInsets.only(left: 20.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Communities",
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.titleMedium!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 5.h),
+                SizedBox(
+                  height: 220.r,
+                  child: ListView.separated(
+                    itemBuilder: (_, index) => GestureDetector(
+                      onTap: () => context.router.pushNamed(
+                        Pages.groupHome,
+                        extra: forYou[index],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: forYou[index].groupCoverImage,
+                            errorWidget: (context, url, error) => Container(
+                              width: 40.r,
+                              height: 40.r,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5.r),
+                                color: appRed.withOpacity(0.5),
+                              ),
+                            ),
+                            progressIndicatorBuilder: (context, url, download) =>
+                                Container(
+                              width: 40.r,
+                              height: 40.r,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5.r),
+                                color: neutral2,
+                              ),
+                            ),
+                            imageBuilder: (context, provider) => Container(
+                              width: 40.r,
+                              height: 40.r,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5.r),
+                                image: DecorationImage(
+                                  image: provider,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 5.w),
+                          Text(
+                            forYou[index].groupName,
+                            style: context.textTheme.titleSmall!
+                                .copyWith(fontWeight: FontWeight.w500),
+                          )
+                        ],
+                      ),
+                    ),
+                    separatorBuilder: (_, __) => SizedBox(height: 5.r),
+                    itemCount: forYou.length > 5 ? 5 : forYou.length,
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: 20.h),
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
             onTap: () async {

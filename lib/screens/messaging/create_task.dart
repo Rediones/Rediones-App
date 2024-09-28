@@ -176,64 +176,64 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
                   ],
                 ),
                 SizedBox(height: 50.h),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20.h),
-                  child: SizedBox(
-                    width: 390.w,
-                    height: 40.h,
-                    child: TextButton(
-                      style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all(appRed)),
-                      onPressed: () {
-                        title.text.trim();
-                        details.text.trim();
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: appRed,
+                      fixedSize: Size(390.w, 40.h),
+                      minimumSize: Size(390.w, 40.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.h),
+                      )
+                  ),
+                  onPressed: () {
+                    title.text.trim();
+                    details.text.trim();
 
-                        String? message;
-                        if (title.text.isEmpty) {
-                          message = "Please Enter Title";
-                        } else if (details.text.isEmpty) {
-                          message = "Please Enter Details";
-                        } else if (pickedTime == null) {
-                          message = "Please Choose Time";
-                        } else if (pickedDate == null) {
-                          message = "Please Choose Date";
-                        }
+                    String? message;
+                    if (title.text.isEmpty) {
+                      message = "Please Enter Title";
+                    } else if (details.text.isEmpty) {
+                      message = "Please Enter Details";
+                    } else if (pickedTime == null) {
+                      message = "Please Choose Time";
+                    } else if (pickedDate == null) {
+                      message = "Please Choose Date";
+                    }
 
-                        if (message != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(message),
-                              duration: const Duration(seconds: 1),
-                              dismissDirection: DismissDirection.vertical));
-                          return;
-                        }
+                    if (message != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(message),
+                          duration: const Duration(seconds: 1),
+                          dismissDirection: DismissDirection.vertical));
+                      return;
+                    }
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("Task Created"),
-                              duration: Duration(seconds: 1),
-                              dismissDirection: DismissDirection.vertical),
-                        );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Task Created"),
+                          duration: Duration(seconds: 1),
+                          dismissDirection: DismissDirection.vertical),
+                    );
 
-                        ref.watch(pocketProvider).add(
-                              PocketData(
-                                content: details.text,
-                                heading: title.text,
-                                created: DateTime.now(),
-                                dateDue: pickedDate!,
-                                timeDue: pickedTime!,
-                                id: "",
-                              ),
-                            );
-                        context.router.pop();
-                      },
-                      child: Text(
-                        "Create",
-                        style: context.textTheme.bodyLarge!.copyWith(
-                            color: theme, fontWeight: FontWeight.w500),
+                    ref.watch(pocketProvider).add(
+                      PocketData(
+                        content: details.text,
+                        heading: title.text,
+                        created: DateTime.now(),
+                        dateDue: pickedDate!,
+                        timeDue: pickedTime!,
+                        id: "",
                       ),
-                    ),
+                    );
+                    context.router.pop();
+                  },
+                  child: Text(
+                    "Create",
+                    style: context.textTheme.bodyLarge!.copyWith(
+                        color: theme, fontWeight: FontWeight.w500),
                   ),
                 ),
+                SizedBox(height: 50.h),
               ],
             ),
           ),

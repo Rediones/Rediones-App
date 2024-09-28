@@ -353,7 +353,7 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                   SizedBox(height: 4.h),
                   Container(
                     height: 40.h,
-                    width: 390.w,
+                    width: 250.w,
                     padding: EdgeInsets.only(left: 10.w),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20.h),
@@ -426,13 +426,13 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                           child: Row(
                             children: [
                               SizedBox(
-                                width: 100.w,
+                                width: 60.w,
                                 child: Text(
-                                  pickedDate == null
+                                  pickedTime == null
                                       ? "12:00 AM"
                                       : formattedTime,
                                   style: context.textTheme.bodyLarge!.copyWith(
-                                    fontWeight: pickedDate == null
+                                    fontWeight: pickedTime == null
                                         ? FontWeight.w200
                                         : FontWeight.normal,
                                   ),
@@ -473,8 +473,8 @@ class _CreateEventsPageState extends ConsumerState<CreateEventsPage> {
                   SpecialForm(
                     controller: eventDescription,
                     hint: "e.g This is a sample description",
-                    maxLines: 10,
-                    height: 150.h,
+                    maxLines: 5,
+                    height: 120.h,
                     width: 390.w,
                     fillColor: darkTheme ? neutral2 : authFieldBackground,
                     borderColor: Colors.transparent,

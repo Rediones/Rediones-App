@@ -73,11 +73,13 @@ class _HomeState extends ConsumerState<Home> {
       return;
     }
 
-    ref.watch(postsProvider.notifier).state = p;
     setState(() => loadingServer = false);
 
+    ref.watch(postsProvider.notifier).state = p;
+
+
     Isar isar = GetIt.I.get();
-    await isar.writeTxn(() async {
+    isar.writeTxn(() async {
       List<Post> serverPosts = p.whereType<Post>().toList();
       List<Poll> serverPolls = p.whereType<Poll>().toList();
 
@@ -92,7 +94,6 @@ class _HomeState extends ConsumerState<Home> {
     searchController.dispose();
     super.dispose();
   }
-
 
 
   void checkForChanges() {
@@ -296,6 +297,7 @@ class _HomeState extends ConsumerState<Home> {
                                 verticalOffset: 25.h,
                                 child: FadeInAnimation(
                                   child: PostObjectContainer(
+                                    key: ValueKey<String>(post.uuid),
                                     postObject: post,
                                     index: index - 1,
                                   ),

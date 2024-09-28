@@ -213,8 +213,9 @@ class SpecialForm extends StatelessWidget {
           hintText: hint,
           hintStyle: hintStyle ??
               context.textTheme.bodyLarge!.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: context.isDark ? Colors.white54 : primaryPoint6),
+                fontWeight: FontWeight.w300,
+                color: context.isDark ? Colors.white54 : Colors.black87,
+              ),
         ),
         onChanged: (value) {
           if (onChange == null) return;
@@ -305,8 +306,9 @@ class ComboBox extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             style: context.textTheme.bodyLarge!.copyWith(
-                fontWeight: FontWeight.w500,
-                color: context.isDark ? offWhite : primaryPoint6),
+              fontWeight: FontWeight.w300,
+              color: context.isDark ? offWhite : primaryPoint6,
+            ),
           ),
         ),
         value: value,
@@ -320,8 +322,9 @@ class ComboBox extends StatelessWidget {
                     item,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
-                    style: context.textTheme.bodyLarge!
-                        .copyWith(fontWeight: FontWeight.w500),
+                    style: context.textTheme.bodyLarge!.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
@@ -366,10 +369,10 @@ class ComboBox extends StatelessWidget {
           scrollbarTheme: ScrollbarThemeData(
             radius: scrollbarRadius ?? const Radius.circular(40),
             thickness: scrollbarThickness != null
-                ? WidgetStateProperty.all<double>(scrollbarThickness!)
+                ? MaterialStatePropertyAll(scrollbarThickness)
                 : null,
             thumbVisibility: scrollbarAlwaysShow != null
-                ? WidgetStateProperty.all<bool>(scrollbarAlwaysShow!)
+                ? MaterialStatePropertyAll(scrollbarAlwaysShow!)
                 : null,
           ),
         ),

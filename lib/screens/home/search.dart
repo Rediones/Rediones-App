@@ -86,6 +86,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       setState(() => hasSearch = true);
     } else if (hasSearch && text.isEmpty) {
       setState(() => hasSearch = false);
+    } else if(text.isEmpty) {
+      setState(() => hasSearch = false);
     }
 
     if (!hasSearch) {
@@ -231,6 +233,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               sliver: SliverGrid.builder(
                 itemBuilder: (_, index) => ResultContainer(
+                  key: ValueKey<String>(searchResults[index].uuid),
                   onAdd: () {},
                   user: searchResults[index],
                 ),
@@ -331,6 +334,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     padding: EdgeInsets.symmetric(horizontal: 20.w),
                     sliver: SliverList.separated(
                       itemBuilder: (_, index) => Row(
+                        key: ValueKey<String>(recentSearches[index].search),
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -444,10 +448,8 @@ class SuggestedContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool darkTheme =
-        MediaQuery.of(context).platformBrightness == Brightness.dark;
+    bool darkTheme = context.isDark;
     return Container(
-      width: 120.w,
       height: 150.h,
       decoration: BoxDecoration(
         color: Colors.transparent,
@@ -553,7 +555,6 @@ class ResultContainer extends ConsumerWidget {
         }
       },
       child: Container(
-        width: 120.w,
         height: 150.h,
         decoration: BoxDecoration(
           color: Colors.transparent,

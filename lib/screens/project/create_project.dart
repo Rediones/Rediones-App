@@ -338,49 +338,49 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
                 ],
               ),
               SizedBox(height: 15.h),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20.h),
-                child: SizedBox(
-                  width: 390.w,
-                  height: 40.h,
-                  child: TextButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(appRed),
-                    ),
-                    onPressed: () {
-                      if (projectCover == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Please choose a cover image"),
-                                duration: Duration(seconds: 1),
-                                dismissDirection: DismissDirection.vertical));
-                        return;
-                      }
-
-                      FormState? state = _formKey.currentState;
-                      if (state == null || !state.validate()) return;
-                      state.save();
-
-                      project = ProjectData(
-                        id: "123456",
-                        user: ref.watch(userProvider.notifier).state,
-                        cover: projectCover!,
-                        description: projectDescription.text.trim(),
-                        title: projectName.text.trim(),
-                        duration: int.parse(projectDuration.text.trim()),
-                        participants: const [],
-                        moderators: const [],
-                        durationType: durationType,
-                      );
-
-                      setState(() => ++page);
-                    },
-                    child: Text("Continue",
-                        style: context.textTheme.bodyLarge!
-                            .copyWith(color: theme)),
-                  ),
-                ),
-              ),
+              // ClipRRect(
+              //   borderRadius: BorderRadius.circular(20.h),
+              //   child: SizedBox(
+              //     width: 390.w,
+              //     height: 40.h,
+              //     child: TextButton(
+              //       style: ButtonStyle(
+              //         backgroundColor: WidgetStateProperty.all(appRed),
+              //       ),
+              //       onPressed: () {
+              //         if (projectCover == null) {
+              //           ScaffoldMessenger.of(context).showSnackBar(
+              //               const SnackBar(
+              //                   content: Text("Please choose a cover image"),
+              //                   duration: Duration(seconds: 1),
+              //                   dismissDirection: DismissDirection.vertical));
+              //           return;
+              //         }
+              //
+              //         FormState? state = _formKey.currentState;
+              //         if (state == null || !state.validate()) return;
+              //         state.save();
+              //
+              //         project = ProjectData(
+              //           id: "123456",
+              //           user: ref.watch(userProvider.notifier).state,
+              //           cover: projectCover!,
+              //           description: projectDescription.text.trim(),
+              //           title: projectName.text.trim(),
+              //           duration: int.parse(projectDuration.text.trim()),
+              //           participants: const [],
+              //           moderators: const [],
+              //           durationType: durationType,
+              //         );
+              //
+              //         setState(() => ++page);
+              //       },
+              //       child: Text("Continue",
+              //           style: context.textTheme.bodyLarge!
+              //               .copyWith(color: theme)),
+              //     ),
+              //   ),
+              // ),
             ]))
       ]),
     );
@@ -407,34 +407,34 @@ class _CreateProjectPageState extends ConsumerState<CreateProjectPage> {
               ],
             ),
             SizedBox(height: 15.h),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20.h),
-              child: SizedBox(
-                width: 390.w,
-                height: 40.h,
-                child: TextButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(appRed),
-                  ),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Project Created"),
-                          duration: Duration(seconds: 1),
-                          dismissDirection: DismissDirection.vertical),
-                    );
-
-                    ref.watch(projectsProvider).add(project);
-
-                    context.router.pop();
-                  },
-                  child: Text(
-                    "Post",
-                    style: context.textTheme.bodyLarge!.copyWith(color: theme),
-                  ),
-                ),
-              ),
-            ),
+            // ClipRRect(
+            //   borderRadius: BorderRadius.circular(20.h),
+            //   child: SizedBox(
+            //     width: 390.w,
+            //     height: 40.h,
+            //     child: TextButton(
+            //       style: ButtonStyle(
+            //         backgroundColor: WidgetStateProperty.all(appRed),
+            //       ),
+            //       onPressed: () {
+            //         ScaffoldMessenger.of(context).showSnackBar(
+            //           const SnackBar(
+            //               content: Text("Project Created"),
+            //               duration: Duration(seconds: 1),
+            //               dismissDirection: DismissDirection.vertical),
+            //         );
+            //
+            //         ref.watch(projectsProvider).add(project);
+            //
+            //         context.router.pop();
+            //       },
+            //       child: Text(
+            //         "Post",
+            //         style: context.textTheme.bodyLarge!.copyWith(color: theme),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ])),
     ]);
   }

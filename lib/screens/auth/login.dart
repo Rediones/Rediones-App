@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
-import 'package:rediones/api/base.dart';
 import 'package:rediones/api/file_handler.dart';
 import 'package:rediones/api/user_service.dart';
 import 'package:rediones/components/user_data.dart';
@@ -80,6 +79,7 @@ class _LoginState extends ConsumerState<Login> {
       if (result.status == Status.success) {
         navigate(result);
       } else {
+        f.showToast(result.message, context);
         Navigator.of(context).pop();
       }
     });
@@ -106,12 +106,21 @@ class _LoginState extends ConsumerState<Login> {
               SizedBox(
                 height: 63.h,
               ),
-              Image.asset("assets/Rediones Logo.png", ),
+              Image.asset(
+                "assets/Rediones Logo.png",
+              ),
               SizedBox(height: 10.h),
-              Text("Log In", style: context.textTheme.titleLarge),
+              Text(
+                "Log In",
+                style: context.textTheme.headlineSmall!.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               Text(
                 "Hi, Welcome back.",
-                style: context.textTheme.bodyLarge,
+                style: context.textTheme.bodyLarge!.copyWith(
+                  color: darkTheme ? Colors.white : const Color(0xFF546881)
+                ),
               ),
               SizedBox(height: 32.h),
               Form(

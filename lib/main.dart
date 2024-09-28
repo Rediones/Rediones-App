@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:camera/camera.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -63,9 +61,15 @@ void main() async {
   bool goHome = await FileHandler.hasAuthDetails;
 
   bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-
-  if (!isAllowed) {
-    AwesomeNotifications().requestPermissionToSendNotifications();
+  if(!isAllowed) {
+    await AwesomeNotifications().requestPermissionToSendNotifications(permissions: [
+      NotificationPermission.Alert,
+      NotificationPermission.Sound,
+      NotificationPermission.Badge,
+      NotificationPermission.Vibration,
+      NotificationPermission.Light,
+      NotificationPermission.FullScreenIntent,
+    ]);
   }
 
   FlutterNativeSplash.preserve(widgetsBinding: binding);

@@ -178,6 +178,10 @@ class _EventContainerState extends ConsumerState<EventContainer> {
                       image: DecorationImage(
                         image: provider,
                         fit: BoxFit.cover,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.black26,
+                          BlendMode.darken,
+                        ),
                       ),
                     ),
                   ),

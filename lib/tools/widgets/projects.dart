@@ -181,10 +181,10 @@ class ProjectContainer extends StatelessWidget {
                   width: 390.w,
                   height: 40.h,
                   child: TextButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                          darkTheme ? Colors.white54 : Colors.black38),
-                    ),
+                    // style: ButtonStyle(
+                    //   backgroundColor: WidgetStateProperty.all(
+                    //       darkTheme ? Colors.white54 : Colors.black38),
+                    // ),
                     onPressed: () {},
                     child: Text(
                       "Apply",

@@ -127,25 +127,25 @@ class _MessagePageState extends ConsumerState<MessagePage>
           "Inbox",
           style: context.textTheme.titleLarge,
         ),
-        actions: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: 10.w),
-              child: SizedBox(
-                height: 40.h,
-                width: 40.h,
-                child: SvgPicture.asset(
-                  "assets/Search Icon.svg",
-                  width: 20.h,
-                  height: 20.h,
-                  color: darkTheme ? Colors.white54 : Colors.black45,
-                  fit: BoxFit.scaleDown,
-                ),
-              ),
-            ),
-          )
-        ],
+        // actions: [
+        //   Align(
+        //     alignment: Alignment.centerRight,
+        //     child: Padding(
+        //       padding: EdgeInsets.only(right: 10.w),
+        //       child: SizedBox(
+        //         height: 40.h,
+        //         width: 40.h,
+        //         child: SvgPicture.asset(
+        //           "assets/Search Icon.svg",
+        //           width: 20.h,
+        //           height: 20.h,
+        //           color: darkTheme ? Colors.white54 : Colors.black45,
+        //           fit: BoxFit.scaleDown,
+        //         ),
+        //       ),
+        //     ),
+        //   )
+        // ],
       ),
       body: SafeArea(
         child: Column(
@@ -188,6 +188,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
                         horizontalOffset: 25.w,
                         child: FadeInAnimation(
                           child: StoryContainer(
+                            key: ValueKey<String>(stories[index - 1].id),
                             data: stories[index - 1],
                             onClick: () {
                               unFocus();
@@ -218,36 +219,19 @@ class _MessagePageState extends ConsumerState<MessagePage>
                 children: [
                   TabBar(
                     controller: controller,
+                    indicatorColor: appRed,
+                    labelStyle: context.textTheme.titleMedium!
+                        .copyWith(fontWeight: FontWeight.w700),
+                    unselectedLabelStyle:
+                        context.textTheme.titleMedium!.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
                     tabs: [
-                      Tab(
-                        child: Text("Chats",
-                            style: context.textTheme.titleSmall!
-                                .copyWith(fontWeight: FontWeight.w600)),
+                      const Tab(
+                        text: "Chats",
                       ),
                       Tab(
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Requests (",
-                                style: context.textTheme.bodyLarge!
-                                    .copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: "${requests.length}",
-                                style: context.textTheme.bodyLarge!.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: appRed,
-                                ),
-                              ),
-                              TextSpan(
-                                text: ")",
-                                style: context.textTheme.bodyLarge!
-                                    .copyWith(fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
+                        text: "Requests (${requests.length})",
                       ),
                     ],
                   ),
@@ -260,13 +244,14 @@ class _MessagePageState extends ConsumerState<MessagePage>
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                         border: Border.all(
-                            color: darkTheme ? neutral3 : fadedPrimary),
+                          color: darkTheme ? neutral3 : fadedPrimary,
+                        ),
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Center(
                         child: Text(
                           "Pocket",
-                          style: context.textTheme.bodyLarge!
+                          style: context.textTheme.titleSmall!
                               .copyWith(fontWeight: FontWeight.w500),
                         ),
                       ),
@@ -280,7 +265,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
               child: loadingConversations
                   ? Skeletonizer(
                       enabled: true,
-                      child: ListView.separated(
+                      child: ListView.builder(
                         itemCount: dummyConversations.length,
                         itemBuilder: (_, index) => LastMessageContainer(
                           data: dummyConversations[index],
@@ -288,7 +273,6 @@ class _MessagePageState extends ConsumerState<MessagePage>
                           onOpen: () {},
                         ),
                         padding: EdgeInsets.symmetric(horizontal: 15.w),
-                        separatorBuilder: (_, __) => SizedBox(height: 5.h),
                       ),
                     )
                   : TabBarView(
@@ -331,7 +315,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
                             : AnimationLimiter(
                                 child: RefreshIndicator(
                                   onRefresh: refresh,
-                                  child: ListView.separated(
+                                  child: ListView.builder(
                                     itemBuilder: (_, index) =>
                                         AnimationConfiguration.staggeredList(
                                       position: index,
@@ -342,6 +326,7 @@ class _MessagePageState extends ConsumerState<MessagePage>
                                         verticalOffset: 25.h,
                                         child: FadeInAnimation(
                                           child: LastMessageContainer(
+                                            key: ValueKey<String>(lastMessages[index].id),
                                             currentID: userID,
                                             onOpen: () =>
                                                 openInbox(lastMessages[index]),
@@ -350,8 +335,6 @@ class _MessagePageState extends ConsumerState<MessagePage>
                                         ),
                                       ),
                                     ),
-                                    separatorBuilder: (_, __) =>
-                                        SizedBox(height: 15.h),
                                     itemCount: lastMessages.length,
                                   ),
                                 ),
@@ -544,7 +527,6 @@ class _AddStoryState extends ConsumerState<_AddStory> {
                   showMedia();
                 },
               ),
-
               ListTile(
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -779,31 +761,19 @@ class LastMessageContainer extends StatelessWidget {
       ),
       title: Text(
         sender.username,
-        style:
-            context.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w700),
+        style: context.textTheme.titleSmall!.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
       ),
-      subtitle: Text(
-        data.lastMessage,
-        style: context.textTheme.bodyMedium,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Skeleton.ignore(
-            ignore: true,
-            child: bg.Badge(
-              badgeStyle: const bg.BadgeStyle(
-                badgeColor: appRed,
-                elevation: 1.0,
-              ),
-              showBadge: true,
-              badgeContent: Text(
-                "0",
-                style: context.textTheme.bodySmall!.copyWith(color: theme),
-              ),
+          Text(
+            data.lastMessage,
+            style: context.textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.w500,
             ),
+            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: 2.h),
           Text(
@@ -811,6 +781,20 @@ class LastMessageContainer extends StatelessWidget {
             style: context.textTheme.bodySmall,
           ),
         ],
+      ),
+      trailing: Skeleton.ignore(
+        ignore: true,
+        child: bg.Badge(
+          badgeStyle: const bg.BadgeStyle(
+            badgeColor: appRed,
+            elevation: 1.0,
+          ),
+          showBadge: true,
+          badgeContent: Text(
+            "0",
+            style: context.textTheme.bodySmall!.copyWith(color: theme),
+          ),
+        ),
       ),
     );
   }

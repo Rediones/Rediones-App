@@ -392,16 +392,16 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                       "Post",
                       style: context.textTheme.titleLarge,
                     ),
-                    actions: [
-                      Padding(
-                        padding: EdgeInsets.only(right: 0.w),
-                        child: IconButton(
-                          onPressed: showExtension,
-                          icon: const Icon(Icons.more_vert_rounded),
-                          iconSize: 26.r,
-                        ),
-                      )
-                    ],
+                    // actions: [
+                    //   Padding(
+                    //     padding: EdgeInsets.only(right: 0.w),
+                    //     child: IconButton(
+                    //       onPressed: showExtension,
+                    //       icon: const Icon(Icons.more_vert_rounded),
+                    //       iconSize: 26.r,
+                    //     ),
+                    //   )
+                    // ],
                   ),
                 if (!loading && object == null)
                   SliverFillRemaining(
