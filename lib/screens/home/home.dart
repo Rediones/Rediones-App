@@ -55,16 +55,18 @@ class _HomeState extends ConsumerState<Home> {
   void periodicRefresh() {
     Timer.periodic(
       const Duration(minutes: 2),
-      (timer) => fetchPosts(),
+      (timer) => fetchPosts(showRefreshingMessage: false),
     );
   }
 
   void showMessage(String message) => showToast(message, context);
 
-  Future<void> fetchPosts() async {
+  Future<void> fetchPosts({bool showRefreshingMessage = true}) async {
     if (loadingServer) return;
     setState(() => loadingServer = true);
-    showMessage("Refreshing");
+    if(showRefreshingMessage) {
+      showMessage("Refreshing");
+    }
 
     var response = await getPosts();
     if (!mounted) return;

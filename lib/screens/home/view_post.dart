@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +92,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
     User user = ref.read(userProvider);
     liked = object!.likes.contains(currentUserID);
-    bookmarked = user.savedPosts.contains(object!.uuid);
+    bookmarked = object!.saved.contains(user.uuid);
     totalComments = object!.comments;
     getPostComments(object!.uuid);
   }
@@ -139,7 +137,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
   Future<void> getPostComments(String id) async {
     var response = await getComments(id);
-    if(response != null) {
+    if (response != null) {
       comments.clear();
       comments.addAll(response);
     }
@@ -246,22 +244,14 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     int index = objects.indexWhere((e) => e.uuid == object!.uuid);
     if (index != -1) {
       PostObject obj = object!.copyWith(newComments: count);
-      ref.watch(postsProvider.notifier).state = [
-        ...objects.sublist(0, index),
-        obj,
-        ...objects.sublist(index + 1),
-      ];
-
       Isar isar = GetIt.I.get();
       if (obj is Post) {
         Post post = obj;
-
         await isar.writeTxn(() async {
           await isar.posts.put(post);
         });
       } else if (obj is Poll) {
         Poll poll = obj;
-
         await isar.writeTxn(() async {
           await isar.polls.put(poll);
         });
@@ -291,7 +281,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
     setState(() {
       bookmarked = !savedInitially;
-      if(savedInitially) {
+      if (savedInitially) {
         object!.saved.remove(currentUserID);
       } else {
         object!.saved.add(currentUserID);
@@ -303,7 +293,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
       } else {
         setState(() {
           bookmarked = savedInitially;
-          if(savedInitially) {
+          if (savedInitially) {
             object!.saved.add(currentUserID);
           } else {
             object!.saved.remove(currentUserID);
@@ -313,7 +303,6 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
       }
     });
   }
-
 
   void showMessage(String message) => showToast(message, context);
 
@@ -352,6 +341,16 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     }
   }
 
+  void exitPageWithComments() {
+    if (context.mounted) {
+      int? count;
+      if (object != null) {
+        count = loadingComments ? object!.comments : comments.length;
+      }
+      context.router.pop([count]);
+    }
+  }
+
   void onSend(String text) async {
     controller.clear();
     unFocus();
@@ -367,202 +366,212 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            CustomScrollView(
-              slivers: [
-                if (loading)
-                  const SliverFillRemaining(
-                    child: Center(child: loader),
-                  ),
-                if (!loading)
-                  SliverAppBar(
-                    pinned: true,
-                    leading: IconButton(
-                      iconSize: 26.r,
-                      splashRadius: 0.01,
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () => context.router.pop(),
+    return BackButtonListener(
+      onBackButtonPressed: () async {
+        exitPageWithComments();
+        return true;
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Stack(
+            children: [
+              CustomScrollView(
+                slivers: [
+                  if (loading)
+                    const SliverFillRemaining(
+                      child: Center(child: loader),
                     ),
-                    elevation: 0.0,
-                    leadingWidth: 30.w,
-                    title: Text(
-                      "Post",
-                      style: context.textTheme.titleLarge,
-                    ),
-                    // actions: [
-                    //   Padding(
-                    //     padding: EdgeInsets.only(right: 0.w),
-                    //     child: IconButton(
-                    //       onPressed: showExtension,
-                    //       icon: const Icon(Icons.more_vert_rounded),
-                    //       iconSize: 26.r,
-                    //     ),
-                    //   )
-                    // ],
-                  ),
-                if (!loading && object == null)
-                  SliverFillRemaining(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            "assets/No Data.png",
-                            width: 150.r,
-                            height: 150.r,
-                            fit: BoxFit.cover,
-                          ),
-                          SizedBox(height: 20.h),
-                          Text(
-                            "Oops. Something went wrong somewhere.",
-                            style: context.textTheme.titleSmall!.copyWith(
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          SizedBox(height: 10.h),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() => loading = true);
-                              getPost();
-                            },
-                            child: Text(
-                              "Retry",
-                              style: context.textTheme.titleSmall!.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: appRed,
-                              ),
-                            ),
-                          ),
-                        ],
+                  if (!loading)
+                    SliverAppBar(
+                      pinned: true,
+                      leading: IconButton(
+                        iconSize: 26.r,
+                        splashRadius: 0.01,
+                        icon: const Icon(Icons.chevron_left),
+                        onPressed: exitPageWithComments,
                       ),
+                      elevation: 0.0,
+                      leadingWidth: 30.w,
+                      title: Text(
+                        "Post",
+                        style: context.textTheme.titleLarge,
+                      ),
+                      // actions: [
+                      //   Padding(
+                      //     padding: EdgeInsets.only(right: 0.w),
+                      //     child: IconButton(
+                      //       onPressed: showExtension,
+                      //       icon: const Icon(Icons.more_vert_rounded),
+                      //       iconSize: 26.r,
+                      //     ),
+                      //   )
+                      // ],
                     ),
-                  ),
-                if (!loading && object != null)
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    sliver: SliverToBoxAdapter(
-                      child: SingleChildScrollView(
+                  if (!loading && object == null)
+                    SliverFillRemaining(
+                      child: Center(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(height: 10.h),
-                            PostHeader(
-                              object: object!,
-                              onFollow: onFollow,
-                              shouldFollow: shouldFollow,
-                              goToProfile: goToProfile,
-                              showExtension: showExtension,
-                              hideMore: true,
+                            Image.asset(
+                              "assets/No Data.png",
+                              width: 150.r,
+                              height: 150.r,
+                              fit: BoxFit.cover,
                             ),
                             SizedBox(height: 20.h),
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text:
-                                        "${object!.text.substring(0, expandText ? null : (object!.text.length >= 150 ? 150 : object!.text.length))}"
-                                        "${object!.text.length >= 150 && !expandText ? "..." : ""}",
-                                    style: context.textTheme.bodyMedium,
-                                  ),
-                                  if (object!.text.length > 150)
-                                    TextSpan(
-                                      text: expandText
-                                          ? " Read Less"
-                                          : " Read More",
-                                      style: context.textTheme.bodyMedium!
-                                          .copyWith(color: appRed),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () => setState(
-                                            () => expandText = !expandText),
-                                    ),
-                                ],
+                            Text(
+                              "Oops. Something went wrong somewhere.",
+                              style: context.textTheme.titleSmall!.copyWith(
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                             SizedBox(height: 10.h),
-                            if (isPost && mediaAndText)
-                              PostContainer(post: object! as Post),
-                            if (!isPost) PollContainer(poll: object! as Poll),
-                            ViewPostFooter(
-                              object: object!,
-                              liked: liked,
-                              bookmarked: bookmarked,
-                              onBookmark: onBookmark,
-                              onLike: onLike,
-                              length: loadingComments ? object!.comments : comments.length,
+                            GestureDetector(
+                              onTap: () {
+                                setState(() => loading = true);
+                                getPost();
+                              },
+                              child: Text(
+                                "Retry",
+                                style: context.textTheme.titleSmall!.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: appRed,
+                                ),
+                              ),
                             ),
-                            SizedBox(height: 20.h),
-                            if (comments.isNotEmpty)
-                              Column(
-                                children: [
-                                  Text(
-                                    "${comments.length} comment${comments.length == 1 ? "" : "s"}",
-                                    style: context.textTheme.titleSmall!
-                                        .copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                  SizedBox(height: 20.h),
-                                ],
-                              )
                           ],
                         ),
                       ),
                     ),
-                  ),
-                if (loadingComments && object != null)
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      width: 390.w,
-                      height: 400.h,
-                      child: loader,
-                    ),
-                  ),
-                if (!loadingComments && object != null)
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    sliver: SliverList.separated(
-                      itemCount: comments.length + 1,
-                      itemBuilder: (_, index) {
-                        if (index == comments.length) {
-                          return SizedBox(height: 80.h);
-                        }
-                        return CommentDataContainer(data: comments[index]);
-                      },
-                      separatorBuilder: (_, __) => SizedBox(height: 10.h),
-                    ),
-                  ),
-              ],
-            ),
-            if (!loadingComments && object != null)
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  height: 60.h,
-                  padding: EdgeInsets.symmetric(horizontal: 5.w),
-                  color:
-                      !context.isDark ? Colors.white : const Color(0xFF121212),
-                  child: SpecialForm(
-                    controller: controller,
-                    suffix: IconButton(
-                      icon: Icon(
-                        Icons.send_rounded,
-                        size: 26.r,
-                        color: appRed,
+                  if (!loading && object != null)
+                    SliverPadding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      sliver: SliverToBoxAdapter(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 10.h),
+                              PostHeader(
+                                object: object!,
+                                onFollow: onFollow,
+                                shouldFollow: shouldFollow,
+                                goToProfile: goToProfile,
+                                showExtension: showExtension,
+                                hideMore: true,
+                              ),
+                              SizedBox(height: 20.h),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          "${object!.text.substring(0, expandText ? null : (object!.text.length >= 150 ? 150 : object!.text.length))}"
+                                          "${object!.text.length >= 150 && !expandText ? "..." : ""}",
+                                      style: context.textTheme.bodyMedium,
+                                    ),
+                                    if (object!.text.length > 150)
+                                      TextSpan(
+                                        text: expandText
+                                            ? " Read Less"
+                                            : " Read More",
+                                        style: context.textTheme.bodyMedium!
+                                            .copyWith(color: appRed),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () => setState(
+                                              () => expandText = !expandText),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 10.h),
+                              if (isPost && mediaAndText)
+                                PostContainer(post: object! as Post),
+                              if (!isPost) PollContainer(poll: object! as Poll),
+                              ViewPostFooter(
+                                object: object!,
+                                liked: liked,
+                                bookmarked: bookmarked,
+                                onBookmark: onBookmark,
+                                onLike: onLike,
+                                length: loadingComments
+                                    ? object!.comments
+                                    : comments.length,
+                              ),
+                              SizedBox(height: 20.h),
+                              if (comments.isNotEmpty)
+                                Column(
+                                  children: [
+                                    Text(
+                                      "${comments.length} comment${comments.length == 1 ? "" : "s"}",
+                                      style: context.textTheme.titleSmall!
+                                          .copyWith(
+                                              fontWeight: FontWeight.w600),
+                                    ),
+                                    SizedBox(height: 20.h),
+                                  ],
+                                )
+                            ],
+                          ),
+                        ),
                       ),
-                      onPressed: () => onSend(controller.text),
-                      splashRadius: 0.01,
                     ),
-                    action: TextInputAction.send,
-                    borderColor: Colors.transparent,
-                    width: 380.w,
-                    height: 40.h,
-                    hint: "Type your comment here",
-                    onActionPressed: onSend,
+                  if (loadingComments && object != null)
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        width: 390.w,
+                        height: 400.h,
+                        child: loader,
+                      ),
+                    ),
+                  if (!loadingComments && object != null)
+                    SliverPadding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      sliver: SliverList.separated(
+                        itemCount: comments.length + 1,
+                        itemBuilder: (_, index) {
+                          if (index == comments.length) {
+                            return SizedBox(height: 80.h);
+                          }
+                          return CommentDataContainer(data: comments[index]);
+                        },
+                        separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                      ),
+                    ),
+                ],
+              ),
+              if (!loadingComments && object != null)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    height: 60.h,
+                    padding: EdgeInsets.symmetric(horizontal: 5.w),
+                    color: !context.isDark
+                        ? Colors.white
+                        : const Color(0xFF121212),
+                    child: SpecialForm(
+                      controller: controller,
+                      suffix: IconButton(
+                        icon: Icon(
+                          Icons.send_rounded,
+                          size: 26.r,
+                          color: appRed,
+                        ),
+                        onPressed: () => onSend(controller.text),
+                        splashRadius: 0.01,
+                      ),
+                      action: TextInputAction.send,
+                      borderColor: Colors.transparent,
+                      width: 380.w,
+                      height: 40.h,
+                      hint: "Type your comment here",
+                      onActionPressed: onSend,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
@@ -634,14 +636,21 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     );
   }
 
-  void refresh() {
+  void refresh(List<dynamic> updatedData) {
     List<String> likes = widget.postObject.likes;
+    List<String> saves = widget.postObject.saved;
     bool hasPostAsLiked = likes.contains(currentUserID);
-    setState(() {
-      liked = hasPostAsLiked;
-      comments = widget.postObject.comments;
-    });
-    updateDatabase(widget.postObject);
+    bool hasPostAsBookmarked = saves.contains(currentUserID);
+    PostObject postObject = widget.postObject;
+    liked = hasPostAsLiked;
+    bookmarked = hasPostAsBookmarked;
+
+    if(updatedData[0] != null) {
+      postObject = postObject.copyWith(newComments: updatedData[0] as int);
+      comments = updatedData[0] as int;
+    }
+    updateDatabase(postObject);
+    setState(() {});
   }
 
   void onLike() {
@@ -695,29 +704,37 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   }
 
   void onBookmark() {
-    bool savedInitially = bookmarked;
+    List<String> saves = widget.postObject.saved;
+    bool hasPostAsSaved = saves.contains(currentUserID);
 
     setState(() {
-      bookmarked = !savedInitially;
-      if (savedInitially) {
-        widget.postObject.saved.remove(currentUserID);
-      } else {
-        widget.postObject.saved.add(currentUserID);
+      bookmarked = !bookmarked;
+      if (bookmarked && !hasPostAsSaved) {
+        saves.add(currentUserID);
+      } else if (!bookmarked && hasPostAsSaved) {
+        saves.remove(currentUserID);
       }
     });
+
     savePost(widget.postObject.uuid).then((value) {
       if (value.status == Status.success) {
         updateDatabase(widget.postObject);
+        if (!mounted) return;
+        setState(() {});
       } else {
-        setState(() {
-          bookmarked = savedInitially;
-          if (savedInitially) {
-            widget.postObject.saved.add(currentUserID);
-          } else {
-            widget.postObject.saved.remove(currentUserID);
-          }
-        });
-        showMessage("Something went wrong");
+        bookmarked = !bookmarked;
+        hasPostAsSaved = saves.contains(currentUserID);
+
+        if (bookmarked && !hasPostAsSaved) {
+          saves.add(currentUserID);
+        } else if (!bookmarked && hasPostAsSaved) {
+          saves.remove(currentUserID);
+        }
+
+        if (!mounted) return;
+        setState(() {});
+
+        showMessage("Unable to ${bookmarked ? "save" : "un-save"} your post");
       }
     });
   }
@@ -746,6 +763,10 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     });
   }
 
+  void updateCommentsCount(int newCount) {
+    setState(() => comments = newCount);
+  }
+
   void goToProfile() {
     User currentUser = ref.watch(userProvider);
     if (widget.postObject.posterID == currentUser.uuid) {
@@ -759,22 +780,25 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
 
   void showMessage(String message) => showToast(message, context);
 
+  Future<void> navigate() async {
+    context.router.pushNamed(
+      Pages.viewPost,
+      pathParameters: {
+        "id": widget.postObject.uuid,
+      },
+      extra: widget.postObject,
+    ).then((data) {
+      if(data == null) return;
+      refresh(data as List<dynamic>);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     bool darkTheme = context.isDark;
 
     return GestureDetector(
-      onTap: () => context.router
-          .pushNamed(
-            Pages.viewPost,
-            pathParameters: {
-              "id": widget.postObject.uuid,
-            },
-            extra: widget.postObject,
-          )
-          .then(
-            (_) => refresh(),
-          ),
+      onTap: navigate,
       child: Container(
         width: 390.w,
         decoration: BoxDecoration(
@@ -828,6 +852,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
               onLike: onLike,
               comments: comments,
               commentsFuture: commentsFuture,
+              onCommentsAdded: updateCommentsCount,
             ),
           ],
         ),
@@ -1001,6 +1026,7 @@ class PostFooter extends ConsumerStatefulWidget {
   final bool liked, bookmarked;
   final VoidCallback onLike, onBookmark;
   final Future commentsFuture;
+  final Function(int) onCommentsAdded;
   final int comments;
 
   const PostFooter({
@@ -1012,6 +1038,7 @@ class PostFooter extends ConsumerStatefulWidget {
     required this.onLike,
     required this.onBookmark,
     required this.commentsFuture,
+    required this.onCommentsAdded,
   });
 
   @override
@@ -1020,11 +1047,20 @@ class PostFooter extends ConsumerStatefulWidget {
 
 class _PostFooterState extends ConsumerState<PostFooter> {
   late int totalComments;
+  late bool bookmarked;
 
   @override
   void initState() {
     super.initState();
     totalComments = widget.comments;
+    bookmarked = widget.bookmarked;
+  }
+
+  @override
+  void didUpdateWidget(covariant PostFooter oldWidget) {
+    totalComments = widget.comments;
+    bookmarked = widget.bookmarked;
+    super.didUpdateWidget(oldWidget);
   }
 
   void onCommentClicked(String postID, Future future) {
@@ -1047,11 +1083,7 @@ class _PostFooterState extends ConsumerState<PostFooter> {
     if (index != -1) {
       PostObject obj = widget.object.copyWith(newComments: count);
       setState(() => totalComments = count);
-      ref.watch(postsProvider.notifier).state = [
-        ...objects.sublist(0, index),
-        obj,
-        ...objects.sublist(index + 1),
-      ];
+      widget.onCommentsAdded(count);
 
       Isar isar = GetIt.I.get();
       if (obj is Post) {
@@ -1154,11 +1186,11 @@ class _PostFooterState extends ConsumerState<PostFooter> {
           child: AnimatedSwitcherZoom.zoomIn(
             duration: const Duration(milliseconds: 200),
             child: IconButton(
-              key: ValueKey<bool>(widget.bookmarked),
+              key: ValueKey<bool>(bookmarked),
               icon: SvgPicture.asset(
-                "assets/Bookmark${widget.bookmarked ? " Filled" : ""}.svg",
-                color: darkTheme && !widget.bookmarked ? Colors.white : null,
-                width: widget.bookmarked ? 24.r : 18.r,
+                "assets/Bookmark${bookmarked ? " Filled" : ""}.svg",
+                color: darkTheme && !bookmarked ? Colors.white : null,
+                width: bookmarked ? 24.r : 18.r,
               ),
               onPressed: widget.onBookmark,
             ),

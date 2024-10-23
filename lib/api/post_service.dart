@@ -295,7 +295,6 @@ Future<RedionesResponse<CommentInfo?>> createComment(
         },
         options: configuration(accessToken!));
     if (response.statusCode! >= 200 && response.statusCode! < 400) {
-      log("${response.data}");
       Map<String, dynamic> map = response.data["payload"]["comment"];
       int noOfComments = response.data["payload"]["noOfComments"];
       CommentData data = _processComment(map);

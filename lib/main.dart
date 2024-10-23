@@ -185,7 +185,6 @@ class _RedionesState extends ConsumerState<Rediones>
     );
   }
 
-// Comments count not updating in post container but updating in viewing mode
 // Voting is not working properly as viewing mode polls and outside may not tally
 
 // @override
