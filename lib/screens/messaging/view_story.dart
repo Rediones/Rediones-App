@@ -80,7 +80,7 @@ class _ViewStoryPageState extends ConsumerState<ViewStoryPage> {
               height: 820.h,
               width: 390.w,
               child: StoryView(
-                color: Colors.black,
+                // color: Colors.black,
                 storyItems: storyItems,
                 controller: storyController,
                 indicatorColor: neutral2,

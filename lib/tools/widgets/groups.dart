@@ -124,15 +124,18 @@ class MultiMemberImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool hasExtra = images.length > 3;
-    int count = images.length > 3 ? 4 : images.length;
+    bool hasExtra = images.length > 1;
+    int count = images.length > 1 ? 2 : 1;
 
     if (images.isEmpty) return const SizedBox();
 
     return SizedBox(
       height: size * 2,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: alignment == ImageAlign.center
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
         children: List.generate(
           count,
           (index) => (hasExtra && index == count - 1)

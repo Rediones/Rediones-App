@@ -1,6 +1,5 @@
 import 'dart:async';
-import 'dart:developer';
-import 'package:awesome_notifications/awesome_notifications.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +12,6 @@ import 'package:rediones/api/post_service.dart';
 import 'package:rediones/components/poll_data.dart';
 import 'package:rediones/components/post_data.dart';
 import 'package:rediones/components/postable.dart';
-import 'package:rediones/screens/home/comments.dart';
 import 'package:rediones/screens/home/home_drawer.dart';
 import 'package:rediones/tools/constants.dart';
 import 'package:rediones/tools/functions.dart' show showToast, unFocus;
@@ -50,6 +48,15 @@ class _HomeState extends ConsumerState<Home> {
     if (ref.read(createdProfileProvider)) {
       fetchPosts();
     }
+
+    periodicRefresh();
+  }
+
+  void periodicRefresh() {
+    Timer.periodic(
+      const Duration(minutes: 2),
+      (timer) => fetchPosts(),
+    );
   }
 
   void showMessage(String message) => showToast(message, context);
@@ -77,7 +84,6 @@ class _HomeState extends ConsumerState<Home> {
 
     ref.watch(postsProvider.notifier).state = p;
 
-
     Isar isar = GetIt.I.get();
     isar.writeTxn(() async {
       List<Post> serverPosts = p.whereType<Post>().toList();
@@ -95,16 +101,17 @@ class _HomeState extends ConsumerState<Home> {
     super.dispose();
   }
 
-
   void checkForChanges() {
     ref.listen(isLoggedInProvider, (oldVal, newVal) {
       if (!oldVal! && newVal) {
         fetchPosts();
       }
     });
+
+    ref.listen(userProvider, (oldUser, newUser) {
+      fetchPosts();
+    });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -176,22 +183,24 @@ class _HomeState extends ConsumerState<Home> {
         ),
         centerTitle: true,
         actions: [
-          if(isLoggedIn)
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: 10.w),
-              child: IconButton(
-                icon: SvgPicture.asset(
-                  darkTheme ? "assets/Message Dark.svg" : "assets/Message.svg",
-                  width: 22.r,
-                  height: 22.r,
+          if (isLoggedIn)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(right: 10.w),
+                child: IconButton(
+                  icon: SvgPicture.asset(
+                    darkTheme
+                        ? "assets/Message Dark.svg"
+                        : "assets/Message.svg",
+                    width: 22.r,
+                    height: 22.r,
+                  ),
+                  onPressed: () => context.router.pushNamed(Pages.message),
+                  splashRadius: 0.01,
                 ),
-                onPressed: () => context.router.pushNamed(Pages.message),
-                splashRadius: 0.01,
               ),
-            ),
-          )
+            )
         ],
       ),
       body: SafeArea(

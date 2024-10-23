@@ -26,7 +26,6 @@ class _GroupHomeState extends State<GroupHome> {
 
   final ScrollController scrollController = ScrollController();
 
-
   @override
   void initState() {
     super.initState();
@@ -168,8 +167,11 @@ class _GroupHomeState extends State<GroupHome> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.center,
                                             children: [
-                                              SizedBox(
-                                                width: 100.w,
+                                              ConstrainedBox(
+                                                constraints: BoxConstraints(
+                                                  minWidth: 0.w,
+                                                  maxWidth: 14.5.r * 4,
+                                                ),
                                                 child: MultiMemberImage(
                                                   alignment: ImageAlign.start,
                                                   total: widget
@@ -182,6 +184,7 @@ class _GroupHomeState extends State<GroupHome> {
                                                   border: goodYellow,
                                                 ),
                                               ),
+                                              SizedBox(width: 5.w),
                                               Text(
                                                 "${widget.data.groupUsers.length} member${widget.data.groupUsers.length == 1 ? "" : "s"}",
                                                 style:
@@ -223,19 +226,21 @@ class _GroupHomeState extends State<GroupHome> {
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Container(
-                                                  width: 18.r,
-                                                  height: 18.r,
+                                                  width: 16.r,
+                                                  height: 16.r,
                                                   alignment: Alignment.center,
                                                   decoration:
                                                       const BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          color: appRed),
+                                                    shape: BoxShape.circle,
+                                                    color: appRed,
+                                                  ),
                                                   child: Center(
-                                                      child: Icon(
-                                                          Icons.add_rounded,
-                                                          color: theme,
-                                                          size: 14.r)),
+                                                    child: Icon(
+                                                      Icons.add_rounded,
+                                                      color: theme,
+                                                      size: 14.r,
+                                                    ),
+                                                  ),
                                                 ),
                                                 Text(
                                                   "Make a Post",
@@ -243,6 +248,7 @@ class _GroupHomeState extends State<GroupHome> {
                                                       .textTheme.titleSmall!
                                                       .copyWith(
                                                     fontWeight: FontWeight.w600,
+                                                    fontSize: 14.sp,
                                                   ),
                                                 )
                                               ],

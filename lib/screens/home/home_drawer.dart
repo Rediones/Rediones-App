@@ -33,11 +33,9 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
     String username = ref.watch(userProvider.select((value) => value.username));
     String nickname = ref.watch(userProvider.select((value) => value.nickname));
 
-    List<GroupData> forYou = ref.watch(forYouGroupsProvider);
-
-    return Container(
-      color: context.isDark ? Colors.black : Colors.white,
-      width: 390.w,
+    return Drawer(
+      backgroundColor: context.isDark ? Colors.black : Colors.white,
+      width: 300.w,
       child: ListView(
         padding: EdgeInsets.symmetric(vertical: 20.h),
         children: [
@@ -133,77 +131,22 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
               context.router.pushNamed(Pages.events);
             },
           ),
-          SizedBox(height: 30.h),
-          Padding(
-            padding: EdgeInsets.only(left: 20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Communities",
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.titleMedium!.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 5.h),
-                SizedBox(
-                  height: 220.r,
-                  child: ListView.separated(
-                    itemBuilder: (_, index) => GestureDetector(
-                      onTap: () => context.router.pushNamed(
-                        Pages.groupHome,
-                        extra: forYou[index],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          CachedNetworkImage(
-                            imageUrl: forYou[index].groupCoverImage,
-                            errorWidget: (context, url, error) => Container(
-                              width: 40.r,
-                              height: 40.r,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5.r),
-                                color: appRed.withOpacity(0.5),
-                              ),
-                            ),
-                            progressIndicatorBuilder: (context, url, download) =>
-                                Container(
-                              width: 40.r,
-                              height: 40.r,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5.r),
-                                color: neutral2,
-                              ),
-                            ),
-                            imageBuilder: (context, provider) => Container(
-                              width: 40.r,
-                              height: 40.r,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5.r),
-                                image: DecorationImage(
-                                  image: provider,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 5.w),
-                          Text(
-                            forYou[index].groupName,
-                            style: context.textTheme.titleSmall!
-                                .copyWith(fontWeight: FontWeight.w500),
-                          )
-                        ],
-                      ),
-                    ),
-                    separatorBuilder: (_, __) => SizedBox(height: 5.r),
-                    itemCount: forYou.length > 5 ? 5 : forYou.length,
-                  ),
-                )
-              ],
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 20.w),
+            leading: SvgPicture.asset(
+              "assets/Groups.svg",
+              color: appRed,
             ),
+            title: Text(
+              "Communities",
+              style: context.textTheme.titleMedium!.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              context.router.pushNamed(Pages.groups);
+            },
           ),
           SizedBox(height: 20.h),
           ListTile(

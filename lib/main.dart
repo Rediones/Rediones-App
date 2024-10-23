@@ -27,7 +27,6 @@ import 'tools/styles.dart';
 
 void main() async {
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   AwesomeNotifications().initialize(
@@ -185,6 +184,9 @@ class _RedionesState extends ConsumerState<Rediones>
       minTextAdapt: true,
     );
   }
+
+// Comments count not updating in post container but updating in viewing mode
+// Voting is not working properly as viewing mode polls and outside may not tally
 
 // @override
 // void didChangeAppLifecycleState(AppLifecycleState state) async {
