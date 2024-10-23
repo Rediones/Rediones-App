@@ -277,29 +277,37 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
   }
 
   void onBookmark() {
-    bool savedInitially = bookmarked;
+    List<String> saves = object!.saved;
+    bool hasPostAsSaved = saves.contains(currentUserID);
 
     setState(() {
-      bookmarked = !savedInitially;
-      if (savedInitially) {
-        object!.saved.remove(currentUserID);
-      } else {
-        object!.saved.add(currentUserID);
+      bookmarked = !bookmarked;
+      if (bookmarked && !hasPostAsSaved) {
+        saves.add(currentUserID);
+      } else if (!bookmarked && hasPostAsSaved) {
+        saves.remove(currentUserID);
       }
     });
+
     savePost(object!.uuid).then((value) {
       if (value.status == Status.success) {
         updateDatabase(object!);
+        if (!mounted) return;
+        setState(() {});
       } else {
-        setState(() {
-          bookmarked = savedInitially;
-          if (savedInitially) {
-            object!.saved.add(currentUserID);
-          } else {
-            object!.saved.remove(currentUserID);
-          }
-        });
-        showMessage("Something went wrong");
+        bookmarked = !bookmarked;
+        hasPostAsSaved = saves.contains(currentUserID);
+
+        if (bookmarked && !hasPostAsSaved) {
+          saves.add(currentUserID);
+        } else if (!bookmarked && hasPostAsSaved) {
+          saves.remove(currentUserID);
+        }
+
+        if (!mounted) return;
+        setState(() {});
+
+        showMessage("Unable to ${bookmarked ? "save" : "un-save"} your post");
       }
     });
   }
@@ -341,7 +349,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
     }
   }
 
-  void exitPageWithComments() {
+  void exitPage() {
     if (context.mounted) {
       int? count;
       if (object != null) {
@@ -368,7 +376,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
   Widget build(BuildContext context) {
     return BackButtonListener(
       onBackButtonPressed: () async {
-        exitPageWithComments();
+        exitPage();
         return true;
       },
       child: Scaffold(
@@ -388,7 +396,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                         iconSize: 26.r,
                         splashRadius: 0.01,
                         icon: const Icon(Icons.chevron_left),
-                        onPressed: exitPageWithComments,
+                        onPressed: exitPage,
                       ),
                       elevation: 0.0,
                       leadingWidth: 30.w,
@@ -488,7 +496,10 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
                               SizedBox(height: 10.h),
                               if (isPost && mediaAndText)
                                 PostContainer(post: object! as Post),
-                              if (!isPost) PollContainer(poll: object! as Poll),
+                              if (!isPost)
+                                PollContainer(
+                                  poll: object! as Poll,
+                                ),
                               ViewPostFooter(
                                 object: object!,
                                 liked: liked,

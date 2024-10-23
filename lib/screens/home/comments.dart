@@ -66,12 +66,6 @@ class _PostCommentsState extends ConsumerState<PostComments> {
     int index = objects.indexWhere((e) => e.uuid == widget.postID);
     if(index != -1) {
       PostObject obj = objects[index].copyWith(newComments: count);
-      ref.watch(postsProvider.notifier).state = [
-        ...objects.sublist(0, index),
-        obj,
-        ...objects.sublist(index + 1),
-      ];
-
       Isar isar = GetIt.I.get();
       if (obj is Post) {
         Post post = obj;

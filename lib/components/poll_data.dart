@@ -92,7 +92,7 @@ class Poll extends PostObject {
   }
 
   @override
-  Poll copyWith({int? newComments}) {
+  Poll copyWith({int? newComments, int? newTotalVotes}) {
     return Poll(
       text: text,
       comments: newComments ?? comments,
@@ -102,7 +102,7 @@ class Poll extends PostObject {
       shares: shares,
       saved: saved,
       polls: polls,
-      totalVotes: totalVotes,
+      totalVotes: newTotalVotes ?? totalVotes,
       durationInHours: durationInHours,
       pollID: pollID,
       posterID: posterID,

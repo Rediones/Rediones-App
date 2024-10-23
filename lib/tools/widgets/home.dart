@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:animated_switcher_plus/animated_switcher_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
@@ -645,10 +643,17 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
     liked = hasPostAsLiked;
     bookmarked = hasPostAsBookmarked;
 
-    if(updatedData[0] != null) {
+    if (updatedData[0] != null) {
       postObject = postObject.copyWith(newComments: updatedData[0] as int);
       comments = updatedData[0] as int;
     }
+
+    if (postObject is Poll && updatedData[1] != null) {
+      Poll p = postObject;
+      postObject = p.copyWith(newTotalVotes: updatedData[1] as int);
+      // totalVotes = updatedData[1] as int;
+    }
+
     updateDatabase(postObject);
     setState(() {});
   }
@@ -781,14 +786,16 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
   void showMessage(String message) => showToast(message, context);
 
   Future<void> navigate() async {
-    context.router.pushNamed(
+    context.router
+        .pushNamed(
       Pages.viewPost,
       pathParameters: {
         "id": widget.postObject.uuid,
       },
       extra: widget.postObject,
-    ).then((data) {
-      if(data == null) return;
+    )
+        .then((data) {
+      if (data == null) return;
       refresh(data as List<dynamic>);
     });
   }
@@ -843,7 +850,9 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
             if (isPost && widget.postObject is Post && mediaAndText)
               PostContainer(post: widget.postObject as Post),
             if (!isPost && widget.postObject is Poll)
-              PollContainer(poll: widget.postObject as Poll),
+              PollContainer(
+                poll: widget.postObject as Poll,
+              ),
             PostFooter(
               object: widget.postObject,
               liked: liked,
@@ -1305,8 +1314,7 @@ class _PollContainerState extends ConsumerState<PollContainer> {
   bool hasVoted = false;
 
   late String currentUserID;
-
-  late int totalVotes;
+  int totalVotes = 0;
 
   @override
   void initState() {
@@ -1320,11 +1328,26 @@ class _PollContainerState extends ConsumerState<PollContainer> {
       if (!hasVoted && voters.contains(currentUserID)) {
         hasVoted = true;
         pollIndex = i;
-        break;
       }
+
+      totalVotes += voters.length;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant PollContainer oldWidget) {
+    for (int i = 0; i < widget.poll.polls.length; ++i) {
+      PollChoice choice = widget.poll.polls[i];
+      List<String> voters = choice.voters;
+      if (!hasVoted && voters.contains(currentUserID)) {
+        hasVoted = true;
+        pollIndex = i;
+      }
+
+      totalVotes += voters.length;
     }
 
-    totalVotes = widget.poll.totalVotes;
+    super.didUpdateWidget(oldWidget);
   }
 
   void vote(String id, int index) {
