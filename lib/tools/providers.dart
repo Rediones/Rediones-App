@@ -102,91 +102,10 @@ final StateProvider<List<ProjectData>> projectsProvider =
     StateProvider((ref) => []);
 
 final StateProvider<List<CommunityData>> communitiesProvider =
-    StateProvider((ref) => const [
-          CommunityData(
-            image: "assets/watch man.jpg",
-            name: "Dev Design",
-            description:
-                "Allow students to create detailed profiles with information such as their school, major, interests, and goals.",
-            members: "500k",
-          ),
-          CommunityData(
-            image: "assets/watch man.jpg",
-            name: "Dev Design",
-            description:
-                "Allow students to create detailed profiles with information such as their school, major, interests, and goals.",
-            members: "500k",
-          ),
-          CommunityData(
-            image: "assets/watch man.jpg",
-            name: "Dev Design",
-            description:
-                "Allow students to create detailed profiles with information such as their school, major, interests, and goals.",
-            members: "500k",
-          ),
-          CommunityData(
-            image: "assets/watch man.jpg",
-            name: "Dev Design",
-            description:
-                "Allow students to create detailed profiles with information such as their school, major, interests, and goals.",
-            members: "500k",
-          ),
-          CommunityData(
-            image: "assets/watch man.jpg",
-            name: "Dev Design",
-            description:
-                "Allow students to create detailed profiles with information such as their school, major, interests, and goals.",
-            members: "500k",
-          ),
-        ]);
+    StateProvider((ref) => []);
 
 final StateProvider<List<CommunityChatData>> communityChatProvider =
-    StateProvider(
-  (ref) => [
-    CommunityChatData(
-      id: "id",
-      userId: "userId",
-      username: "Ava Lee",
-      image: "assets/watch man.jpg",
-      message:
-          "Hello kifpsofp posipfoi posipogi poipogp iopfoga ipsfopaoigp oapio ipoigpo agiopafogi afg ",
-      timestamp: DateTime.now(),
-    ),
-    CommunityChatData(
-      id: "id",
-      userId: "userId",
-      username: "Ava Lee",
-      image: "assets/watch man.jpg",
-      message: "aisipgowr oqpirwp oirpoiq pigpqoirwg iproig gri gpqojpro",
-      timestamp: DateTime.now(),
-    ),
-    CommunityChatData(
-      id: "id",
-      userId: "userId",
-      username: "Ava Lee",
-      image: "assets/watch man.jpg",
-      message: "qri poqproit oqipto iporitporitpoiwt",
-      timestamp: DateTime.now(),
-    ),
-    CommunityChatData(
-      id: "id",
-      userId: "userId",
-      username: "Ava Lee",
-      image: "assets/watch man.jpg",
-      message:
-          "qirtpo pqoritpoqirpotiq wrtpoqir trout qwrutp roit poitp iwpoti wprit pqowit iropt oqirw ptoirwpot iprwit poqirt ",
-      timestamp: DateTime.now(),
-    ),
-    CommunityChatData(
-      id: "id",
-      userId: "6504e7b668ad68ed675a18d6",
-      username: "Idowu Emmanuel",
-      image: "assets/watch man.jpg",
-      message: "Hello",
-      timestamp: DateTime.now(),
-    ),
-  ],
-);
+    StateProvider((ref) => []);
 
 final StateProvider<List<String>> eventCategories = StateProvider(
   (ref) => [
@@ -262,7 +181,7 @@ final StateProvider<bool> isLoggedInProvider = StateProvider((ref) => false);
 final StateProvider<bool> createdProfileProvider =
     StateProvider((ref) => false);
 
-final StateProvider<bool> registeredNotificationHandler = StateProvider((ref) {
+final StateProvider<bool> socketHandlerProvider = StateProvider((ref) {
   ref.listen(isLoggedInProvider, (oldVal, newVal) {
     if (!oldVal! && newVal) {
       addHandler(notificationSignal, (data) {
@@ -289,6 +208,7 @@ final StateProvider<bool> registeredNotificationHandler = StateProvider((ref) {
   });
   return true;
 });
+
 
 final StateProvider<bool> initializedProvider = StateProvider((ref) => false);
 final StateProvider<bool> hideBottomProvider = StateProvider((ref) => false);
@@ -324,7 +244,7 @@ void toggle(StateProvider<UpdatePost> provider, WidgetRef ref) {
 void logout(WidgetRef ref) {
   FileHandler.saveAuthDetails(null);
   FileHandler.saveString(userIsarId, "");
-  ref.invalidate(registeredNotificationHandler);
+  ref.invalidate(socketHandlerProvider);
   ref.invalidate(currentUserStory);
   ref.invalidate(outgoingStatus);
   ref.invalidate(exitAttemptProvider);
@@ -346,6 +266,7 @@ void logout(WidgetRef ref) {
   ref.invalidate(notificationsProvider);
   ref.invalidate(spotlightsProvider);
   ref.invalidate(postsProvider);
+  ref.invalidate(communityChatProvider);
   ref.invalidate(conversationsProvider);
   ref.invalidate(userProvider);
 }

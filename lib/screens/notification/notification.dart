@@ -60,7 +60,6 @@ class _NotificationPageState extends ConsumerState<NotificationPage>
         refresh();
       }
     });
-    Future.delayed(Duration.zero, () => ref.watch(registeredNotificationHandler));
   }
 
   @override

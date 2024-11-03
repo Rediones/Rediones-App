@@ -37,7 +37,10 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     ];
 
     _authenticate(5);
-    Future.delayed(Duration.zero, () => FlutterNativeSplash.remove());
+    Future.delayed(Duration.zero, () {
+      FlutterNativeSplash.remove();
+      ref.watch(socketHandlerProvider);
+    });
   }
 
   void _showError(String text) => showToast(text, context);
@@ -45,7 +48,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
   void goHome() => context.router.goNamed(Pages.login);
 
   void _authenticate(int level) async {
-    if(ref.read(isLoggedInProvider)) {
+    if (ref.read(isLoggedInProvider)) {
       return;
     }
 
@@ -56,7 +59,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     }
 
     Map<String, String>? authDetails = await FileHandler.loadAuthDetails();
-    if(authDetails == null) {
+    if (authDetails == null) {
       goHome();
       return;
     }

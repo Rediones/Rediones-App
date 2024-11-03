@@ -5,7 +5,7 @@ export 'package:dio/dio.dart';
 import 'dart:developer' show log;
 export 'dart:developer' show log;
 
-// const String baseURL = "http://192.168.0.58:5560";
+// const String baseURL = "http://192.168.87.168:5560";
 const String baseURL = "https://rediones.onrender.com";
 
 const String imgPrefix = "data:image/jpeg;base64,";
@@ -68,7 +68,7 @@ class RedionesResponse<T> {
 void initSocket(String userID) {
   _socket = io(
     'ws://rediones.onrender.com',
-    // 'ws://192.168.0.58:5560',
+    // 'ws://192.168.87.168:5560',
     OptionBuilder().setTransports(['websocket']).build(),
   );
 
