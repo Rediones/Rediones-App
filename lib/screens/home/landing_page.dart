@@ -50,7 +50,7 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     }
 
     if (level == 0) {
-      // _showError("Could not login you in automatically");
+      _showError("Could not login you in automatically");
       goHome();
       return;
     }

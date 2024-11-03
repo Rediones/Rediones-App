@@ -54,7 +54,7 @@ class _HomeState extends ConsumerState<Home> {
 
   void periodicRefresh() {
     Timer.periodic(
-      const Duration(minutes: 2),
+      const Duration(minutes: 1),
       (timer) => fetchPosts(showRefreshingMessage: false),
     );
   }

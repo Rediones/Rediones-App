@@ -28,7 +28,7 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
 
   final TextEditingController textController = TextEditingController();
 
-  String conversationID = "", currentID = "";
+  String conversationID = "", currentID = "", currentUsername = "";
   bool loading = true;
 
   @override
@@ -48,6 +48,7 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
     );
 
     currentID = ref.read(userProvider).uuid;
+    currentUsername = ref.read(userProvider).username;
     getAllCommunityMessages();
   }
 
@@ -80,9 +81,26 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
   }
 
   void send(String msg) {
+    DateTime timestamp = DateTime.now();
+    CommunityChatData chatData = CommunityChatData(
+      id: "${timestamp.millisecondsSinceEpoch}",
+      userId: currentID,
+      username: currentUsername,
+      image: "",
+      message: msg,
+      timestamp: timestamp,
+    );
+
+    List<CommunityChatData> chats = ref.watch(communityChatProvider);
+    ref.watch(communityChatProvider.notifier).state = [
+      ...chats,
+      chatData,
+    ];
+    setState(() {});
+
     sendMessage(
       MessageData(
-        timestamp: DateTime.now(),
+        timestamp: timestamp,
         id: "",
         content: msg,
         sender: currentID,
@@ -110,12 +128,12 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
         centerTitle: true,
         title: GestureDetector(
           onTap: () => setState(() {
-            expanded = !expanded;
-            if (expanded) {
-              controller.forward();
-            } else {
-              controller.reverse();
-            }
+            // expanded = !expanded;
+            // if (expanded) {
+            //   controller.forward();
+            // } else {
+            //   controller.reverse();
+            // }
           }),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -147,7 +165,8 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
                         }
 
                         return _CommunityChatContainer(
-                            data: communityChats[index]);
+                          data: communityChats[index],
+                        );
                       },
                       separatorBuilder: (_, __) => SizedBox(height: 10.h),
                       itemCount: communityChats.length + 1,
@@ -213,50 +232,28 @@ class _CommunityChatPageState extends ConsumerState<CommunityChatPage>
           height: 60.h,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.w),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () {},
-                  child: Icon(
-                    Icons.add_circle,
-                    size: 36.r,
-                  ),
+            child: SpecialForm(
+              controller: textController,
+              fillColor: Colors.transparent,
+              borderColor: neutral,
+              width: 390.w,
+              height: 40.h,
+              hint: "Type your message",
+              maxLines: 1,
+              suffix: GestureDetector(
+                onTap: () {
+                  String msg = textController.text;
+                  msg = msg.trim();
+                  if (msg.isNotEmpty) {
+                    send(msg);
+                    textController.clear();
+                  }
+                },
+                child: Icon(
+                  Icons.send_rounded,
+                  size: 28.r,
                 ),
-                SizedBox(width: 10.w),
-                GestureDetector(
-                  onTap: () {},
-                  child: Icon(
-                    Icons.mic_rounded,
-                    size: 28.r,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                SpecialForm(
-                  controller: textController,
-                  fillColor: Colors.transparent,
-                  borderColor: neutral,
-                  width: 250.w,
-                  height: 40.h,
-                  hint: "Type your message",
-                  maxLines: 1,
-                  prefix: Icon(Icons.emoji_emotions_rounded, size: 26.r),
-                ),
-                SizedBox(width: 8.w),
-                GestureDetector(
-                  onTap: () {
-                    String msg = textController.text;
-                    msg = msg.trim();
-                    if (msg.isNotEmpty) {
-                      send(msg);
-                      textController.clear();
-                    }
-                  },
-                  child: Icon(
-                    Icons.send_rounded,
-                    size: 28.r,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

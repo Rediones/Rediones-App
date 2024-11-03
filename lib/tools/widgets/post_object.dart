@@ -141,12 +141,6 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
       comments = updatedData[0] as int;
     }
 
-    if (postObject is Poll && updatedData[1] != null) {
-      Poll p = postObject;
-      postObject = p.copyWith(newTotalVotes: updatedData[1] as int);
-      // totalVotes = updatedData[1] as int;
-    }
-
     updateDatabase(postObject);
     setState(() {});
   }
@@ -849,16 +843,15 @@ class _PollContainerState extends ConsumerState<PollContainer> {
       hasVoted = true;
       pollIndex = index;
       totalVotes += 1;
+      widget.poll.polls[index].voters.add(currentUserID);
     });
     votePoll(id).then((response) {
-      if (response.status == Status.success) {
-        widget.poll.polls[index].voters.add(currentUserID);
-        setState(() {});
-      } else {
+      if (response.status == Status.failed) {
         setState(() {
           hasVoted = false;
           pollIndex = -1;
           totalVotes -= 1;
+          widget.poll.polls[index].voters.remove(currentUserID);
         });
         showMessage("Something went wrong voting on this poll");
       }

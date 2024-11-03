@@ -142,6 +142,7 @@ class _ViewPostObjectPageState extends ConsumerState<ViewPostObjectPage> {
       comments.addAll(response);
     }
 
+    if(!mounted) return;
     setState(() {
       loadingComments = false;
       totalComments = response?.length ?? totalComments;
