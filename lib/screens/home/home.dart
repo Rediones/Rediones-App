@@ -82,17 +82,19 @@ class _HomeState extends ConsumerState<Home> {
       return;
     }
 
-    // ref.watch(postsProvider.notifier).state = p;
+    if (p.isNotEmpty) {
+      ref.watch(postsProvider.notifier).state = p;
+      Isar isar = GetIt.I.get();
+      isar.writeTxn(() async {
+        List<Post> serverPosts = p.whereType<Post>().toList();
+        List<Poll> serverPolls = p.whereType<Poll>().toList();
+
+        await isar.posts.putAll(serverPosts);
+        await isar.polls.putAll(serverPolls);
+      });
+    }
+
     setState(() => loadingServer = false);
-
-    Isar isar = GetIt.I.get();
-    isar.writeTxn(() async {
-      List<Post> serverPosts = p.whereType<Post>().toList();
-      List<Poll> serverPolls = p.whereType<Poll>().toList();
-
-      await isar.posts.putAll(serverPosts);
-      await isar.polls.putAll(serverPolls);
-    });
   }
 
   @override

@@ -16,65 +16,57 @@ class SpotlightPage extends ConsumerStatefulWidget {
 }
 
 class _SpotlightPageState extends ConsumerState<SpotlightPage> {
-  final List<FijkPlayer> spotlightPlayers = [];
-  final List<bool> spotlightStates = [];
+  late List<FijkPlayer?> spotlightPlayers;
 
-  int spotlightPointer = 0, initialVideoDurationInMilliseconds = 0;
-
-  double initialDragDx = 0.0;
-
-  bool showText = false, _shouldRefresh = false;
-  String durationText = "";
-
-  late Future spotlightFuture;
+  int spotlightCurrentIndex = 0;
+  bool loading = false;
 
   @override
   void initState() {
     super.initState();
-    spotlightFuture = Future.delayed(Duration.zero);
+    spotlightPlayers = [];
+    Future.delayed(Duration.zero, fetchSpotlights);
   }
 
   Future<void> fetchSpotlights() async {
-    if (_shouldRefresh) {
-      var response = (await getAllSpotlights()).payload;
-      if (response != null) {
-        ref.watch(spotlightsProvider.notifier).state = response;
-        ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
-      }
+    if (loading) return;
+    setState(() => loading = true);
 
-      setState(() => _shouldRefresh = false);
-
-      if (response == null) {
-        return;
-      }
-
-      List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
-      ref.watch(spotlightsPlayStatusProvider.notifier).state =
-          spotlights.isNotEmpty;
-
-      for (FijkPlayer p in spotlightPlayers) {
-        p.release();
-      }
-      spotlightStates.clear();
-      spotlightPlayers.clear();
-
-      for (int i = 0; i < spotlights.length; ++i) {
-        FijkPlayer player = FijkPlayer();
-        SpotlightData data = spotlights[i];
-        player.setDataSource(data.url, autoPlay: false);
-        player.setLoop(0);
-        spotlightPlayers.add(player);
-        spotlightStates.add(false);
-      }
-
-      spotlightPlayers.first.start();
-
-      setState(() => _shouldRefresh = false);
+    var response = (await getAllSpotlights()).payload;
+    if (response == null) {
+      setState(() => loading = false);
+      return;
     }
+
+    ref.watch(spotlightsProvider.notifier).state = response;
+    ref.watch(spotlightsPlayStatusProvider.notifier).state = false;
+    List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
+
+    for (FijkPlayer? p in spotlightPlayers) {
+      p?.release();
+    }
+
+    spotlightPlayers.clear();
+    spotlightPlayers.addAll(List.filled(spotlights.length, null));
+
+    int total = spotlights.length;
+
+    for (int i = 0; i < total; ++i) {
+      FijkPlayer player = FijkPlayer();
+      SpotlightData data = spotlights[i];
+      player.setDataSource(data.url, autoPlay: false);
+      player.setLoop(0);
+      spotlightPlayers[i] = player;
+    }
+
+    spotlightPlayers.first?.start();
+
+    setState(() => loading = false);
   }
 
   void pauseAll() {
-    for (FijkPlayer player in spotlightPlayers) {
+    for (FijkPlayer? player in spotlightPlayers) {
+      if (player == null) continue;
       if (player.state == FijkState.started) {
         player.pause();
       }
@@ -83,8 +75,8 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
 
   @override
   void dispose() {
-    for (FijkPlayer player in spotlightPlayers) {
-      player.release();
+    for (FijkPlayer? player in spotlightPlayers) {
+      player?.release();
     }
 
     super.dispose();
@@ -97,22 +89,16 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
       } else {
         if (spotlightPlayers.isNotEmpty) {
           pauseAll();
-          spotlightPlayers[spotlightPointer].start();
-          Future.delayed(Duration.zero,
-              () => setState(() => spotlightStates[spotlightPointer] = true));
+          spotlightPlayers[spotlightCurrentIndex]?.start();
         }
       }
     });
 
     ref.listen(isLoggedInProvider, (oldVal, newVal) {
       if (!oldVal! && newVal) {
-        setState(() => _shouldRefresh = true);
+        fetchSpotlights();
       }
     });
-  }
-
-  bool get available {
-    return spotlightPlayers.isNotEmpty && spotlightStates.isNotEmpty;
   }
 
   @override
@@ -122,7 +108,7 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
     Size size = MediaQuery.of(context).size;
     double height = size.height;
     List<SpotlightData> spotlights = ref.watch(spotlightsProvider);
-    int length = spotlights.length;
+    bool isPlaying = ref.watch(spotlightsPlayStatusProvider);
 
     return BackButtonListener(
       onBackButtonPressed: () async {
@@ -139,229 +125,134 @@ class _SpotlightPageState extends ConsumerState<SpotlightPage> {
           children: [
             SizedBox(
               height: height,
-              child: FutureBuilder(
-                future: _shouldRefresh ? fetchSpotlights() : spotlightFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting &&
-                      !_shouldRefresh) {
-                    return const Center(child: loader);
-                  } else if (snapshot.connectionState == ConnectionState.done) {
-                    if (!available || length == 0) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              "assets/No Data.png",
-                              width: 150.r,
-                              height: 150.r,
-                              fit: BoxFit.cover,
-                            ),
-                            SizedBox(height: 20.h),
-                            Text(
-                              "There are no spotlights available",
-                              style: context.textTheme.titleSmall!.copyWith(
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
+              width: 390.w,
+              child: loading
+                  ? const Center(
+                      child: loader,
+                    )
+                  : (spotlights.isEmpty)
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                "assets/No Data.png",
+                                width: 150.r,
+                                height: 150.r,
+                                fit: BoxFit.cover,
                               ),
-                            ),
-                            SizedBox(height: 10.h),
-                            GestureDetector(
-                              onTap: () =>
-                                  setState(() => _shouldRefresh = true),
-                              child: Text(
-                                "Refresh",
+                              SizedBox(height: 20.h),
+                              Text(
+                                "There are no spotlights available",
                                 style: context.textTheme.titleSmall!.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: appRed,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return PageView.builder(
-                      onPageChanged: (index) {
-                        if (index != 0) {
-                          spotlightPlayers[index - 1].pause();
-                          spotlightStates[index - 1] = false;
-                        }
-
-                        if (index != spotlightPlayers.length - 1) {
-                          spotlightPlayers[index + 1].pause();
-                          spotlightStates[index + 1] = false;
-                        }
-
-                        spotlightPlayers[index].seekTo(100);
-                        spotlightPlayers[index].start();
-                        spotlightStates[index] = true;
-                        spotlightPointer = index;
-
-                        setState(() {});
-                      },
-                      itemBuilder: (_, index) => GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (spotlightStates[index]) {
-                              spotlightPlayers[index].pause();
-                              spotlightStates[index] = false;
+                              SizedBox(height: 10.h),
+                              GestureDetector(
+                                onTap: fetchSpotlights,
+                                child: Text(
+                                  "Refresh",
+                                  style: context.textTheme.titleSmall!.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: appRed,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : PageView.builder(
+                          onPageChanged: (index) {
+                            pauseAll();
+                            setState(() => spotlightCurrentIndex = index);
+                            spotlightPlayers[index]?.seekTo(100);
+                            spotlightPlayers[index]?.start();
+                            ref
+                                .watch(spotlightsPlayStatusProvider.notifier)
+                                .state = true;
+                          },
+                          itemBuilder: (_, index) => GestureDetector(
+                            onTap: () {
+                              if (isPlaying) {
+                                spotlightPlayers[spotlightCurrentIndex]
+                                    ?.pause();
+                              } else {
+                                spotlightPlayers[spotlightCurrentIndex]
+                                    ?.start();
+                              }
                               ref
                                   .watch(spotlightsPlayStatusProvider.notifier)
-                                  .state = false;
-                            } else {
-                              spotlightPlayers[index].start();
-                              spotlightStates[index] = true;
-                              ref
-                                  .watch(spotlightsPlayStatusProvider.notifier)
-                                  .state = true;
-                            }
-                          });
-                        },
-                        onHorizontalDragStart: (details) {
-                          // setState(() {
-                          //   initialVideoDurationInMilliseconds =
-                          //       spotlightPlayers[index].currentPos.inMilliseconds;
-                          //   initialDragDx = details.globalPosition.dx;
-                          //   showText = true;
-                          // });
-                        },
-                        onHorizontalDragUpdate: (details) {
-                          // double currentDX = details.globalPosition.dx;
-                          // double newPosition = currentDX / width * 1000;
-                          // newPosition = newPosition.clamp(0, 1000);
-                          // bool reverse = initialDragDx - currentDX > 0;
-                          //
-                          // int milliseconds = initialVideoDurationInMilliseconds +
-                          //     (newPosition *
-                          //             fullDragInSeconds *
-                          //             (reverse ? -1.0 : 1.0))
-                          //         .toInt();
-                          // FijkPlayer player = spotlightPlayers[index];
-                          // player.seekTo(milliseconds);
-                          //
-                          // Duration currentDuration =
-                          //     Duration(milliseconds: milliseconds);
-                          //
-                          // setState(() {
-                          //   durationText =
-                          //       "${formatDuration(currentDuration)} - ${formatDuration(player.value.duration)}";
-                          // });
-                        },
-                        onHorizontalDragEnd: (details) {
-                          // setState(() {
-                          //   showText = false;
-                          //   durationText = "";
-                          //   spotlightPlayers[index].start();
-                          //   spotlightStates[index] = true;
-                          // });
-                        },
-                        child: Stack(
-                          children: [
-                            Center(
-                              child: FijkView(
-                                player: spotlightPlayers[index],
-                                fsFit: FijkFit.cover,
-                                fit: FijkFit.cover,
-                                panelBuilder:
-                                    (player, data, context, rect, size) =>
-                                        const SizedBox(),
-                              ),
-                            ),
-                            Container(
-                              width: 390.w,
-                              height: 844.h,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color.fromRGBO(0, 0, 0, 0.7),
-                                    Colors.transparent,
-                                  ],
-                                  stops: [0.1, 1],
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
+                                  .state = !isPlaying;
+                            },
+                            child: Stack(
+                              children: [
+                                Center(
+                                  child: spotlightPlayers[index] == null
+                                      ? loader
+                                      : FijkView(
+                                          player: spotlightPlayers[index]!,
+                                          fsFit: FijkFit.cover,
+                                          fit: FijkFit.cover,
+                                          panelBuilder: (player, data, context,
+                                                  rect, size) =>
+                                              const SizedBox(),
+                                        ),
                                 ),
-                              ),
-                              child: AnimatedOpacity(
-                                opacity: spotlightStates[index] ? 0 : 1,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeOut,
-                                child: Icon(
-                                  Icons.play_arrow_rounded,
-                                  size: 64.r,
-                                  color: Colors.white60,
+                                Container(
+                                  width: 390.w,
+                                  height: 844.h,
+                                  alignment: Alignment.center,
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color.fromRGBO(0, 0, 0, 0.7),
+                                        Colors.transparent,
+                                      ],
+                                      stops: [0.1, 1],
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                    ),
+                                  ),
+                                  child: AnimatedOpacity(
+                                    opacity: isPlaying ? 0 : 1,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                    child: Icon(
+                                      Icons.play_arrow_rounded,
+                                      size: 64.r,
+                                      color: Colors.white60,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                Positioned(
+                                  right: 10.w,
+                                  bottom: 80.h,
+                                  child: SpotlightToolbar(
+                                    spotlight: spotlights[index],
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 10.w,
+                                  bottom: 100.h,
+                                  child: SpotlightUserData(
+                                    spotlight: spotlights[index],
+                                  ),
+                                )
+                              ],
                             ),
-
-                            Positioned(
-                              right: 10.w,
-                              bottom: 80.h,
-                              child: SpotlightToolbar(
-                                spotlight: spotlights[index],
-                              ),
-                            ),
-                            Positioned(
-                              left: 10.w,
-                              bottom: 100.h,
-                              child: SpotlightUserData(
-                                spotlight: spotlights[index],
-                              ),
-                            )
-                          ],
+                          ),
+                          itemCount: spotlights.length,
+                          scrollDirection: Axis.vertical,
                         ),
-                      ),
-                      itemCount: length,
-                      scrollDirection: Axis.vertical,
-                    );
-                  } else {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            "assets/No Data.png",
-                            width: 150.r,
-                            height: 150.r,
-                            fit: BoxFit.cover,
-                          ),
-                          SizedBox(height: 20.h),
-                          Text(
-                            "Unable to fetch spotlights",
-                            style: context.textTheme.titleSmall!.copyWith(
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(height: 10.h),
-                          GestureDetector(
-                            onTap: () => setState(() => _shouldRefresh = true),
-                            child: Text(
-                              "Try again",
-                              style: context.textTheme.titleSmall!.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: appRed,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                },
-              ),
             ),
             Positioned(
               top: 10.h,
               left: 10.w,
-              child: GestureDetector(
-                onTap: () => setState(() => _shouldRefresh = true),
-                child: Text(
-                  "Spotlight",
-                  style: context.textTheme.titleLarge!.copyWith(color: theme),
-                ),
+              child: Text(
+                "Spotlight",
+                style: context.textTheme.titleLarge!.copyWith(color: theme),
               ),
             ),
           ],

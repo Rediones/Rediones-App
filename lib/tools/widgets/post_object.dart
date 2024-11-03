@@ -303,7 +303,7 @@ class _PostObjectContainerState extends ConsumerState<PostObjectContainer> {
         width: 390.w,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.r),
-          border: Border.all(color: darkTheme ? neutral : border),
+          border: Border.all(color: darkTheme ? neutral2 : border),
           color: Colors.transparent,
         ),
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
