@@ -64,7 +64,7 @@ class _HomeState extends ConsumerState<Home> {
   Future<void> fetchPosts({bool showRefreshingMessage = true}) async {
     if (loadingServer) return;
     setState(() => loadingServer = true);
-    if(showRefreshingMessage) {
+    if (showRefreshingMessage) {
       showMessage("Refreshing");
     }
 
@@ -82,9 +82,8 @@ class _HomeState extends ConsumerState<Home> {
       return;
     }
 
+    // ref.watch(postsProvider.notifier).state = p;
     setState(() => loadingServer = false);
-
-    ref.watch(postsProvider.notifier).state = p;
 
     Isar isar = GetIt.I.get();
     isar.writeTxn(() async {
@@ -104,15 +103,8 @@ class _HomeState extends ConsumerState<Home> {
   }
 
   void checkForChanges() {
-    ref.listen(isLoggedInProvider, (oldVal, newVal) {
-      if (!oldVal! && newVal) {
-        fetchPosts();
-      }
-    });
-
-    ref.listen(userProvider, (oldUser, newUser) {
-      fetchPosts();
-    });
+    ref.listen(isLoggedInProvider, (_, __) => fetchPosts());
+    ref.listen(userProvider, (_, __) => fetchPosts());
   }
 
   @override

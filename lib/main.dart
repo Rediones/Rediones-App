@@ -134,8 +134,8 @@ class _RedionesState extends ConsumerState<Rediones>
         .whereType<SearchData>()
         .toList();
 
-    ref.watch(recentSearchesProvider.notifier).state.addAll(searches);
-    ref.watch(postsProvider.notifier).state.addAll(objects);
+    ref.watch(recentSearchesProvider.notifier).state = searches;
+    ref.watch(postsProvider.notifier).state = objects;
     ref.watch(loadingLocalPostsProvider.notifier).state = false;
 
     String? id = await FileHandler.loadString(userIsarId);

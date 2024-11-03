@@ -114,7 +114,10 @@ class _SpotlightToolbarState extends ConsumerState<SpotlightToolbar> {
     );
   }
 
-  void updateCount(int val) => Future.delayed(Duration.zero, () => setState(() => totalComments = val));
+  void updateCount(int val) => Future.delayed(Duration.zero, () {
+    if(!mounted) return;
+    setState(() => totalComments = val);
+  });
 
   @override
   Widget build(BuildContext context) {

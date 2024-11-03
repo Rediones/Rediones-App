@@ -107,7 +107,7 @@ class _InboxState extends ConsumerState<Inbox> {
       chatController.clearMessages();
     }
 
-    chatController.addAllMessages(msgs);
+    chatController.addMessages(msgs);
     setState(() {
       loading = false;
       hasError = false;

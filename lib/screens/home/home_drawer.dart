@@ -112,6 +112,10 @@ class _HomeDrawerState extends ConsumerState<HomeDrawer> {
                 fontWeight: FontWeight.w600,
               ),
             ),
+            subtitle: Text(
+              "Coming Soon",
+              style: context.textTheme.bodyMedium,
+            ),
             onTap: () {},
           ),
           ListTile(

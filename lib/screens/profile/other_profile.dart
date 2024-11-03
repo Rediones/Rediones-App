@@ -73,7 +73,7 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
         } else {
           following.remove(id);
         }
-        showToast(resp.message, context);
+        showMessage(resp.message);
       }
 
       setState(() {});
@@ -107,15 +107,16 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                 child: ElevatedButton(
                   onPressed: () => setState(() => refreshDetails = true),
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: appRed,
-                      fixedSize: Size(90.w, 35.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(7.5.r),
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 5.h,
-                      )),
+                    backgroundColor: appRed,
+                    fixedSize: Size(90.w, 35.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(7.5.r),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 5.h,
+                    ),
+                  ),
                   child: Text(
                     "Retry",
                     style: context.textTheme.bodyLarge!.copyWith(
@@ -137,7 +138,7 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                           SizedBox(height: 15.h),
                           SizedBox(
                             width: 390.w,
-                            height: 100.h,
+                            height: 125.h,
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -177,7 +178,7 @@ class _OtherProfilePageState extends ConsumerState<OtherProfilePage>
                                 ),
                                 SizedBox(
                                   width: 210.w,
-                                  height: 100.h,
+                                  height: 125.h,
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
